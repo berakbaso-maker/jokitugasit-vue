@@ -9,22 +9,22 @@ const WA_TEXT = 'Halo JokiTugasIT.id, saya butuh bantuan untuk project IT saya.'
 
 const services = [
   {
-    icon: 'language', title: 'Bikin Website', color: 'bg-primary-fixed/50 text-electric-blue',
+    icon: 'language', title: 'Bikin Website', color: 'bg-primary-fixed/50 text-electric-blue', link: '/joki-project-web',
     desc: 'Landing page, dashboard admin, sistem informasi, sampai slicing Figma ke HTML/React. Beres rapi dan bisa langsung dipakai.',
     tags: ['React', 'Next.js', 'PHP', 'Laravel', 'HTML/CSS'],
   },
   {
-    icon: 'sos', title: 'Selamatkan Kode Error', color: 'bg-error-container text-urgency-red', popular: true,
+    icon: 'sos', title: 'Selamatkan Kode Error', color: 'bg-error-container text-urgency-red', popular: true, link: '/request',
     desc: 'Kode ChatGPT atau codingan sendiri yang error dan bikin pusing? Kami cari akar masalahnya, perbaiki, sampai benar-benar jalan.',
     tags: ['Debug', 'Refactor', 'Fix Error'],
   },
   {
-    icon: 'smartphone', title: 'Bikin Aplikasi Mobile', color: 'bg-primary-fixed/50 text-electric-blue',
+    icon: 'smartphone', title: 'Bikin Aplikasi Mobile', color: 'bg-primary-fixed/50 text-electric-blue', link: '/joki-tugas-mobile-app',
     desc: 'Aplikasi Android & iOS yang smooth untuk tugas akhir, project kuliah, atau aplikasi yang mau kamu rilis.',
     tags: ['Flutter', 'React Native'],
   },
   {
-    icon: 'database', title: 'Database & API', color: 'bg-tertiary-fixed/30 text-tertiary',
+    icon: 'database', title: 'Database & API', color: 'bg-tertiary-fixed/30 text-tertiary', link: '/layanan',
     desc: 'Desain skema database yang rapi dan REST API yang aman. project kamu nggak bakal berantakan pas dikembangkan.',
     tags: ['MySQL', 'PostgreSQL', 'Node.js', 'Supabase'],
   },

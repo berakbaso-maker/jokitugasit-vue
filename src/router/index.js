@@ -40,6 +40,21 @@ const router = createRouter({
       component: () => import('../views/JokiSkripsiView.vue'),
     },
     {
+      path: '/joki-tugas-mobile-app',
+      name: 'joki-mobile',
+      component: () => import('../views/JokiMobileView.vue'),
+    },
+    {
+      path: '/joki-project-web',
+      name: 'joki-web',
+      component: () => import('../views/JokiWebView.vue'),
+    },
+    {
+      path: '/solusi-tugas-it',
+      name: 'solusi-tugas',
+      component: () => import('../views/SolusiTugasView.vue'),
+    },
+    {
       path: '/request',
       name: 'request-submit',
       component: () => import('../views/RequestSubmitView.vue'),
@@ -121,6 +136,9 @@ router.afterEach((to) => {
     faq: 'Tanya Jawab - JokiTugasIT.id',
     'joki-tugas-kuliah': 'Joki Tugas Kuliah IT Umum - JokiTugasIT.id',
     'joki-skripsi': 'Joki Skripsi IT & Final Project - JokiTugasIT.id',
+    'joki-mobile': 'Joki Tugas Mobile App - Fix Bug UI & API Hari Ini - JokiTugasIT.id',
+    'joki-web': 'Joki Project Web - Fix Error & CRUD - JokiTugasIT.id',
+    'solusi-tugas': 'Direktori Solusi Tugas IT Mahasiswa - JokiTugasIT.id',
     'request-submit': 'Kirim Project - JokiTugasIT.id',
     'request-success': 'Request Success - JokiTugasIT.id',
     login: 'Engineer Login - JokiTugasIT.id',
