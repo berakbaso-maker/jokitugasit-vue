@@ -6,6 +6,52 @@ import FooterBar from '../components/FooterBar.vue'
 import { waLink } from '../lib/api'
 
 const WA_TEXT = 'Halo JokiTugasIT.id, saya butuh bantuan untuk project IT saya.'
+
+import { ref, onMounted, onBeforeUnmount } from 'vue'
+
+const solvedProjects = [
+  {
+    icon: 'integration_instructions', title: 'Perbaikan Tampilan Flutter', ticket: 'Tiket #8892',
+    deadline: 'Besok', deadlineColor: 'bg-error-container text-error',
+    tags: ['Flutter', 'Firebase', 'Manajemen State'],
+    desc: '"Tampilan berantakan di layar kecil saat keyboard muncul. Butuh bantuan agar elemen bisa diatur dalam scroll view."',
+    status: 'Siap kamu cek', progress: 100, orderNo: 'TEST-REVIEW',
+  },
+  {
+    icon: 'web', title: 'Landing Page Skripsi', ticket: 'Tiket #8901',
+    deadline: 'Selesai', deadlineColor: 'bg-success-green/10 text-success-green',
+    tags: ['HTML/CSS', 'React', 'Responsive'],
+    desc: '"Perlu landing page untuk proposal skripsi, clean dan mobile-friendly, buat demo besok pagi."',
+    status: 'Selesai & Terkirim', progress: 100, orderNo: 'TEST-DONE',
+  },
+  {
+    icon: 'smartphone', title: 'Aplikasi Catatan Kuliah', ticket: 'Tiket #8874',
+    deadline: 'Selesai', deadlineColor: 'bg-success-green/10 text-success-green',
+    tags: ['Flutter', 'SQLite', 'UI/UX'],
+    desc: '"Aplikasi catatan kuliah offline dengan reminder tugas, biar nggak ada deadline yang kelewat."',
+    status: 'Selesai & Terkirim', progress: 100, orderNo: 'TEST-DONE',
+  },
+]
+
+const activeSlide = ref(0)
+let slideTimer = null
+
+function nextSlide() {
+  activeSlide.value = (activeSlide.value + 1) % solvedProjects.length
+}
+function prevSlide() {
+  activeSlide.value = (activeSlide.value - 1 + solvedProjects.length) % solvedProjects.length
+}
+function goSlide(i) {
+  activeSlide.value = i
+}
+
+onMounted(() => {
+  slideTimer = setInterval(nextSlide, 4000)
+})
+onBeforeUnmount(() => {
+  if (slideTimer) clearInterval(slideTimer)
+})
 </script>
 
 <template>
@@ -67,55 +113,80 @@ const WA_TEXT = 'Halo JokiTugasIT.id, saya butuh bantuan untuk project IT saya.'
           </div>
         </div>
 
-        <!-- Hero Visual (Mock Project Card) -->
+        <!-- Hero Visual (Carousel Project Selesai) -->
         <div class="flex-1 w-full max-w-md relative z-10">
           <div class="absolute -bottom-10 -right-10 w-64 h-64 bg-primary-fixed-dim/30 rounded-full blur-2xl -z-10"></div>
-          <div class="bg-surface-white rounded-2xl shadow-[0px_10px_30px_rgba(15,23,42,0.12)] border border-border-subtle p-6 flex flex-col gap-5 transform rotate-y-[-5deg] rotate-x-[5deg] hover:rotate-0 transition-transform duration-500 ease-out">
-            <div class="flex justify-between items-start">
-              <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-primary-fixed/50 rounded-xl flex items-center justify-center text-electric-blue">
-                  <span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1">integration_instructions</span>
+          <div class="relative overflow-hidden rounded-2xl shadow-[0px_10px_30px_rgba(15,23,42,0.12)] border border-border-subtle bg-surface-white">
+            <!-- Slides -->
+            <div class="flex transition-transform duration-500 ease-out" :style="{ transform: `translateX(-${activeSlide * 100}%)` }">
+              <div
+                v-for="(proj, i) in solvedProjects"
+                :key="i"
+                class="w-full shrink-0 p-6 flex flex-col gap-5"
+              >
+                <div class="flex justify-between items-start">
+                  <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 bg-primary-fixed/50 rounded-xl flex items-center justify-center text-electric-blue">
+                      <span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1">{{ proj.icon }}</span>
+                    </div>
+                    <div>
+                      <h3 class="font-label-bold text-label-bold text-on-surface">{{ proj.title }}</h3>
+                      <p class="font-label-sm text-label-sm text-secondary mt-1">{{ proj.ticket }}</p>
+                    </div>
+                  </div>
+                  <span class="px-2 py-1 rounded-md font-label-sm text-label-sm flex items-center gap-1" :class="proj.deadlineColor">
+                    <span class="material-symbols-outlined text-[14px]">timer</span>
+                    {{ proj.deadline }}
+                  </span>
                 </div>
-                <div>
-                  <h3 class="font-label-bold text-label-bold text-on-surface">Perbaikan Tampilan Flutter</h3>
-                  <p class="font-label-sm text-label-sm text-secondary mt-1">Tiket #8892</p>
+                <div class="space-y-3">
+                  <div class="flex flex-wrap gap-2">
+                    <span v-for="t in proj.tags" :key="t" class="bg-surface-container-high text-on-secondary-container px-2.5 py-1 rounded-full font-label-sm text-label-sm">{{ t }}</span>
+                  </div>
+                  <p class="font-body-md text-body-md text-on-surface-variant text-sm leading-6">{{ proj.desc }}</p>
                 </div>
-              </div>
-              <span class="bg-error-container text-error px-2 py-1 rounded-md font-label-sm text-label-sm flex items-center gap-1">
-                <span class="material-symbols-outlined text-[14px]">timer</span>
-                Besok
-              </span>
-            </div>
-            <div class="space-y-3">
-              <div class="flex gap-2">
-                <span class="bg-surface-container-high text-on-secondary-container px-2.5 py-1 rounded-full font-label-sm text-label-sm">Flutter</span>
-                <span class="bg-surface-container-high text-on-secondary-container px-2.5 py-1 rounded-full font-label-sm text-label-sm">Firebase</span>
-                <span class="bg-surface-container-high text-on-secondary-container px-2.5 py-1 rounded-full font-label-sm text-label-sm">Manajemen State</span>
-              </div>
-              <p class="font-body-md text-body-md text-on-surface-variant line-clamp-2 text-sm">
-                "Tampilan berantakan di layar kecil saat keyboard muncul. Butuh bantuan agar elemen bisa diatur dalam scroll view."
-              </p>
-            </div>
-            <div class="bg-surface-container-low rounded-xl p-4 border border-border-subtle/50">
-              <div class="flex justify-between items-center mb-2">
-                <span class="font-label-bold text-label-bold text-secondary">Status Pengerjaan</span>
-                <span class="font-label-bold text-label-bold text-success-green flex items-center gap-1">
-                  <span class="material-symbols-outlined text-[16px]">check_circle</span>
-                  Siap kamu cek
-                </span>
-              </div>
-              <div class="w-full bg-surface-dim rounded-full h-2 overflow-hidden">
-                <div class="bg-success-green h-full w-full rounded-full relative">
-                  <div class="absolute inset-0 bg-white/20 animate-pulse"></div>
+                <div class="bg-surface-container-low rounded-xl p-4 border border-border-subtle/50">
+                  <div class="flex justify-between items-center mb-2">
+                    <span class="font-label-bold text-label-bold text-secondary">Status Pengerjaan</span>
+                    <span class="font-label-bold text-label-bold text-success-green flex items-center gap-1">
+                      <span class="material-symbols-outlined text-[16px]">check_circle</span>
+                      {{ proj.status }}
+                    </span>
+                  </div>
+                  <div class="w-full bg-surface-dim rounded-full h-2 overflow-hidden">
+                    <div class="bg-success-green h-full rounded-full relative" :style="{ width: proj.progress + '%' }">
+                      <div class="absolute inset-0 bg-white/20 animate-pulse"></div>
+                    </div>
+                  </div>
                 </div>
+                <RouterLink
+                  :to="`/track/${proj.orderNo}`"
+                  class="w-full bg-surface-white border-2 border-electric-blue text-electric-blue font-label-bold text-label-bold py-3 rounded-xl hover:bg-primary-fixed/20 transition-colors h-[44px] text-center"
+                >
+                  Lihat Hasil Project
+                </RouterLink>
               </div>
             </div>
-            <RouterLink
-              to="/track/TEST-REVIEW"
-              class="w-full bg-surface-white border-2 border-electric-blue text-electric-blue font-label-bold text-label-bold py-3 rounded-xl hover:bg-primary-fixed/20 transition-colors h-[44px] text-center"
-            >
-              Lihat Hasil Project
-            </RouterLink>
+
+            <!-- Controls -->
+            <div class="flex items-center justify-between px-5 py-3 border-t border-border-subtle bg-surface-container-lowest/80">
+              <button @click="prevSlide" class="w-8 h-8 rounded-full bg-surface-container-high text-on-surface-variant hover:bg-electric-blue hover:text-white transition-colors flex items-center justify-center" aria-label="Project sebelumnya">
+                <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+              </button>
+              <div class="flex items-center gap-1.5">
+                <button
+                  v-for="(_, i) in solvedProjects"
+                  :key="i"
+                  @click="goSlide(i)"
+                  class="h-2 rounded-full transition-all duration-300"
+                  :class="i === activeSlide ? 'w-6 bg-electric-blue' : 'w-2 bg-border-subtle hover:bg-outline-variant'"
+                  :aria-label="`Ke project ${i + 1}`"
+                ></button>
+              </div>
+              <button @click="nextSlide" class="w-8 h-8 rounded-full bg-surface-container-high text-on-surface-variant hover:bg-electric-blue hover:text-white transition-colors flex items-center justify-center" aria-label="Project berikutnya">
+                <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+              </button>
+            </div>
           </div>
         </div>
       </section>
