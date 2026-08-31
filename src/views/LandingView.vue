@@ -39,9 +39,6 @@ let slideTimer = null
 function nextSlide() {
   activeSlide.value = (activeSlide.value + 1) % solvedProjects.length
 }
-function prevSlide() {
-  activeSlide.value = (activeSlide.value - 1 + solvedProjects.length) % solvedProjects.length
-}
 function goSlide(i) {
   activeSlide.value = i
 }
@@ -168,11 +165,8 @@ onBeforeUnmount(() => {
               </div>
             </div>
 
-            <!-- Controls -->
-            <div class="flex items-center justify-between px-5 py-3 border-t border-border-subtle bg-surface-container-lowest/80">
-              <button @click="prevSlide" class="w-8 h-8 rounded-full bg-surface-container-high text-on-surface-variant hover:bg-electric-blue hover:text-white transition-colors flex items-center justify-center" aria-label="Project sebelumnya">
-                <span class="material-symbols-outlined text-[18px]">chevron_left</span>
-              </button>
+            <!-- Controls (indikator saja) -->
+            <div class="flex items-center justify-center px-5 py-3 border-t border-border-subtle bg-surface-container-lowest/80">
               <div class="flex items-center gap-1.5">
                 <button
                   v-for="(_, i) in solvedProjects"
@@ -183,9 +177,6 @@ onBeforeUnmount(() => {
                   :aria-label="`Ke project ${i + 1}`"
                 ></button>
               </div>
-              <button @click="nextSlide" class="w-8 h-8 rounded-full bg-surface-container-high text-on-surface-variant hover:bg-electric-blue hover:text-white transition-colors flex items-center justify-center" aria-label="Project berikutnya">
-                <span class="material-symbols-outlined text-[18px]">chevron_right</span>
-              </button>
             </div>
           </div>
         </div>
