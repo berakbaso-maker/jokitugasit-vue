@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://jokitugasit-vue.vercel.app/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://jokitugasit-vue.vercel.app/layanan</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://jokitugasit-vue.vercel.app/joki-tugas-kuliah-it</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://jokitugasit-vue.vercel.app/joki-skripsi-it</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://jokitugasit-vue.vercel.app/joki-tugas-mobile-app</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://jokitugasit-vue.vercel.app/joki-project-web</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://jokitugasit-vue.vercel.app/joki-database-api</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://jokitugasit-vue.vercel.app/joki-aplikasi-desktop</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://jokitugasit-vue.vercel.app/joki-data-science-ai</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://jokitugasit-vue.vercel.app/joki-desain-ui-ux</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://jokitugasit-vue.vercel.app/joki-debug-error</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://jokitugasit-vue.vercel.app/solusi-tugas-it</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://jokitugasit-vue.vercel.app/cara-kerja</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://jokitugasit-vue.vercel.app/tentang</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://jokitugasit-vue.vercel.app/tanya-jawab</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://jokitugasit-vue.vercel.app/request</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://jokitugasit-vue.vercel.app/track</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+</urlset>

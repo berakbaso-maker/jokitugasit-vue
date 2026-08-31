@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /requests
+Disallow: /settings
+Disallow: /earnings
+Disallow: /login
+
+Sitemap: https://jokitugasit-vue.vercel.app/sitemap.xml
