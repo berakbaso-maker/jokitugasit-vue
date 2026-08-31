@@ -55,6 +55,31 @@ const router = createRouter({
       component: () => import('../views/SolusiTugasView.vue'),
     },
     {
+      path: '/joki-database-api',
+      name: 'joki-database-api',
+      component: () => import('../views/JokiDatabaseApiView.vue'),
+    },
+    {
+      path: '/joki-aplikasi-desktop',
+      name: 'joki-desktop',
+      component: () => import('../views/JokiDesktopView.vue'),
+    },
+    {
+      path: '/joki-data-science-ai',
+      name: 'joki-data-science',
+      component: () => import('../views/JokiDataScienceView.vue'),
+    },
+    {
+      path: '/joki-desain-ui-ux',
+      name: 'joki-design',
+      component: () => import('../views/JokiDesignView.vue'),
+    },
+    {
+      path: '/joki-debug-error',
+      name: 'joki-debug',
+      component: () => import('../views/JokiDebugView.vue'),
+    },
+    {
       path: '/request',
       name: 'request-submit',
       component: () => import('../views/RequestSubmitView.vue'),
@@ -139,6 +164,11 @@ router.afterEach((to) => {
     'joki-mobile': 'Joki Tugas Mobile App - Fix Bug UI & API Hari Ini - JokiTugasIT.id',
     'joki-web': 'Joki Project Web - Fix Error & CRUD - JokiTugasIT.id',
     'solusi-tugas': 'Direktori Solusi Tugas IT Mahasiswa - JokiTugasIT.id',
+    'joki-database-api': 'Joki Database & API - Fix Query & Integrasi - JokiTugasIT.id',
+    'joki-desktop': 'Joki Aplikasi Desktop - Java C++ Python - JokiTugasIT.id',
+    'joki-data-science': 'Joki Data Science & AI - Analisis & ML - JokiTugasIT.id',
+    'joki-design': 'Joki Desain UI/UX - Figma & Prototype - JokiTugasIT.id',
+    'joki-debug': 'Jasa Debug & Benerin Error Kode - JokiTugasIT.id',
     'request-submit': 'Kirim Project - JokiTugasIT.id',
     'request-success': 'Request Success - JokiTugasIT.id',
     login: 'Engineer Login - JokiTugasIT.id',
