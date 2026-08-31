@@ -10,6 +10,26 @@ const router = createRouter({
       component: () => import('../views/LandingView.vue'),
     },
     {
+      path: '/layanan',
+      name: 'services',
+      component: () => import('../views/ServicesView.vue'),
+    },
+    {
+      path: '/cara-kerja',
+      name: 'how-it-works',
+      component: () => import('../views/HowItWorksView.vue'),
+    },
+    {
+      path: '/tentang',
+      name: 'about',
+      component: () => import('../views/AboutView.vue'),
+    },
+    {
+      path: '/tanya-jawab',
+      name: 'faq',
+      component: () => import('../views/FaqView.vue'),
+    },
+    {
       path: '/request',
       name: 'request-submit',
       component: () => import('../views/RequestSubmitView.vue'),
@@ -84,7 +104,11 @@ router.beforeEach(async (to) => {
 
 router.afterEach((to) => {
   const titles = {
-    landing: 'JokiTugasIT.id - Expert Friend Engineer',
+    landing: 'Jasa Bantu Tugas IT & Coding - JokiTugasIT.id',
+    services: 'Layanan Jasa Bantu Tugas IT - JokiTugasIT.id',
+    'how-it-works': 'Cara Kerja Jasa Bantu Tugas IT - JokiTugasIT.id',
+    about: 'Tentang Kami - JokiTugasIT.id',
+    faq: 'Tanya Jawab - JokiTugasIT.id',
     'request-submit': 'Kirim Project - JokiTugasIT.id',
     'request-success': 'Request Success - JokiTugasIT.id',
     login: 'Engineer Login - JokiTugasIT.id',
