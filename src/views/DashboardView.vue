@@ -152,7 +152,7 @@ const statusClass = (s) => {
               <td class="p-4 text-secondary">{{ r.quote_amount ? formatRupiah(r.quote_amount) : '—' }}</td>
               <td class="p-4 text-right" @click.stop>
                 <a
-                  :href="waLink(r.whatsapp ? '62' + r.whatsapp : '6281234567890', `Halo ${r.customer_name}, ini engineer JokiTugasIT.id untuk request ${r.order_no}.`)"
+                  :href="waLink(r.whatsapp ? '62' + r.whatsapp : '6285166337257', `Halo ${r.customer_name}, ini engineer JokiTugasIT.id untuk request ${r.order_no}.`)"
                   target="_blank"
                   rel="noopener"
                   class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-surface-container-high text-on-surface-variant hover:bg-success-green hover:text-on-primary transition-colors"

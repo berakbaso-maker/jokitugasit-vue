@@ -2,7 +2,7 @@
 import { RouterLink, useRoute } from 'vue-router'
 
 const route = useRoute()
-const whatsappUrl = 'https://wa.me/6281234567890?text=Halo%20JokiTugasIT.id%2C%20saya%20ingin%20konsultasi%20project.'
+const whatsappUrl = 'https://wa.me/6285166337257?text=Halo%20JokiTugasIT.id%2C%20saya%20ingin%20konsultasi%20project.'
 
 const items = [
   { label: 'Home', icon: 'home', to: '/', type: 'route' },

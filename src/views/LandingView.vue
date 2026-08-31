@@ -38,7 +38,7 @@ const WA_TEXT = 'Halo JokiTugasIT.id, saya butuh bantuan untuk project IT saya.'
               Cek Dulu Gratis
             </RouterLink>
             <a
-              :href="waLink('6281234567890', WA_TEXT)"
+              :href="waLink('6285166337257', WA_TEXT)"
               target="_blank"
               rel="noopener"
               class="bg-surface-white border-2 border-border-subtle text-on-surface font-label-bold text-label-bold px-8 py-4 rounded-xl hover:border-electric-blue hover:text-electric-blue transition-all duration-200 active:scale-95 shadow-sm flex items-center justify-center gap-2 h-[52px]"
@@ -325,7 +325,7 @@ const WA_TEXT = 'Halo JokiTugasIT.id, saya butuh bantuan untuk project IT saya.'
               </div>
             </div>
             <a
-              :href="waLink('6281234567890', WA_TEXT)"
+              :href="waLink('6285166337257', WA_TEXT)"
               target="_blank"
               rel="noopener"
               class="bg-surface-white border-2 border-electric-blue text-electric-blue font-label-bold text-label-bold px-8 py-3.5 rounded-xl hover:bg-primary-fixed/20 transition-colors shadow-sm h-[48px] inline-flex items-center gap-2"
