@@ -1,0 +1,95 @@
+import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '../stores/auth'
+
+const router = createRouter({
+  history: createWebHistory(import.meta.env.BASE_URL),
+  routes: [
+    {
+      path: '/',
+      name: 'landing',
+      component: () => import('../views/LandingView.vue'),
+    },
+    {
+      path: '/request',
+      name: 'request-submit',
+      component: () => import('../views/RequestSubmitView.vue'),
+    },
+    {
+      path: '/success/:orderNo',
+      name: 'request-success',
+      component: () => import('../views/RequestSuccessView.vue'),
+    },
+    {
+      path: '/track',
+      name: 'request-track',
+      component: () => import('../views/TrackRequestView.vue'),
+    },
+    {
+      path: '/track/:orderNo',
+      name: 'request-track-order',
+      component: () => import('../views/TrackRequestView.vue'),
+    },
+    {
+      path: '/login',
+      name: 'login',
+      component: () => import('../views/LoginView.vue'),
+    },
+    {
+      path: '/requests', name: 'requests', component: () => import('../views/RequestsView.vue'), meta: { requiresEngineer: true },
+    },
+    {
+      path: '/settings', name: 'settings', component: () => import('../views/SettingsView.vue'), meta: { requiresEngineer: true },
+    },
+    {
+      path: '/dashboard',
+      name: 'dashboard',
+      component: () => import('../views/DashboardView.vue'),
+      meta: { requiresEngineer: true },
+    },
+    {
+      path: '/requests/:id',
+      name: 'request-detail',
+      component: () => import('../views/RequestDetailView.vue'),
+      meta: { requiresEngineer: true },
+    },
+    {
+      path: '/earnings',
+      name: 'earnings',
+      component: () => import('../views/EarningsView.vue'),
+      meta: { requiresEngineer: true },
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'not-found',
+      component: () => import('../views/NotFoundView.vue'),
+    },
+  ],
+})
+
+router.beforeEach(async (to) => {
+  const auth = useAuthStore()
+  if (!auth.session && !auth.loading) {
+    await auth.init()
+  }
+  if (to.meta.requiresEngineer && !auth.isEngineer) {
+    return { name: 'login', query: { redirect: to.fullPath } }
+  }
+  return true
+})
+
+router.afterEach((to) => {
+  const titles = {
+    landing: 'JokiTugasIT.id - Expert Friend Engineer',
+    'request-submit': 'Kirim Project - JokiTugasIT.id',
+    'request-success': 'Request Success - JokiTugasIT.id',
+    login: 'Engineer Login - JokiTugasIT.id',
+    dashboard: 'Engineer Dashboard - JokiTugasIT.id',
+    requests: 'Requests - JokiTugasIT.id',
+    settings: 'Settings - JokiTugasIT.id',
+    'request-detail': 'Request Detail - JokiTugasIT.id',
+    earnings: 'Earnings Dashboard - JokiTugasIT.id',
+  }
+  document.title = titles[to.name] || 'JokiTugasIT.id'
+})
+
+export default router
