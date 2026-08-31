@@ -200,8 +200,8 @@ const typeColor = (c) => {
               <label class="block text-label-bold font-label-bold mb-2">Update Status</label>
               <select v-model="status" class="w-full rounded-xl border-border-subtle focus:border-electric-blue focus:ring focus:ring-electric-blue/20 transition-all font-body-md p-3 bg-surface-white capitalize">
                 <option value="consultation">Consultation</option>
-                <option value="working">Working on it</option>
-                <option value="review">Waiting for Review</option>
+                <option value="working">Sedang dikerjakan</option>
+                <option value="review">Menunggu review</option>
                 <option value="done">Done</option>
                 <option value="paid">Paid</option>
               </select>

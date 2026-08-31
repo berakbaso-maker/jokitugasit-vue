@@ -299,7 +299,7 @@ const WA_TEXT = 'Halo JokiTugasIT.id, saya butuh bantuan untuk project IT saya.'
           <div class="relative">
             <img
               class="w-48 h-48 md:w-64 md:h-64 rounded-full object-cover border-4 border-surface-white shadow-lg"
-              alt="Expert Engineer"
+              alt="Engineer JokiTugasIT"
               src="https://lh3.googleusercontent.com/aida-public/AB6AXuDR8RkLI8_HBU4ssWVtUwGtrTtUwVrnu6ATXMjApcpX6tEXsgv63arNTK4UHyIL2rTfCOXc76-S8CzZhHa5gCrLqvjxnI-9hL2U9mmviC9OvFsA2hXb-tz4Lxbaq5C-JtEZ9kkf7BXFfvb-FNyzFmOyadu8EI_0_jQGMIw7PtGeyQbBYrOX7rpENsCCIKZc8b_piKWRueDw4IfOlhyPT60Y7Hl5r5zi_MkHdnKzdxEsibTRQOOCsLuN"
             />
             <div class="absolute bottom-4 right-4 bg-surface-white px-3 py-1.5 rounded-full border border-border-subtle shadow-md flex items-center gap-2">

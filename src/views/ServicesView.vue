@@ -25,7 +25,7 @@ const services = [
   },
   {
     icon: 'database', title: 'Database & API', color: 'bg-tertiary-fixed/30 text-tertiary',
-    desc: 'Desain skema database yang rapi dan REST API yang aman. Project kamu nggak bakal berantakan pas dikembangkan.',
+    desc: 'Desain skema database yang rapi dan REST API yang aman. project kamu nggak bakal berantakan pas dikembangkan.',
     tags: ['MySQL', 'PostgreSQL', 'Node.js', 'Supabase'],
   },
   {
