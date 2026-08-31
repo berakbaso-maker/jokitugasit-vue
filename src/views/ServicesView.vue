@@ -10,8 +10,50 @@ const WA_TEXT = 'Halo JokiTugasIT.id, saya butuh bantuan untuk project IT saya.'
 const services = [
   {
     icon: 'language', title: 'Bikin Website', color: 'bg-primary-fixed/50 text-electric-blue', link: '/joki-project-web',
-    desc: 'Landing page, dashboard admin, sistem informasi, sampai slicing Figma ke HTML/React. Beres rapi dan bisa langsung dipakai.',
+    desc: 'Landing page, dashboard admin, sistem informasi, toko online, sampai slicing Figma ke HTML/React. Beres rapi dan siap pakai.',
     tags: ['React', 'Next.js', 'PHP', 'Laravel', 'HTML/CSS'],
+  },
+  {
+    icon: 'smartphone', title: 'Bikin Aplikasi Mobile', color: 'bg-primary-fixed/50 text-electric-blue', link: '/joki-tugas-mobile-app',
+    desc: 'Aplikasi Android & iOS yang smooth untuk tugas akhir, project kuliah, atau aplikasi yang mau kamu rilis.',
+    tags: ['Flutter', 'React Native', 'Kotlin', 'Swift'],
+  },
+  {
+    icon: 'desktop_windows', title: 'Aplikasi Desktop', color: 'bg-tertiary-fixed/40 text-tertiary', link: '/request',
+    desc: 'Program desktop berbasis Java, C++, Python, atau .NET untuk tugas praktikum sampai project skala lab.',
+    tags: ['Java', 'C++', 'Python', '.NET'],
+  },
+  {
+    icon: 'database', title: 'Database & API', color: 'bg-tertiary-fixed/40 text-tertiary', link: '/layanan',
+    desc: 'Desain skema database yang rapi, optimalisasi query, dan REST API / GraphQL yang aman. Project nggak berantakan pas dikembangkan.',
+    tags: ['MySQL', 'PostgreSQL', 'Supabase', 'Node.js'],
+  },
+  {
+    icon: 'monitoring', title: 'Data Science & AI', color: 'bg-error-container text-urgency-red', link: '/request',
+    desc: 'Analisis data, machine learning models, scraping, dan implementasi algoritma AI untuk tugas kuliah atau riset.',
+    tags: ['Python', 'Pandas', 'Scikit-learn', 'ML'],
+  },
+  {
+    icon: 'sos', title: 'Selamatkan Kode Error', color: 'bg-error-container text-urgency-red', popular: true, link: '/request',
+    desc: 'Kode ChatGPT atau codingan sendiri yang error dan bikin pusing? Kami cari akar masalahnya, perbaiki, sampai benar-benar jalan.',
+    tags: ['Debug', 'Refactor', 'Fix Error'],
+  },
+  {
+    icon: 'integration_instructions', title: 'Tugas Kuliah IT', color: 'bg-primary-fixed/50 text-electric-blue', link: '/joki-tugas-kuliah-it',
+    desc: 'Dasar pemrograman, algoritma & struktur data, logika informatika, sampai tugas praktikum. Dikerjakan sesuai aturan dosen.',
+    tags: ['C++', 'Java', 'Python', 'Algoritma'],
+  },
+  {
+    icon: 'school', title: 'Skripsi & Final Project', color: 'bg-tertiary-fixed/40 text-tertiary', link: '/joki-skripsi-it',
+    desc: 'Bantuan teknis skripsi: fix bug, integrasi API & database, sampai persiapan demo dan deploy untuk sidang.',
+    tags: ['Skripsi', 'Tugas Akhir', 'Capstone', 'Sidang'],
+  },
+  {
+    icon: 'palette', title: 'Desain UI/UX', color: 'bg-success-green/10 text-success-green', link: '/request',
+    desc: 'Desain tampilan aplikasi dan website yang modern, rapi, dan mobile-friendly. Siap di-slicing ke kode.',
+    tags: ['Figma', 'Prototype', 'Responsive'],
+  },
+],
   },
   {
     icon: 'sos', title: 'Selamatkan Kode Error', color: 'bg-error-container text-urgency-red', popular: true, link: '/request',
