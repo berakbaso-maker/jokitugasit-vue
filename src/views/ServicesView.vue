@@ -29,9 +29,14 @@ const services = [
     tags: ['MySQL', 'PostgreSQL', 'Node.js', 'Supabase'],
   },
   {
-    icon: 'integration_instructions', title: 'Tugas Kuliah IT', color: 'bg-primary-fixed/50 text-electric-blue',
+    icon: 'integration_instructions', title: 'Tugas Kuliah IT', color: 'bg-primary-fixed/50 text-electric-blue', link: '/joki-tugas-kuliah-it',
     desc: 'Materi kuliah seperti struktur data, basis data, pemrograman web, sampai skripsi bagian coding. Dikerjakan sesuai aturan dosen.',
     tags: ['Skripsi', 'Tugas Akhir', 'Praktikum'],
+  },
+  {
+    icon: 'school', title: 'Skripsi & Final Project', color: 'bg-tertiary-fixed/40 text-tertiary', link: '/joki-skripsi-it',
+    desc: 'Bantuan teknis skripsi: fix bug, integrasi API & database, sampai persiapan demo dan deploy.',
+    tags: ['Skripsi', 'Tugas Akhir', 'Capstone', 'Sidang'],
   },
 ]
 </script>
@@ -52,7 +57,7 @@ const services = [
 
       <!-- Grid Layanan -->
       <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-14">
-        <div v-for="s in services" :key="s.title"
+        <RouterLink v-for="s in services" :key="s.title" :to="s.link || '/request'"
           class="group bg-surface-white border border-border-subtle rounded-2xl p-6 shadow-[0px_4px_20px_rgba(15,23,42,0.04)] hover:shadow-[0px_8px_30px_rgba(15,23,42,0.08)] hover:border-electric-blue transition-all duration-300 flex flex-col h-full relative overflow-hidden">
           <div class="absolute top-0 right-0 w-32 h-32 bg-electric-blue/5 rounded-bl-full -z-10 transition-transform group-hover:scale-110"></div>
           <div class="flex justify-between items-start mb-5">
@@ -66,7 +71,8 @@ const services = [
           <div class="flex flex-wrap gap-2 mt-auto">
             <span v-for="t in s.tags" :key="t" class="bg-surface-container-high text-on-secondary-container px-3 py-1 rounded-full font-label-sm text-label-sm">{{ t }}</span>
           </div>
-        </div>
+          <span class="inline-flex items-center gap-1 text-electric-blue font-label-bold text-label-bold mt-4 group-hover:gap-2 transition-all">Lihat Layanan <span class="material-symbols-outlined text-[18px]">arrow_forward</span></span>
+        </RouterLink>
       </section>
 
       <!-- CTA -->
