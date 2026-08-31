@@ -128,7 +128,7 @@ const WA_TEXT = 'Halo JokiTugasIT.id, saya butuh bantuan untuk project IT saya.'
               <span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1">payments</span>
             </div>
             <div>
-              <h3 class="font-headline-md text-headline-md text-on-surface">Mulai dari <span class="text-electric-blue">Rp20k</span></h3>
+              <h3 class="font-headline-md text-headline-md text-on-surface">Mulai dari <span class="text-electric-blue">Rp10k</span></h3>
               <p class="font-body-md text-body-md text-on-surface-variant">Harga mahasiswa, kualitas tetap profesional.</p>
             </div>
           </div>

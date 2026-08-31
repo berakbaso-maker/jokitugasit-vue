@@ -9,7 +9,7 @@ import { waLink } from '../lib/api'
 const WA_TEXT = 'Halo JokiTugasIT.id, saya mau tanya tentang layanan kalian.'
 
 const faqs = [
-  { q: 'Berapa harga jasa bantu tugas IT?', a: 'Mulai dari Rp20 ribu tergantung tingkat kesulitan dan deadline. Semua transparan, diskusi dulu sebelum deal, nggak ada biaya tersembunyi.' },
+  { q: 'Berapa harga jasa bantu tugas IT?', a: 'Mulai dari Rp10 ribu tergantung tingkat kesulitan dan deadline. Semua transparan, diskusi dulu sebelum deal, nggak ada biaya tersembunyi.' },
   { q: 'Apakah bisa dikerjakan hari ini / deadline mepet?', a: 'Bisa. Kami biasa ngerjain project yang deadline-nya hari ini juga. Pilih opsi "Hari Ini" saat kirim request, atau langsung chat WhatsApp biar dijadwalkan.' },
   { q: 'Jenis tugas IT apa saja yang bisa dibantu?', a: 'Website, aplikasi mobile, database & API, debug kode error (termasuk hasil ChatGPT), tugas kuliah pemrograman, sampai bagian coding skripsi.' },
   { q: 'Apakah data / project saya aman?', a: 'Aman. Semua data dan project dirahasiakan dan nggak akan disebar ke siapa pun. Privasi kamu prioritas.' },

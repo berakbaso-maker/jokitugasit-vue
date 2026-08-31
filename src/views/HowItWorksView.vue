@@ -18,7 +18,7 @@ const steps = [
 const guarantees = [
   { icon: 'schedule', title: 'Cepat', desc: 'Deadline hari ini pun bisa dikejar.' },
   { icon: 'verified_user', title: 'Aman & Privat', desc: 'Data project kamu dijaga, nggak disebar.' },
-  { icon: 'payments', title: 'Harga Mahasiswa', desc: 'Mulai dari Rp20 ribu. Pas di kantong.' },
+  { icon: 'payments', title: 'Harga Mahasiswa', desc: 'Mulai dari Rp10 ribu. Pas di kantong.' },
   { icon: 'support_agent', title: '24/7 Tanya', desc: 'Bisa chat kapan pun kalau bingung.' },
 ]
 </script>
