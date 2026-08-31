@@ -18,11 +18,11 @@ import { RouterLink } from 'vue-router'
         </span>
       </RouterLink>
       <nav class="flex items-center gap-8 font-label-bold text-label-bold">
-        <RouterLink class="text-secondary hover:text-electric-blue transition-colors duration-200" to="/#services">Services</RouterLink>
-        <RouterLink class="text-secondary hover:text-electric-blue transition-colors duration-200" to="/#how-it-works">How it Works</RouterLink>
-        <RouterLink class="text-secondary hover:text-electric-blue transition-colors duration-200" to="/#about">About</RouterLink>
+        <RouterLink class="text-secondary hover:text-electric-blue transition-colors duration-200" to="/#services">Layanan</RouterLink>
+        <RouterLink class="text-secondary hover:text-electric-blue transition-colors duration-200" to="/#how-it-works">Cara Kerja</RouterLink>
+        <RouterLink class="text-secondary hover:text-electric-blue transition-colors duration-200" to="/#about">Tentang</RouterLink>
         <RouterLink class="text-secondary hover:text-electric-blue transition-colors duration-200" to="/track">Cek Status</RouterLink>
-        <RouterLink class="text-secondary hover:text-electric-blue transition-colors duration-200" to="/#how-it-works">FAQ</RouterLink>
+        <RouterLink class="text-secondary hover:text-electric-blue transition-colors duration-200" to="/#how-it-works">Tanya Jawab</RouterLink>
       </nav>
 
     </div>
