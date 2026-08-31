@@ -30,6 +30,11 @@ const router = createRouter({
       component: () => import('../views/FaqView.vue'),
     },
     {
+      path: '/joki-tugas-kuliah-it',
+      name: 'joki-tugas-kuliah',
+      component: () => import('../views/JokiTugasKuliahView.vue'),
+    },
+    {
       path: '/request',
       name: 'request-submit',
       component: () => import('../views/RequestSubmitView.vue'),
@@ -109,6 +114,7 @@ router.afterEach((to) => {
     'how-it-works': 'Cara Kerja Jasa Bantu Tugas IT - JokiTugasIT.id',
     about: 'Tentang Kami - JokiTugasIT.id',
     faq: 'Tanya Jawab - JokiTugasIT.id',
+    'joki-tugas-kuliah': 'Joki Tugas Kuliah IT Umum - JokiTugasIT.id',
     'request-submit': 'Kirim Project - JokiTugasIT.id',
     'request-success': 'Request Success - JokiTugasIT.id',
     login: 'Engineer Login - JokiTugasIT.id',
