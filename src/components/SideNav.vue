@@ -7,10 +7,10 @@ const router = useRouter()
 const auth = useAuthStore()
 
 const navItems = [
-  { label: 'Dashboard', icon: 'dashboard', to: '/dashboard' },
-  { label: 'Requests', icon: 'list_alt', to: '/requests' },
-  { label: 'Earnings', icon: 'payments', to: '/earnings' },
-  { label: 'Settings', icon: 'settings', to: '/settings' },
+  { label: 'Dasbor', icon: 'dashboard', to: '/dashboard' },
+  { label: 'Permintaan', icon: 'list_alt', to: '/requests' },
+  { label: 'Pendapatan', icon: 'payments', to: '/earnings' },
+  { label: 'Pengaturan', icon: 'settings', to: '/settings' },
 ]
 
 const isActive = (to) => route.path.startsWith(to)
@@ -21,7 +21,7 @@ const profileInitial = () => {
 }
 const profileName = () => auth.profile?.full_name || auth.profile?.name || 'Engineer'
 
-async function handleLogout() {
+async function handleKeluar() {
   await auth.logout()
   router.push('/')
 }
@@ -34,7 +34,7 @@ async function handleLogout() {
       <RouterLink to="/dashboard" class="text-headline-md font-headline-md font-extrabold text-primary">
         JokiTugasIT.id
       </RouterLink>
-      <button class="text-electric-blue" @click="handleLogout" title="Logout">
+      <button class="text-electric-blue" @click="handleKeluar" title="Keluar">
         <span class="material-symbols-outlined">logout</span>
       </button>
     </header>
@@ -43,10 +43,10 @@ async function handleLogout() {
     <aside class="hidden md:flex flex-col h-screen py-4 bg-surface-white shadow-2xl fixed inset-y-0 left-0 w-64 z-[60]">
       <div class="px-6 pb-5 border-b border-border-subtle">
         <h1 class="text-headline-md font-headline-md font-extrabold text-electric-blue mb-1">JokiTugasIT.id</h1>
-        <p class="font-label-sm text-label-sm text-secondary">Expert Friend Engineer</p>
+        <p class="font-label-sm text-label-sm text-secondary">Teman Ngoding Engineer</p>
         <div class="flex items-center gap-2 mt-3">
           <div class="w-2 h-2 rounded-full bg-success-green pulse-dot"></div>
-          <span class="font-label-sm text-label-sm text-secondary">Engineer Available</span>
+          <span class="font-label-sm text-label-sm text-secondary">Engineer Siap Bantu</span>
         </div>
       </div>
       <nav class="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
@@ -79,9 +79,9 @@ async function handleLogout() {
         </button>
         <button
           class="w-full bg-transparent border border-electric-blue text-electric-blue font-label-bold text-label-bold py-3 rounded-lg hover:bg-surface-container-low transition-colors"
-          @click="handleLogout"
+          @click="handleKeluar"
         >
-          Logout
+          Keluar
         </button>
       </div>
     </aside>

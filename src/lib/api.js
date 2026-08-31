@@ -71,12 +71,12 @@ export function waLink(phoneNumber, text = '') {
 }
 
 export const STATUS_LABELS = {
-  new: 'New',
-  consultation: 'Consultation',
-  working: 'Working',
+  new: 'Baru',
+  consultation: 'Konsultasi',
+  working: 'Dikerjakan',
   review: 'Review',
-  done: 'Done',
-  paid: 'Paid',
+  done: 'Selesai',
+  paid: 'Lunas',
 }
 
 export const DEADLINE_LABELS = {

@@ -42,8 +42,8 @@ async function handleLogin() {
         <div class="inline-flex items-center justify-center w-16 h-16 bg-electric-blue rounded-2xl shadow-lg mb-4">
           <span class="material-symbols-outlined text-surface-white text-3xl" style="font-variation-settings: 'FILL' 1">terminal</span>
         </div>
-        <h1 class="font-headline-lg text-headline-lg text-on-surface mb-1">Engineer Login</h1>
-        <p class="font-body-md text-body-md text-secondary">Masuk untuk akses dashboard, request, dan earnings.</p>
+        <h1 class="font-headline-lg text-headline-lg text-on-surface mb-1">Login Engineer</h1>
+        <p class="font-body-md text-body-md text-secondary">Masuk untuk akses dasbor, permintaan, dan pendapatan.</p>
       </div>
 
       <div class="bg-surface-white rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] p-6 md:p-8">

@@ -5,8 +5,8 @@ const route = useRoute()
 const whatsappUrl = 'https://wa.me/6285166337257?text=Halo%20JokiTugasIT.id%2C%20saya%20ingin%20konsultasi%20project.'
 
 const items = [
-  { label: 'Home', icon: 'home', to: '/', type: 'route' },
-  { label: 'Request', icon: 'add_circle', to: '/request', type: 'route' },
+  { label: 'Beranda', icon: 'home', to: '/', type: 'route' },
+  { label: 'Kirim', icon: 'add_circle', to: '/request', type: 'route' },
   { label: 'Status', icon: 'track_changes', to: '/track', type: 'route' },
   { label: 'WhatsApp', icon: 'chat', to: whatsappUrl, type: 'external' },
 ]
