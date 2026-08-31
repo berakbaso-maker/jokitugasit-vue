@@ -1,0 +1,24 @@
+{
+  "name": "JokiTugasIT.id - Jasa Bantu Tugas IT",
+  "short_name": "JokiTugasIT",
+  "description": "Jasa bantu tugas IT dan coding: web, aplikasi mobile, database, debug error, sampai tugas kuliah. Harga ramah mahasiswa.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f9fb",
+  "theme_color": "#2563EB",
+  "lang": "id",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "32x32",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

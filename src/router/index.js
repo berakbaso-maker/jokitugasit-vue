@@ -152,6 +152,16 @@ router.beforeEach(async (to) => {
   return true
 })
 
+function setMetaTag(attr, key, content) {
+  let el = document.head.querySelector(`meta[${attr}="${key}"]`)
+  if (!el) {
+    el = document.createElement('meta')
+    el.setAttribute(attr, key)
+    document.head.appendChild(el)
+  }
+  el.setAttribute('content', content)
+}
+
 router.afterEach((to) => {
   const titles = {
     landing: 'Jasa Bantu Tugas IT & Coding - JokiTugasIT.id',
@@ -179,7 +189,12 @@ router.afterEach((to) => {
     'request-detail': 'Request Detail - JokiTugasIT.id',
     earnings: 'Earnings Dashboard - JokiTugasIT.id',
   }
-  document.title = titles[to.name] || 'JokiTugasIT.id'
+  const title = titles[to.name] || 'JokiTugasIT.id - Jasa Bantu Tugas IT'
+  document.title = title
+  const url = 'https://jokitugasit-vue.vercel.app' + to.path
+  setMetaTag('property', 'og:title', title)
+  setMetaTag('property', 'og:url', url)
+  setMetaTag('name', 'twitter:title', title)
 })
 
 export default router

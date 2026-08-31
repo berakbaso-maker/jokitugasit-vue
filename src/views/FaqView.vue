@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import TopAppBar from '../components/TopAppBar.vue'
 import BottomNavBar from '../components/BottomNavBar.vue'
@@ -20,6 +20,27 @@ const faqs = [
 ]
 
 const open = ref(0)
+
+// JSON-LD FAQPage untuk SEO
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((f) => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+}
+onMounted(() => {
+  const existing = document.getElementById('faq-jsonld')
+  if (!existing) {
+    const script = document.createElement('script')
+    script.id = 'faq-jsonld'
+    script.type = 'application/ld+json'
+    script.textContent = JSON.stringify(faqSchema)
+    document.head.appendChild(script)
+  }
+})
 </script>
 
 <template>
