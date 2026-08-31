@@ -53,77 +53,99 @@ const statusClass = (s) => {
 
 <template>
   <SideNav>
+    <!-- Header -->
     <div class="mb-8">
-      <h2 class="text-headline-md font-headline-md font-bold text-on-surface mb-2">Welcome back, Expert!</h2>
-      <p class="text-body-md font-body-md text-secondary">Here's your queue for today. Let's get things Beres.</p>
+      <h1 class="text-headline-md font-headline-md font-bold text-on-surface">Dashboard Engineer</h1>
+      <p class="text-body-md font-body-md text-secondary mt-1">Pantau request masuk dan prioritas hari ini.</p>
     </div>
 
-    <!-- Stats Overview Bento -->
+    <!-- Stats Overview -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-      <div class="bg-surface-white p-4 rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] hover:shadow-lg hover:border-electric-blue border border-transparent transition-all duration-200">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-secondary text-label-bold font-label-bold">New Requests</span>
-          <span class="material-symbols-outlined text-electric-blue">inbox</span>
-        </div>
-        <div class="text-headline-lg font-headline-lg font-bold text-on-surface">{{ stats.new }}</div>
-      </div>
-      <div class="bg-surface-white p-4 rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] hover:shadow-lg hover:border-electric-blue border border-transparent transition-all duration-200">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-secondary text-label-bold font-label-bold">Need Review</span>
-          <span class="material-symbols-outlined text-tertiary-container">find_in_page</span>
-        </div>
-        <div class="text-headline-lg font-headline-lg font-bold text-on-surface">{{ stats.review }}</div>
-      </div>
-      <div class="bg-surface-white p-4 rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] hover:shadow-lg hover:border-electric-blue border border-transparent transition-all duration-200">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-secondary text-label-bold font-label-bold">Working</span>
-          <span class="material-symbols-outlined text-primary-container">engineering</span>
-        </div>
-        <div class="text-headline-lg font-headline-lg font-bold text-on-surface">{{ stats.working }}</div>
-      </div>
-      <div class="bg-error-container p-4 rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] hover:shadow-lg border-l-4 border-urgency-red transition-all duration-200">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-on-error-container text-label-bold font-label-bold flex items-center gap-1">
-            <span class="material-symbols-outlined text-[16px]">warning</span>
-            Deadline Today
+      <div class="bg-surface-white p-5 rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] border border-transparent hover:border-electric-blue hover:shadow-lg transition-all duration-200">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-secondary text-label-sm font-label-sm uppercase tracking-wide">Request Baru</span>
+          <span class="w-9 h-9 rounded-lg bg-primary-fixed/40 text-electric-blue flex items-center justify-center">
+            <span class="material-symbols-outlined text-[20px]">inbox</span>
           </span>
         </div>
-        <div class="text-headline-lg font-headline-lg font-bold text-on-error-container">{{ stats.deadlineToday }}</div>
+        <div class="text-display-hero-mobile font-headline-md font-extrabold text-on-surface leading-none">{{ stats.new }}</div>
+      </div>
+      <div class="bg-surface-white p-5 rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] border border-transparent hover:border-electric-blue hover:shadow-lg transition-all duration-200">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-secondary text-label-sm font-label-sm uppercase tracking-wide">Perlu Review</span>
+          <span class="w-9 h-9 rounded-lg bg-tertiary-fixed/40 text-tertiary flex items-center justify-center">
+            <span class="material-symbols-outlined text-[20px]">find_in_page</span>
+          </span>
+        </div>
+        <div class="text-display-hero-mobile font-headline-md font-extrabold text-on-surface leading-none">{{ stats.review }}</div>
+      </div>
+      <div class="bg-surface-white p-5 rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] border border-transparent hover:border-electric-blue hover:shadow-lg transition-all duration-200">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-secondary text-label-sm font-label-sm uppercase tracking-wide">Dikerjakan</span>
+          <span class="w-9 h-9 rounded-lg bg-primary-container/30 text-primary flex items-center justify-center">
+            <span class="material-symbols-outlined text-[20px]">engineering</span>
+          </span>
+        </div>
+        <div class="text-display-hero-mobile font-headline-md font-extrabold text-on-surface leading-none">{{ stats.working }}</div>
+      </div>
+      <div class="bg-error-container p-5 rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] border border-transparent hover:border-urgency-red hover:shadow-lg transition-all duration-200">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-on-error-container text-label-sm font-label-sm uppercase tracking-wide">Deadline Hari Ini</span>
+          <span class="w-9 h-9 rounded-lg bg-white/30 text-on-error-container flex items-center justify-center">
+            <span class="material-symbols-outlined text-[20px]">warning</span>
+          </span>
+        </div>
+        <div class="text-display-hero-mobile font-headline-md font-extrabold text-on-error-container leading-none">{{ stats.deadlineToday }}</div>
       </div>
     </div>
 
-    <!-- Request List Table Area -->
+    <!-- Active Queue -->
     <div class="bg-surface-white rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] overflow-hidden">
-      <div class="p-6 border-b border-border-subtle flex justify-between items-center">
-        <h3 class="text-body-lg font-body-lg font-bold text-on-surface">Active Queue</h3>
-        <div class="flex gap-2">
-          <button class="text-secondary hover:text-electric-blue transition-colors">
-            <span class="material-symbols-outlined">filter_list</span>
-          </button>
+      <div class="px-6 py-5 border-b border-border-subtle flex justify-between items-center">
+        <div>
+          <h3 class="text-body-lg font-body-lg font-bold text-on-surface">Antrian Request</h3>
+          <p class="text-label-sm text-label-sm text-secondary mt-0.5">{{ requests.length }} request total</p>
         </div>
+        <RouterLink
+          to="/requests"
+          class="inline-flex items-center gap-1.5 text-electric-blue font-label-bold text-label-bold hover:underline"
+        >
+          Lihat Semua
+          <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+        </RouterLink>
       </div>
 
-      <div v-if="loading" class="p-10 text-center">
+      <div v-if="loading" class="p-12 text-center">
         <span class="material-symbols-outlined animate-spin text-electric-blue text-4xl">progress_activity</span>
+        <p class="text-body-md font-body-md text-secondary mt-3">Memuat request...</p>
       </div>
 
-      <div v-else-if="requests.length === 0" class="p-10 text-center">
-        <span class="material-symbols-outlined text-5xl text-outline-variant mb-2">inbox</span>
-        <p class="text-body-md font-body-md text-secondary">Belum ada request masuk.</p>
+      <div v-else-if="requests.length === 0" class="p-12 text-center">
+        <div class="w-16 h-16 mx-auto rounded-2xl bg-surface-container-low flex items-center justify-center mb-4">
+          <span class="material-symbols-outlined text-3xl text-outline-variant">inbox</span>
+        </div>
+        <h4 class="text-body-lg font-body-lg font-bold text-on-surface mb-1">Belum ada request masuk</h4>
+        <p class="text-body-md font-body-md text-secondary mb-6">Request customer akan muncul di sini begitu masuk.</p>
+        <button
+          @click="router.push('/request')"
+          class="inline-flex items-center gap-2 bg-electric-blue text-white font-label-bold text-label-bold px-5 py-3 rounded-lg hover:bg-primary transition-colors"
+        >
+          <span class="material-symbols-outlined text-[18px]">add_circle</span>
+          Buat Request Contoh
+        </button>
       </div>
 
       <div v-else class="overflow-x-auto">
         <table class="w-full text-left border-collapse">
           <thead>
             <tr class="bg-surface text-secondary text-label-sm font-label-sm uppercase tracking-wider">
-              <th class="p-4 font-semibold">ID</th>
-              <th class="p-4 font-semibold">Customer</th>
-              <th class="p-4 font-semibold">Project</th>
-              <th class="p-4 font-semibold">Problem</th>
-              <th class="p-4 font-semibold">Deadline</th>
-              <th class="p-4 font-semibold">Status</th>
-              <th class="p-4 font-semibold">Quote</th>
-              <th class="p-4 font-semibold text-right">Action</th>
+              <th class="px-5 py-3.5 font-semibold">Order</th>
+              <th class="px-5 py-3.5 font-semibold">Customer</th>
+              <th class="px-5 py-3.5 font-semibold">Project</th>
+              <th class="px-5 py-3.5 font-semibold">Deadline</th>
+              <th class="px-5 py-3.5 font-semibold">Status</th>
+              <th class="px-5 py-3.5 font-semibold">Quote</th>
+              <th class="px-5 py-3.5 font-semibold text-right">Aksi</th>
             </tr>
           </thead>
           <tbody class="text-body-md font-body-md divide-y divide-border-subtle">
@@ -134,28 +156,27 @@ const statusClass = (s) => {
               :class="r.deadline === 'hari_ini' ? 'bg-error-container/10' : ''"
               @click="goDetail(r.id)"
             >
-              <td class="p-4 font-label-bold text-label-bold text-on-surface">{{ r.order_no }}</td>
-              <td class="p-4 text-on-surface">{{ r.customer_name }}</td>
-              <td class="p-4">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-label-sm font-label-sm bg-inverse-primary text-on-primary-fixed capitalize">{{ r.category }}</span>
+              <td class="px-5 py-4 font-label-bold text-label-bold text-on-surface whitespace-nowrap">#{{ r.order_no }}</td>
+              <td class="px-5 py-4 text-on-surface whitespace-nowrap">{{ r.customer_name }}</td>
+              <td class="px-5 py-4">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-label-sm font-label-sm bg-inverse-primary text-on-primary-fixed capitalize whitespace-nowrap">{{ r.category }}</span>
               </td>
-              <td class="p-4 text-on-surface-variant max-w-[200px] truncate">{{ r.description }}</td>
-              <td class="p-4 font-label-bold text-label-bold flex items-center gap-1" :class="deadlineColor(r.deadline)">
-                <span class="material-symbols-outlined text-[16px]">timer</span>
+              <td class="px-5 py-4 font-label-bold text-label-bold whitespace-nowrap" :class="deadlineColor(r.deadline)">
+                <span class="material-symbols-outlined text-[16px] align-middle mr-1">timer</span>
                 {{ r.deadline_date ? new Date(r.deadline_date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : (DEADLINE_LABELS[r.deadline] || r.deadline) }}
               </td>
-              <td class="p-4">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-label-sm font-label-sm" :class="statusClass(r.status)">
+              <td class="px-5 py-4">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-label-sm font-label-sm whitespace-nowrap" :class="statusClass(r.status)">
                   {{ STATUS_LABELS[r.status] || r.status }}
                 </span>
               </td>
-              <td class="p-4 text-secondary">{{ r.quote_amount ? formatRupiah(r.quote_amount) : '—' }}</td>
-              <td class="p-4 text-right" @click.stop>
+              <td class="px-5 py-4 text-secondary whitespace-nowrap">{{ r.quote_amount ? formatRupiah(r.quote_amount) : '—' }}</td>
+              <td class="px-5 py-4 text-right whitespace-nowrap" @click.stop>
                 <a
                   :href="waLink(r.whatsapp ? '62' + r.whatsapp : '6285166337257', `Halo ${r.customer_name}, ini engineer JokiTugasIT.id untuk request ${r.order_no}.`)"
                   target="_blank"
                   rel="noopener"
-                  class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-surface-container-high text-on-surface-variant hover:bg-success-green hover:text-on-primary transition-colors"
+                  class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-surface-container-high text-on-surface-variant hover:bg-success-green hover:text-white transition-colors"
                   title="WhatsApp Customer"
                 >
                   <span class="material-symbols-outlined text-[18px]">chat</span>
