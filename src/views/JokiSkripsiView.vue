@@ -90,10 +90,11 @@ const packages = [
                 {{ f }}
               </li>
             </ul>
-            <a :href="waLink('6285166337257', `Halo, saya mau paket ${pkg.name} untuk skripsi saya.`)" target="_blank" rel="noopener"
-              class="w-full text-center py-3 rounded-xl font-label-bold text-label-bold transition-colors"
+            <a :href="waLink('6285166337257', `Halo, saya mau konsultasi paket ${pkg.name} untuk skripsi saya.`)" target="_blank" rel="noopener"
+              class="w-full text-center py-3 rounded-xl font-label-bold text-label-bold transition-colors inline-flex items-center justify-center gap-2"
               :class="pkg.popular ? 'bg-electric-blue text-white hover:bg-primary' : 'border-2 border-electric-blue text-electric-blue hover:bg-primary-fixed/20'">
-              Solve This
+              <span class="material-symbols-outlined text-[18px]">chat</span>
+              Konsultasi ke Engineer
             </a>
           </div>
         </div>
