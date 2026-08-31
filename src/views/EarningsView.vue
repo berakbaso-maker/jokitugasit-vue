@@ -52,12 +52,12 @@ onMounted(async () => {
   <SideNav>
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
       <div>
-        <h2 class="text-display-hero-mobile md:text-display-hero font-display-hero-mobile md:font-display-hero text-on-surface">Earnings Overview</h2>
-        <p class="font-body-lg text-body-lg text-secondary mt-1">Track your income and request withdrawals.</p>
+        <h2 class="text-display-hero-mobile md:text-display-hero font-display-hero-mobile md:font-display-hero text-on-surface">Ringkasan Pendapatan</h2>
+        <p class="font-body-lg text-body-lg text-secondary mt-1">Pantau penghasilan dan tarik dana dengan mudah.</p>
       </div>
       <button class="bg-electric-blue text-surface-white font-label-bold text-label-bold px-6 py-3 rounded-lg hover:scale-[0.98] transition-transform shadow-soft flex items-center gap-2 w-full md:w-auto justify-center">
         <span class="material-symbols-outlined">account_balance_wallet</span>
-        Withdraw Funds
+        Tarik Dana
       </button>
     </div>
 
@@ -65,27 +65,27 @@ onMounted(async () => {
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       <div class="bg-surface-white p-6 rounded-xl shadow-soft hover:shadow-[0_8px_30px_rgba(15,23,42,0.12)] hover:border hover:border-electric-blue transition-all group">
         <div class="flex items-center justify-between mb-4">
-          <span class="font-label-bold text-label-bold text-secondary">Total Earnings</span>
+          <span class="font-label-bold text-label-bold text-secondary">Total Penghasilan</span>
           <span class="material-symbols-outlined text-electric-blue bg-primary-fixed/30 p-2 rounded-lg group-hover:bg-primary-fixed/50 transition-colors">account_balance</span>
         </div>
         <div class="text-headline-lg font-headline-lg text-on-surface mb-1">{{ formatRupiah(stats.totalEarnings) }}</div>
         <div class="font-label-sm text-label-sm text-success-green flex items-center gap-1">
-          <span class="material-symbols-outlined text-[14px]">trending_up</span> {{ stats.completed }} Completed Projects
+          <span class="material-symbols-outlined text-[14px]">trending_up</span> {{ stats.completed }} Project Selesai
         </div>
       </div>
 
       <div class="bg-surface-white p-6 rounded-xl shadow-soft hover:shadow-[0_8px_30px_rgba(15,23,42,0.12)] hover:border hover:border-electric-blue transition-all group">
         <div class="flex items-center justify-between mb-4">
-          <span class="font-label-bold text-label-bold text-secondary">Pending Payments</span>
+          <span class="font-label-bold text-label-bold text-secondary">Pembayaran Menunggu</span>
           <span class="material-symbols-outlined text-electric-blue bg-primary-fixed/30 p-2 rounded-lg group-hover:bg-primary-fixed/50 transition-colors">schedule</span>
         </div>
         <div class="text-headline-lg font-headline-lg text-on-surface mb-1">{{ formatRupiah(stats.pending) }}</div>
-        <div class="font-label-sm text-label-sm text-secondary">From {{ stats.pendingCount }} active projects</div>
+        <div class="font-label-sm text-label-sm text-secondary">Dari {{ stats.pendingCount }} project aktif</div>
       </div>
 
       <div class="bg-surface-white p-6 rounded-xl shadow-soft hover:shadow-[0_8px_30px_rgba(15,23,42,0.12)] hover:border hover:border-electric-blue transition-all group">
         <div class="flex items-center justify-between mb-4">
-          <span class="font-label-bold font-label-bold text-secondary">This Month Income</span>
+          <span class="font-label-bold font-label-bold text-secondary">Pendapatan Bulan Ini</span>
           <span class="material-symbols-outlined text-electric-blue bg-primary-fixed/30 p-2 rounded-lg group-hover:bg-primary-fixed/50 transition-colors">calendar_month</span>
         </div>
         <div class="text-headline-lg font-headline-lg text-on-surface mb-1">{{ formatRupiah(stats.monthIncome) }}</div>
@@ -94,36 +94,36 @@ onMounted(async () => {
 
       <div class="bg-surface-white p-6 rounded-xl shadow-soft hover:shadow-[0_8px_30px_rgba(15,23,42,0.12)] hover:border hover:border-electric-blue transition-all group">
         <div class="flex items-center justify-between mb-4">
-          <span class="font-label-bold font-label-bold text-secondary">Success Rate</span>
+          <span class="font-label-bold font-label-bold text-secondary">Tingkat Keberhasilan</span>
           <span class="material-symbols-outlined text-electric-blue bg-primary-fixed/30 p-2 rounded-lg group-hover:bg-primary-fixed/50 transition-colors">verified</span>
         </div>
         <div class="text-headline-lg font-headline-lg text-on-surface mb-1">{{ stats.successRate }}%</div>
-        <div class="font-label-sm text-label-sm text-success-green">{{ stats.completed }} Completed Projects</div>
+        <div class="font-label-sm text-label-sm text-success-green">{{ stats.completed }} Project Selesai</div>
       </div>
     </div>
 
     <!-- Chart Area -->
     <div class="bg-surface-white p-6 rounded-xl shadow-soft mb-8 border border-border-subtle/50">
       <div class="flex justify-between items-center mb-6">
-        <h3 class="text-headline-md font-headline-md text-on-surface">Income Trends</h3>
+        <h3 class="text-headline-md font-headline-md text-on-surface">Tren Pendapatan</h3>
         <select class="bg-surface border-border-subtle rounded-lg font-label-sm text-label-sm px-3 py-2 text-secondary focus:ring-electric-blue focus:border-electric-blue">
-          <option>Monthly</option>
-          <option>Weekly</option>
+          <option>Bulanan</option>
+          <option>Mingguan</option>
         </select>
       </div>
       <div class="w-full h-64 bg-surface-container-low rounded-lg flex items-center justify-center border border-dashed border-outline-variant">
         <span class="text-secondary font-body-md text-body-md flex items-center gap-2">
           <span class="material-symbols-outlined">bar_chart</span>
-          Chart visualization area
+          Area visualisasi grafik
         </span>
       </div>
     </div>
 
-    <!-- Recent Transactions Table -->
+    <!-- Transaksi Terbaru Table -->
     <div class="bg-surface-white rounded-xl shadow-soft border border-border-subtle/50 overflow-hidden">
       <div class="p-6 border-b border-border-subtle flex justify-between items-center">
-        <h3 class="text-headline-md font-headline-md text-on-surface">Recent Transactions</h3>
-        <button class="text-electric-blue font-label-bold text-label-bold hover:underline">View All</button>
+        <h3 class="text-headline-md font-headline-md text-on-surface">Transaksi Terbaru</h3>
+        <button class="text-electric-blue font-label-bold text-label-bold hover:underline">Lihat Semua</button>
       </div>
 
       <div v-if="loading" class="p-10 text-center">

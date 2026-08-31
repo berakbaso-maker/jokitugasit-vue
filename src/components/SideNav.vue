@@ -100,7 +100,7 @@ async function handleLogout() {
       </RouterLink>
     </nav>
 
-    <main class="flex-1 md:ml-64 px-4 sm:px-gutter pt-6 md:pt-10 pb-32 md:pb-10 w-full max-w-[1200px]">
+    <main class="flex-1 md:ml-64 px-4 sm:px-6 md:px-8 pt-6 md:pt-10 pb-32 md:pb-10 w-full min-w-0">
       <slot />
     </main>
   </div>
