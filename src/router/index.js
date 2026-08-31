@@ -35,6 +35,11 @@ const router = createRouter({
       component: () => import('../views/LoginView.vue'),
     },
     {
+      path: '/engineer-login',
+      name: 'engineer-login',
+      component: () => import('../views/LoginView.vue'),
+    },
+    {
       path: '/requests', name: 'requests', component: () => import('../views/RequestsView.vue'), meta: { requiresEngineer: true },
     },
     {
@@ -83,6 +88,7 @@ router.afterEach((to) => {
     'request-submit': 'Kirim Project - JokiTugasIT.id',
     'request-success': 'Request Success - JokiTugasIT.id',
     login: 'Engineer Login - JokiTugasIT.id',
+    'engineer-login': 'Engineer Login - JokiTugasIT.id',
     dashboard: 'Engineer Dashboard - JokiTugasIT.id',
     requests: 'Requests - JokiTugasIT.id',
     settings: 'Settings - JokiTugasIT.id',

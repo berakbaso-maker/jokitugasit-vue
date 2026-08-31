@@ -12,7 +12,7 @@ import { RouterLink } from 'vue-router'
         <a class="hover:text-electric-blue underline transition-all opacity-80 hover:opacity-100" href="#">Terms of Service</a>
         <a class="hover:text-electric-blue underline transition-all opacity-80 hover:opacity-100" href="#">Privacy Policy</a>
         <a class="hover:text-electric-blue underline transition-all opacity-80 hover:opacity-100" href="#">Contact Us</a>
-        <RouterLink class="hover:text-electric-blue underline transition-all opacity-80 hover:opacity-100" to="/login">Engineer Login</RouterLink>
+
       </nav>
       <div class="font-label-sm text-label-sm text-secondary opacity-80">
         © 2024 JokiTugasIT.id - Made with ❤️ for Students

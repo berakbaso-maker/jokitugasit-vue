@@ -24,12 +24,7 @@ import { RouterLink } from 'vue-router'
         <RouterLink class="text-secondary hover:text-electric-blue transition-colors duration-200" to="/track">Cek Status</RouterLink>
         <RouterLink class="text-secondary hover:text-electric-blue transition-colors duration-200" to="/#how-it-works">FAQ</RouterLink>
       </nav>
-      <RouterLink
-        to="/login"
-        class="bg-electric-blue text-surface-white font-label-bold text-label-bold px-6 py-2.5 rounded-lg hover:bg-primary transition-all duration-200 active:scale-95 shadow-md"
-      >
-        Engineer Login
-      </RouterLink>
+
     </div>
   </header>
 </template>

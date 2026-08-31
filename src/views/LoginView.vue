@@ -6,7 +6,6 @@ import { useAuthStore } from '../stores/auth'
 const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
-import { USE_DEMO_AUTH } from '../stores/auth'
 
 const email = ref('')
 const password = ref('')
@@ -45,7 +44,6 @@ async function handleLogin() {
         </div>
         <h1 class="font-headline-lg text-headline-lg text-on-surface mb-1">Engineer Login</h1>
         <p class="font-body-md text-body-md text-secondary">Masuk untuk akses dashboard, request, dan earnings.</p>
-        <p v-if="USE_DEMO_AUTH" class="text-xs text-secondary mt-2">Mode demo lokal: gunakan admin / admin</p>
       </div>
 
       <div class="bg-surface-white rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] p-6 md:p-8">
