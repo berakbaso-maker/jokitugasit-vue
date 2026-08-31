@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getPublicOrder, waLink, DEADLINE_LABELS, STATUS_LABELS } from '../lib/api'
+import { getPublicOrder, waLink, DEADLINE_LABELS, STATUS_LABELS, CATEGORY_LABELS } from '../lib/api'
 
 const route = useRoute()
 const router = useRouter()
@@ -59,7 +59,7 @@ onMounted(async () => {
           <div class="space-y-3">
             <div class="flex justify-between">
               <span class="font-body-md text-body-md text-secondary text-sm">Jenis Project</span>
-              <span class="font-body-md text-body-md text-on-surface font-semibold text-sm capitalize">{{ request.category }}</span>
+              <span class="font-body-md text-body-md text-on-surface font-semibold text-sm capitalize">{{ CATEGORY_LABELS[request.category] || request.category }}</span>
             </div>
             <div class="flex justify-between">
               <span class="font-body-md text-body-md text-secondary text-sm">Tenggat Waktu</span>

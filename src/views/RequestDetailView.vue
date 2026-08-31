@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import SideNav from '../components/SideNav.vue'
-import { getRequest, updateRequest, waLink, DEADLINE_LABELS, STATUS_LABELS, formatRupiah } from '../lib/api'
+import { getRequest, updateRequest, waLink, DEADLINE_LABELS, STATUS_LABELS, CATEGORY_LABELS, formatRupiah } from '../lib/api'
 
 const route = useRoute()
 const router = useRouter()
@@ -147,7 +147,7 @@ const typeColor = (c) => {
             </div>
             <div class="mb-6">
               <div class="flex gap-2 mb-3">
-                <span class="px-3 py-1 bg-surface-container-low text-primary rounded-full text-xs font-semibold capitalize">{{ request.category }}</span>
+                <span class="px-3 py-1 bg-surface-container-low text-primary rounded-full text-xs font-semibold capitalize">{{ CATEGORY_LABELS[request.category] || request.category }}</span>
               </div>
               <div class="bg-surface-container-lowest p-4 rounded-lg border border-border-subtle">
                 <p class="font-body-md italic text-on-surface-variant">"{{ request.description }}"</p>

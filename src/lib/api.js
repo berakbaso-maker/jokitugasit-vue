@@ -70,6 +70,20 @@ export function waLink(phoneNumber, text = '') {
   return `https://wa.me/${num}${msg ? `?text=${msg}` : ''}`
 }
 
+
+export const CATEGORY_LABELS = {
+  web: 'Website / Web App',
+  mobile: 'Aplikasi Mobile',
+  desktop: 'Aplikasi Desktop',
+  database: 'Database',
+  ai: 'AI / Machine Learning',
+  debug: 'Debug / Benerin Error',
+  skripsi: 'Skripsi / Tugas Akhir',
+  tugas_kuliah: 'Tugas Kuliah Dasar',
+  design: 'Desain UI/UX',
+  lainnya: 'Lainnya',
+}
+
 export const STATUS_LABELS = {
   new: 'Baru',
   consultation: 'Konsultasi',

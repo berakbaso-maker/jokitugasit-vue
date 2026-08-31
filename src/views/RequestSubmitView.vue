@@ -9,10 +9,15 @@ import { createRequest, uploadAttachment } from '../lib/api'
 const router = useRouter()
 
 const categories = [
-  { label: 'Website (PHP/JS)', value: 'web' },
-  { label: 'Data (Python/SQL)', value: 'data' },
+  { label: 'Website / Web App', value: 'web' },
   { label: 'Aplikasi Mobile', value: 'mobile' },
-  { label: 'AI / Benerin Error', value: 'ai' },
+  { label: 'Aplikasi Desktop', value: 'desktop' },
+  { label: 'Database', value: 'database' },
+  { label: 'AI / Machine Learning', value: 'ai' },
+  { label: 'Debug / Benerin Error', value: 'debug' },
+  { label: 'Skripsi / Tugas Akhir', value: 'skripsi' },
+  { label: 'Tugas Kuliah Dasar', value: 'tugas_kuliah' },
+  { label: 'Desain UI/UX', value: 'design' },
   { label: 'Lainnya', value: 'lainnya' },
 ]
 

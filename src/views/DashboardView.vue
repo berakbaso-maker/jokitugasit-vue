@@ -2,7 +2,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import SideNav from '../components/SideNav.vue'
-import { listRequests, formatRupiah, DEADLINE_LABELS, STATUS_LABELS, waLink } from '../lib/api'
+import { listRequests, formatRupiah, DEADLINE_LABELS, STATUS_LABELS, CATEGORY_LABELS, waLink } from '../lib/api'
 
 const router = useRouter()
 const requests = ref([])
@@ -159,7 +159,7 @@ const statusClass = (s) => {
               <td class="px-5 py-4 font-label-bold text-label-bold text-on-surface whitespace-nowrap">#{{ r.order_no }}</td>
               <td class="px-5 py-4 text-on-surface whitespace-nowrap">{{ r.customer_name }}</td>
               <td class="px-5 py-4">
-                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-label-sm font-label-sm bg-inverse-primary text-on-primary-fixed capitalize whitespace-nowrap">{{ r.category }}</span>
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-label-sm font-label-sm bg-inverse-primary text-on-primary-fixed capitalize whitespace-nowrap">{{ CATEGORY_LABELS[r.category] || r.category }}</span>
               </td>
               <td class="px-5 py-4 font-label-bold text-label-bold whitespace-nowrap" :class="deadlineColor(r.deadline)">
                 <span class="material-symbols-outlined text-[16px] align-middle mr-1">timer</span>
