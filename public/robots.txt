@@ -6,4 +6,4 @@ Disallow: /settings
 Disallow: /earnings
 Disallow: /login
 
-Sitemap: https://jokitugasit-vue.vercel.app/sitemap.xml
+Sitemap: https://jokitugasit.my.id/sitemap.xml

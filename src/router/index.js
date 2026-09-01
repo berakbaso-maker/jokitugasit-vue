@@ -191,7 +191,7 @@ router.afterEach((to) => {
   }
   const title = titles[to.name] || 'JokiTugasIT.id - Jasa Bantu Tugas IT'
   document.title = title
-  const url = 'https://jokitugasit-vue.vercel.app' + to.path
+  const url = 'https://jokitugasit.my.id' + to.path
   setMetaTag('property', 'og:title', title)
   setMetaTag('property', 'og:url', url)
   setMetaTag('name', 'twitter:title', title)

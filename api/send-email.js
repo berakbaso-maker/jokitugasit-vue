@@ -25,7 +25,7 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'RESEND_API_KEY belum dikonfigurasi' })
   }
 
-  const trackUrl = `https://jokitugasit-vue.vercel.app/track/${orderNo}`
+  const trackUrl = `https://jokitugasit.my.id/track/${orderNo}`
   const rupiah = quoteAmount ? 'Rp ' + Number(quoteAmount).toLocaleString('id-ID') : 'Belum ditentukan'
 
   const html = `<div style="font-family:Arial,sans-serif;max-width:520px;margin:auto;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden">
