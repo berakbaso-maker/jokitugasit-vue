@@ -90,6 +90,16 @@ const router = createRouter({
       component: () => import('../views/RequestSuccessView.vue'),
     },
     {
+      path: '/blog',
+      name: 'blog',
+      component: () => import('../views/BlogView.vue'),
+    },
+    {
+      path: '/blog/:slug',
+      name: 'blog-post',
+      component: () => import('../views/BlogPostView.vue'),
+    },
+    {
       path: '/track',
       name: 'request-track',
       component: () => import('../views/TrackRequestView.vue'),
@@ -182,6 +192,8 @@ router.afterEach((to) => {
     'joki-data-science': 'Joki Data Science & AI - Analisis & ML - JokiTugasIT.id',
     'joki-design': 'Joki Desain UI/UX - Figma & Prototype - JokiTugasIT.id',
     'joki-debug': 'Jasa Debug & Benerin Error Kode - JokiTugasIT.id',
+    'blog': 'Blog Tips Ngoding & Bantuan Tugas IT - JokiTugasIT.id',
+    'blog-post': 'Artikel - JokiTugasIT.id',
     'request-submit': 'Kirim Project - JokiTugasIT.id',
     'request-success': 'Request Success - JokiTugasIT.id',
     login: 'Engineer Login - JokiTugasIT.id',

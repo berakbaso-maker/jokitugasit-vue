@@ -9,10 +9,10 @@ import { RouterLink } from 'vue-router'
         JokiTugasIT.id
       </RouterLink>
       <nav class="flex flex-wrap justify-center gap-6 mb-6 md:mb-0 font-label-sm text-label-sm text-secondary">
-        <a class="hover:text-electric-blue underline transition-all opacity-80 hover:opacity-100" href="#">Syarat & Ketentuan</a>
-        <a class="hover:text-electric-blue underline transition-all opacity-80 hover:opacity-100" href="#">Kebijakan Privasi</a>
-        <a class="hover:text-electric-blue underline transition-all opacity-80 hover:opacity-100" href="#">Hubungi Kami</a>
-
+        <RouterLink to="/layanan" class="hover:text-electric-blue underline transition-all opacity-80 hover:opacity-100">Layanan</RouterLink>
+        <RouterLink to="/blog" class="hover:text-electric-blue underline transition-all opacity-80 hover:opacity-100">Blog & Tips</RouterLink>
+        <RouterLink to="/tanya-jawab" class="hover:text-electric-blue underline transition-all opacity-80 hover:opacity-100">Tanya Jawab</RouterLink>
+        <RouterLink to="/tentang" class="hover:text-electric-blue underline transition-all opacity-80 hover:opacity-100">Tentang</RouterLink>
       </nav>
       <div class="font-label-sm text-label-sm text-secondary opacity-80">
         © 2024 JokiTugasIT.id - Dibuat dengan ❤️ untuk Mahasiswa

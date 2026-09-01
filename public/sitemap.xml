@@ -15,6 +15,9 @@
   <url><loc>https://jokitugasit.my.id/cara-kerja</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://jokitugasit.my.id/tentang</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://jokitugasit.my.id/tanya-jawab</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://jokitugasit.my.id/blog</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://jokitugasit.my.id/blog/kenapa-kode-chatgpt-sering-error</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://jokitugasit.my.id/blog/cara-pilih-jasa-bantu-tugas-it-yang-aman</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://jokitugasit.my.id/request</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://jokitugasit.my.id/track</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
 </urlset>
