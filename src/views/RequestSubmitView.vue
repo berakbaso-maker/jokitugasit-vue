@@ -256,16 +256,6 @@ async function handleSubmit() {
               </button>
             </div>
 
-              <div class="flex items-center gap-1 text-on-surface-variant">
-                <span class="material-symbols-outlined text-[16px]">lock</span>
-                <span class="text-[11px] font-medium">100% Privacy</span>
-              </div>
-              <div class="w-1 h-1 rounded-full bg-border-subtle"></div>
-              <div class="flex items-center gap-1 text-on-surface-variant">
-                <span class="material-symbols-outlined text-[16px]">verified_user</span>
-                <span class="text-[11px] font-medium">No Account Needed</span>
-              </div>
-            </div>
           </form>
         </div>
       </div>
