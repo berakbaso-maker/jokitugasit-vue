@@ -188,7 +188,6 @@ export const posts = [
     ],
   },
 ]
-]
 
 export function getPost(slug) {
   return posts.find((p) => p.slug === slug)
