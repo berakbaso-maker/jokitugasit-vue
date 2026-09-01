@@ -12,6 +12,7 @@ import { RouterLink } from 'vue-router'
         <RouterLink to="/layanan" class="hover:text-electric-blue underline transition-all opacity-80 hover:opacity-100">Layanan</RouterLink>
         <RouterLink to="/blog" class="hover:text-electric-blue underline transition-all opacity-80 hover:opacity-100">Blog & Tips</RouterLink>
         <RouterLink to="/tanya-jawab" class="hover:text-electric-blue underline transition-all opacity-80 hover:opacity-100">Tanya Jawab</RouterLink>
+        <RouterLink to="/testimoni" class="hover:text-electric-blue underline transition-all opacity-80 hover:opacity-100">Testimoni</RouterLink>
         <RouterLink to="/tentang" class="hover:text-electric-blue underline transition-all opacity-80 hover:opacity-100">Tentang</RouterLink>
       </nav>
       <div class="font-label-sm text-label-sm text-secondary opacity-80">
