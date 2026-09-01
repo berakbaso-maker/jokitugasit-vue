@@ -9,7 +9,7 @@ const WA_TEXT = 'Halo JokiTugasIT.id, saya butuh bantuan database & API.'
 
 const problems = [
   { icon: 'table_view', title: 'Skema Database Kacau', desc: 'Tabel nggak jelas relasinya, normalisasi salah, atau query makin lama makin lemot.', color: 'bg-error-container text-urgency-red' },
-  { icon: 'link_off', title: 'API Gak Bisa Dipanggil', desc: 'CORS error, endpoint 404, response format beda, atau auth token bermasalah.', color: 'bg-primary-fixed/40 text-electric-blue' },
+  { icon: 'api', title: 'API Gak Bisa Dipanggil', desc: 'CORS error, endpoint 404, response format beda, atau auth token bermasalah.', color: 'bg-primary-fixed/40 text-electric-blue' },
   { icon: 'speed', title: 'Query Lambat', desc: 'Data banyak tapi loading lama? Indeks, join, dan optimasi query kami beresin.', color: 'bg-tertiary-fixed/40 text-tertiary' },
 ]
 

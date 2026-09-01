@@ -9,8 +9,8 @@ const WA_TEXT = 'Halo JokiTugasIT.id, saya butuh bantuan aplikasi desktop.'
 
 const problems = [
   { icon: 'bug_report', title: 'Program Error / Crash', desc: 'Runtime error, null pointer, atau program langsung close saat dijalankan.', color: 'bg-error-container text-urgency-red' },
-  { icon: 'dashboard_customize', title: 'GUI Berantakan', desc: 'Layout form nggak rapi, komponen ketutupan, atau desain tampilan kurang menarik.', color: 'bg-primary-fixed/40 text-electric-blue' },
-  { icon: 'data_object', title: 'Logika Program Salah', desc: 'Perhitungan, loop, atau algoritma hasilnya beda dari yang seharusnya.', color: 'bg-tertiary-fixed/40 text-tertiary' },
+  { icon: 'desktop_windows', title: 'GUI Berantakan', desc: 'Layout form nggak rapi, komponen ketutupan, atau desain tampilan kurang menarik.', color: 'bg-primary-fixed/40 text-electric-blue' },
+  { icon: 'code', title: 'Logika Program Salah', desc: 'Perhitungan, loop, atau algoritma hasilnya beda dari yang seharusnya.', color: 'bg-tertiary-fixed/40 text-tertiary' },
 ]
 
 const stacks = ['Java', 'C++', 'Python', '.NET', 'JavaFX', 'Swing']

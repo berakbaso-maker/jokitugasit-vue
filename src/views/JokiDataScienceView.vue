@@ -9,8 +9,8 @@ const WA_TEXT = 'Halo JokiTugasIT.id, saya butuh bantuan data science / AI.'
 
 const problems = [
   { icon: 'analytics', title: 'Analisis Data Rumit', desc: 'Data kotor, format beda-beda, atau bingung mulai analisis dari mana.', color: 'bg-error-container text-urgency-red' },
-  { icon: 'memory', title: 'Model ML Gagal', desc: 'Akurasi rendah, overfitting, atau model error pas dipakai prediksi.', color: 'bg-primary-fixed/40 text-electric-blue' },
-  { icon: 'web_scraper', title: 'Scraping Bermasalah', desc: 'Anti-scraping, struktur HTML berubah, atau data yang diambil nggak lengkap.', color: 'bg-tertiary-fixed/40 text-tertiary' },
+  { icon: 'model_training', title: 'Model ML Gagal', desc: 'Akurasi rendah, overfitting, atau model error pas dipakai prediksi.', color: 'bg-primary-fixed/40 text-electric-blue' },
+  { icon: 'cloud_download', title: 'Scraping Bermasalah', desc: 'Anti-scraping, struktur HTML berubah, atau data yang diambil nggak lengkap.', color: 'bg-tertiary-fixed/40 text-tertiary' },
 ]
 
 const stacks = ['Python', 'Pandas', 'Scikit-learn', 'TensorFlow', 'Jupyter']

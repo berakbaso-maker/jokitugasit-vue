@@ -10,7 +10,7 @@ const WA_TEXT = 'Halo JokiTugasIT.id, saya butuh bantuan debug kode yang error.'
 const problems = [
   { icon: 'bug_report', title: 'Error dari ChatGPT', desc: 'Kode hasil AI yang error, logic muter-muter, atau susah dipahami.', color: 'bg-error-container text-urgency-red' },
   { icon: 'warning', title: 'Runtime / Build Error', desc: 'Error pas dijalankan atau dibuild. Red screen, crash, atau dependency conflict.', color: 'bg-primary-fixed/40 text-electric-blue' },
-  { icon: 'sync_problem', title: 'Logic Salah', desc: 'Hasil program beda dari yang diharapkan, padahal nggak ada error.', color: 'bg-tertiary-fixed/40 text-tertiary' },
+  { icon: 'bug_report', title: 'Logic Salah', desc: 'Hasil program beda dari yang diharapkan, padahal nggak ada error.', color: 'bg-tertiary-fixed/40 text-tertiary' },
 ]
 
 const stacks = ['Debug', 'Refactor', 'Fix Error', 'Optimasi']

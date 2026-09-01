@@ -29,18 +29,18 @@ const services = [
     tags: ['MySQL', 'PostgreSQL', 'Supabase', 'Node.js'],
   },
   {
-    icon: 'monitoring', title: 'Data Science & AI', color: 'bg-error-container text-urgency-red', link: '/joki-data-science-ai',
+    icon: 'analytics', title: 'Data Science & AI', color: 'bg-error-container text-urgency-red', link: '/joki-data-science-ai',
     desc: 'Analisis data, machine learning models, scraping, dan implementasi algoritma AI untuk tugas kuliah atau riset.',
     tags: ['Python', 'Pandas', 'Scikit-learn', 'ML'],
   },
   {
-    icon: 'sos', title: 'Selamatkan Kode Error', color: 'bg-error-container text-urgency-red', popular: true, link: '/joki-debug-error',
+    icon: 'bug_report', title: 'Selamatkan Kode Error', color: 'bg-error-container text-urgency-red', popular: true, link: '/joki-debug-error',
     desc: 'Kode ChatGPT atau codingan sendiri yang error dan bikin pusing? Kami cari akar masalahnya, perbaiki, sampai benar-benar jalan.',
     tags: ['Debug', 'Refactor', 'Fix Error'],
   },
 
   {
-    icon: 'integration_instructions', title: 'Tugas Kuliah IT', color: 'bg-primary-fixed/50 text-electric-blue', link: '/joki-tugas-kuliah-it',
+    icon: 'school', title: 'Tugas Kuliah IT', color: 'bg-primary-fixed/50 text-electric-blue', link: '/joki-tugas-kuliah-it',
     desc: 'Materi kuliah seperti struktur data, basis data, pemrograman web, sampai skripsi bagian coding. Dikerjakan sesuai aturan dosen.',
     tags: ['Skripsi', 'Tugas Akhir', 'Praktikum'],
   },
