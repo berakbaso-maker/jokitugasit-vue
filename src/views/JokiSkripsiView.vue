@@ -15,13 +15,13 @@ const problems = [
 ]
 
 const packages = [
-  { name: 'Minor Fix', price: '10k', unit: '/bug', popular: false,
+  { name: 'Minor Fix', popular: false,
     desc: 'Untuk debugging dan optimasi ringan.',
     features: ['Perbaikan 1 bug / error', 'Optimasi kecil', 'Revisi sekali', 'Cepat selesai'] },
-  { name: 'Feature Add-on', price: '50k', unit: '/fitur', popular: true,
+  { name: 'Feature Add-on', popular: true,
     desc: 'Nambah modul atau integrasi baru.',
     features: ['1 fitur/modul baru', 'Integrasi API/DB', 'Testing & demo', 'Revisi 2x'] },
-  { name: 'Full Project Support', price: 'Nego', unit: '/project', popular: false,
+  { name: 'Full Project Support', popular: false,
     desc: 'Bantuan teknis menyeluruh (A-Z).',
     features: ['Review seluruh codebase', 'Fix semua bug', 'Persiapan demo & deploy', 'Pendampingan sampai sidang'] },
 ]
@@ -80,9 +80,12 @@ const packages = [
             <span v-if="pkg.popular" class="absolute -top-3 left-1/2 -translate-x-1/2 bg-electric-blue text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full">Paling Laku</span>
             <h3 class="font-headline-md text-headline-md font-bold text-on-surface mb-1">{{ pkg.name }}</h3>
             <p class="text-sm text-secondary mb-4">{{ pkg.desc }}</p>
-            <div class="mb-5">
-              <span class="font-display-hero-mobile text-display-hero-mobile font-extrabold text-electric-blue">Rp{{ pkg.price }}</span>
-              <span class="text-sm text-secondary">{{ pkg.unit }}</span>
+            <div class="mb-5 rounded-xl bg-primary-fixed/30 border border-primary-fixed px-4 py-3">
+              <div class="flex items-center gap-2 text-electric-blue mb-1">
+                <span class="material-symbols-outlined text-[20px]">handshake</span>
+                <span class="font-label-bold text-label-bold">Konsultasi sesuai kebutuhan</span>
+              </div>
+              <p class="text-xs text-on-surface-variant">Ceritakan detailnya, kami bantu cari solusi yang paling pas.</p>
             </div>
             <ul class="space-y-2.5 mb-7 flex-grow">
               <li v-for="f in pkg.features" :key="f" class="flex items-start gap-2 text-sm text-on-surface-variant">
