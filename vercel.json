@@ -10,6 +10,21 @@
   "functions": {
     "api/send-email.js": {
       "maxDuration": 10
+    },
+    "api/ig-webhook.js": {
+      "maxDuration": 10
+    },
+    "api/ig-publish.js": {
+      "maxDuration": 30
+    },
+    "api/ig-reply.js": {
+      "maxDuration": 10
+    },
+    "api/ig-insights.js": {
+      "maxDuration": 15
+    },
+    "api/ig-run-schedule.js": {
+      "maxDuration": 30
     }
   }
 }

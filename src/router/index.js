@@ -113,6 +113,9 @@ const router = createRouter({
       path: '/requests', name: 'requests', component: () => import('../views/RequestsView.vue'), meta: { requiresEngineer: true },
     },
     {
+      path: '/ig-leads', name: 'instagram', component: () => import('../views/InstagramView.vue'), meta: { requiresEngineer: true },
+    },
+    {
       path: '/settings', name: 'settings', component: () => import('../views/SettingsView.vue'), meta: { requiresEngineer: true },
     },
     {
@@ -185,6 +188,7 @@ router.afterEach((to) => {
     'engineer-login': 'Engineer Login - JokiTugasIT.id',
     dashboard: 'Engineer Dashboard - JokiTugasIT.id',
     requests: 'Requests - JokiTugasIT.id',
+    instagram: 'Instagram Command Center - JokiTugasIT.id',
     settings: 'Settings - JokiTugasIT.id',
     'request-detail': 'Request Detail - JokiTugasIT.id',
     earnings: 'Earnings Dashboard - JokiTugasIT.id',
