@@ -68,7 +68,7 @@ export default async function handler(req, res) {
     if (!response.ok) {
       const errText = await response.text()
       console.error('Resend error:', response.status, errText)
-      return res.status(502).json({ error: 'Gagal kirim email via Resend' })
+      return res.status(502).json({ error: 'Gagal kirim email via Resend', detail: errText.slice(0, 300) })
     }
 
     return res.status(200).json({ ok: true })
