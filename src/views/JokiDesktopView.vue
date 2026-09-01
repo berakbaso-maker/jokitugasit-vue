@@ -41,7 +41,7 @@ const stacks = ['Java', 'C++', 'Python', '.NET', 'JavaFX', 'Swing']
           </a>
         </div>
         <div class="flex flex-wrap justify-center gap-2 mt-7">
-          <span v-for="st in stacks" :key="st" class="bg-surface-white border border-border-subtle px-3 py-1.5 rounded-full font-label-sm text-label-sm text-secondary">{ st }</span>
+          <span v-for="st in stacks" :key="st" class="bg-surface-white border border-border-subtle px-3 py-1.5 rounded-full font-label-sm text-label-sm text-secondary">{{ st }}</span>
         </div>
       </section>
 
@@ -50,10 +50,10 @@ const stacks = ['Java', 'C++', 'Python', '.NET', 'JavaFX', 'Swing']
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
           <div v-for="p in problems" :key="p.title" class="bg-surface-white rounded-xl p-6 border border-border-subtle shadow-sm hover:shadow-md hover:border-electric-blue transition-all">
             <span class="w-12 h-12 rounded-xl flex items-center justify-center mb-4" :class="p.color">
-              <span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1">{ p.icon }</span>
+              <span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1">{{ p.icon }}</span>
             </span>
-            <h3 class="font-headline-md text-headline-md font-bold text-on-surface mb-2">{ p.title }</h3>
-            <p class="text-sm text-secondary leading-6">{ p.desc }</p>
+            <h3 class="font-headline-md text-headline-md font-bold text-on-surface mb-2">{{ p.title }}</h3>
+            <p class="text-sm text-secondary leading-6">{{ p.desc }}</p>
           </div>
         </div>
       </section>
