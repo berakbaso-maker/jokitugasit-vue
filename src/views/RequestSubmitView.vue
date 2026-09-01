@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import TopAppBar from '../components/TopAppBar.vue'
 import BottomNavBar from '../components/BottomNavBar.vue'
 import FooterBar from '../components/FooterBar.vue'
-import { createRequest, uploadAttachment } from '../lib/api'
+import { createRequest, uploadAttachment, CATEGORY_LABELS, DEADLINE_LABELS } from '../lib/api'
 
 const router = useRouter()
 
@@ -29,6 +29,7 @@ const deadlines = [
 
 const form = ref({
   customer_name: '',
+  email: '',
   whatsapp: '',
   category: 'web',
   description: '',
@@ -92,6 +93,28 @@ async function handleSubmit() {
       status: 'new',
     }
     const created = await createRequest(payload)
+
+    // Kirim email booking (opsional) — tidak menggagalkan alur jika gagal
+    if (form.value.email.trim()) {
+      try {
+        await fetch('/api/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: form.value.email.trim(),
+            orderNo: created.order_no,
+            customerName: form.value.customer_name.trim(),
+            category: CATEGORY_LABELS[form.value.category] || form.value.category,
+            deadline: DEADLINE_LABELS[form.value.deadline] || form.value.deadline,
+            description: form.value.description.trim(),
+            quoteAmount: null,
+          }),
+        })
+      } catch (err) {
+        console.error('Email booking gagal:', err)
+      }
+    }
+
     router.push({ name: 'request-success', params: { orderNo: created.order_no } })
   } catch (err) {
     console.error(err)
@@ -129,6 +152,19 @@ async function handleSubmit() {
                 placeholder="Contoh: Budi Santoso"
                 type="text"
               />
+            </div>
+
+            <!-- Email (opsional) -->
+            <div>
+              <label class="block font-label-bold text-label-bold text-on-background mb-2" for="email">Email (opsional)</label>
+              <input
+                id="email"
+                v-model="form.email"
+                class="w-full rounded-xl border border-border-subtle bg-surface-container-lowest px-4 py-3 text-body-md focus:border-electric-blue focus:ring-1 focus:ring-electric-blue outline-none transition-shadow placeholder:text-outline-variant"
+                placeholder="biar dapat kode booking di email"
+                type="email"
+              />
+              <p class="text-xs text-secondary mt-1.5">Kosongkan kalau nggak mau dapat email. Kode booking tetap muncul di layar.</p>
             </div>
 
             <!-- 1. Upload Field -->
