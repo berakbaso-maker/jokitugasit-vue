@@ -8,11 +8,12 @@ import { waLink } from '../lib/api'
 const WA_TEXT = 'Halo JokiTugasIT.id, saya mau tanya cara kerja jasa bantu tugas IT.'
 
 const steps = [
-  { num: '01', icon: 'send', title: 'Kirim', desc: 'Kirim tugas, screenshot error, atau brief lewat form atau WhatsApp. Nggak perlu login.' },
-  { num: '02', icon: 'search', title: 'Dicek', desc: 'Kami cek tingkat kesulitan dan estimasi waktu pengerjaannya. Dijawab cepat.' },
-  { num: '03', icon: 'handshake', title: 'Nego', desc: 'Diskusikan harga yang masuk akal dan sesuai budget mahasiswa. Transparan.' },
-  { num: '04', icon: 'verified', title: 'Deal', desc: 'Setelah deal dan DP, kami langsung mulai mengerjakan project-mu.' },
-  { num: '05', icon: 'task_alt', title: 'Beres', desc: 'Project selesai, kita review bareng, lalu siap dikumpulkan.' },
+  { num: '01', icon: 'send', title: 'Kirim', desc: 'Isi form 30 detik atau langsung chat WhatsApp. Nggak perlu daftar, nggak perlu login.' },
+  { num: '02', icon: 'chat', title: 'Ngobrol', desc: 'Langsung nyambung ke engineer. Ceritain detailnya santai di WhatsApp.' },
+  { num: '03', icon: 'search', title: 'Dicek', desc: 'Kami cek tingkat kesulitan dan estimasi waktu pengerjaannya. Dijawab cepat.' },
+  { num: '04', icon: 'handshake', title: 'Nego', desc: 'Diskusikan harga yang masuk akal dan sesuai budget mahasiswa. Transparan.' },
+  { num: '05', icon: 'verified', title: 'Deal', desc: 'Setelah deal dan DP, kami langsung mulai mengerjakan project-mu.' },
+  { num: '06', icon: 'task_alt', title: 'Beres', desc: 'Project selesai, kita review bareng, lalu siap dikumpulkan.' },
 ]
 
 const guarantees = [

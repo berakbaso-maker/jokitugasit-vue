@@ -61,9 +61,15 @@ onBeforeUnmount(() => {
         <div class="absolute -top-20 -left-20 w-96 h-96 bg-electric-blue/10 rounded-full blur-3xl -z-10 mix-blend-multiply"></div>
 
         <div class="flex-1 flex flex-col gap-6 items-start z-10">
-          <div class="flex items-center gap-2 bg-surface-white border border-border-subtle rounded-full px-4 py-1.5 shadow-sm">
-            <div class="w-2.5 h-2.5 rounded-full bg-success-green animate-pulse-slow"></div>
-            <span class="font-label-sm text-label-sm text-secondary">Engineer siap bantu sekarang</span>
+          <div class="flex items-center gap-3 flex-wrap">
+            <div class="flex items-center gap-2 bg-surface-white border border-border-subtle rounded-full px-4 py-1.5 shadow-sm">
+              <div class="w-2.5 h-2.5 rounded-full bg-success-green animate-pulse-slow"></div>
+              <span class="font-label-sm text-label-sm text-secondary">Engineer siap bantu sekarang</span>
+            </div>
+            <div class="flex items-center gap-1.5 bg-primary-fixed/40 border border-primary-fixed/50 rounded-full px-3 py-1.5">
+              <span class="material-symbols-outlined text-[14px] text-electric-blue">person_off</span>
+              <span class="font-label-sm text-label-sm text-on-surface-variant">Tanpa Daftar</span>
+            </div>
           </div>
           <h1 class="font-display-hero-mobile text-display-hero-mobile md:font-display-hero md:text-display-hero text-on-surface">
             Tugas ngoding apa pun,<br />
@@ -89,6 +95,22 @@ onBeforeUnmount(() => {
               <span class="material-symbols-outlined text-[#25D366]" style="font-variation-settings: 'FILL' 1">chat</span>
               Tanya via WhatsApp
             </a>
+          </div>
+          <div class="flex items-center gap-4 mt-3 flex-wrap">
+            <div class="flex items-center gap-1.5 text-on-surface-variant">
+              <span class="material-symbols-outlined text-[16px] text-success-green">lock</span>
+              <span class="text-[11px] font-medium">100% Privasi</span>
+            </div>
+            <div class="w-1 h-1 rounded-full bg-border-subtle"></div>
+            <div class="flex items-center gap-1.5 text-on-surface-variant">
+              <span class="material-symbols-outlined text-[16px] text-electric-blue">person_off</span>
+              <span class="text-[11px] font-medium">Tanpa Login</span>
+            </div>
+            <div class="w-1 h-1 rounded-full bg-border-subtle"></div>
+            <div class="flex items-center gap-1.5 text-on-surface-variant">
+              <span class="material-symbols-outlined text-[16px] text-electric-blue">bolt</span>
+              <span class="text-[11px] font-medium">Langsung ke Engineer</span>
+            </div>
           </div>
           <div class="flex items-center gap-3 mt-4">
             <div class="flex -space-x-3">

@@ -109,8 +109,8 @@ async function handleSubmit() {
     <main class="flex-grow flex flex-col items-center justify-start pt-8 pb-section-gap-mobile md:pb-section-gap-desktop px-4 sm:px-gutter w-full">
       <div class="w-full max-w-2xl">
         <div class="text-center mb-8">
-          <h1 class="font-display-hero-mobile md:font-display-hero text-display-hero-mobile md:text-display-hero text-on-background mb-2">Kirim Tugas / Project</h1>
-          <p class="font-body-lg text-body-lg text-secondary">Tidak perlu login. Ceritakan masalahnya, kami bantu sampai beres.</p>
+          <h1 class="font-display-hero-mobile md:font-display-hero text-display-hero-mobile md:text-display-hero text-on-background mb-2">Ceritain Aja Masalahmu</h1>
+          <p class="font-body-lg text-body-lg text-secondary">Gak perlu daftar, gak perlu ribet. Langsung ke engineer.</p>
           <div class="inline-flex items-center gap-2 mt-4 bg-surface-white px-3 py-1.5 rounded-full shadow-sm border border-border-subtle">
             <span class="w-2.5 h-2.5 rounded-full bg-success-green animate-pulse"></span>
             <span class="font-label-sm text-label-sm text-on-surface-variant">Engineer siap bantu</span>
@@ -230,8 +230,21 @@ async function handleSubmit() {
               {{ errorMsg }}
             </div>
 
+            <!-- Trust Badges (dekat CTA) -->
+            <div class="flex justify-center items-center gap-4 pt-1">
+              <div class="flex items-center gap-1 text-on-surface-variant">
+                <span class="material-symbols-outlined text-[16px]">lock</span>
+                <span class="text-[11px] font-medium">100% Privasi</span>
+              </div>
+              <div class="w-1 h-1 rounded-full bg-border-subtle"></div>
+              <div class="flex items-center gap-1 text-on-surface-variant">
+                <span class="material-symbols-outlined text-[16px]">person_off</span>
+                <span class="text-[11px] font-medium">Tanpa Daftar</span>
+              </div>
+            </div>
+
             <!-- CTA -->
-            <div class="pt-2">
+            <div class="pt-1">
               <button
                 class="w-full bg-electric-blue text-surface-white font-label-bold text-label-bold py-4 rounded-xl flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 transition-all shadow-md min-h-[44px] disabled:opacity-60 disabled:active:scale-100"
                 type="submit"
@@ -243,8 +256,6 @@ async function handleSubmit() {
               </button>
             </div>
 
-            <!-- Trust Badges -->
-            <div class="flex justify-center items-center gap-4 pt-2">
               <div class="flex items-center gap-1 text-on-surface-variant">
                 <span class="material-symbols-outlined text-[16px]">lock</span>
                 <span class="text-[11px] font-medium">100% Privacy</span>
