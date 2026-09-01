@@ -77,6 +77,117 @@ export const posts = [
       ]},
     ],
   },
+  {
+    slug: 'cara-membuat-crud-php-mysql-untuk-tugas-kuliah',
+    title: 'Cara Membuat CRUD PHP MySQL untuk Tugas Kuliah (Lengkap)',
+    date: '2026-09-02',
+    excerpt: 'Tugas bikin CRUD PHP MySQL gampang pusing? Ini panduan step-by-step bikin Create, Read, Update, Delete sederhana yang rapi dan bisa langsung dikumpulin.',
+    keywords: ['tutorial crud php', 'crud php mysql tugas', 'bikin crud tugas kuliah'],
+    readTime: 6,
+    sections: [
+      { h: 'CRUD Itu Nggak Seseram Kelihatannya', p: [
+        'CRUD (Create, Read, Update, Delete) adalah dasar hampir semua aplikasi. Kalau kamu paham pola ini, kamu bisa bikin aplikasi apa pun — dari data mahasiswa, inventori, sampai sistem kasir.',
+        'Buat tugas kuliah, dosen biasanya cuma butuh CRUD yang jalan, rapi, dan ada validasi dasar. Nggak perlu over-engineering.',
+      ]},
+      { h: '1. Siapkan Database & Koneksi', p: [
+        'Buat database di phpMyAdmin, misalnya `db_tugas`. Lalu buat satu tabel sederhana, contohnya tabel `mahasiswa` dengan kolom id, nama, nim, jurusan.',
+        'Buat file `koneksi.php` untuk koneksi ke MySQL: buat variabel host, user, password, dan nama database, lalu pakai `mysqli_connect` atau PDO.',
+      ]},
+      { h: '2. Halaman Create (Tambah Data)', p: [
+        'Buat form HTML dengan input sesuai kolom tabel. Saat form di-submit, tangkap data dengan `$_POST`, lalu jalankan query INSERT.',
+        'Jangan lupa validasi dasar: pastikan field nggak kosong sebelum insert. Ini nilai plus di mata dosen.',
+      ]},
+      { h: '3. Halaman Read (Tampilkan Data)', p: [
+        'Pakai query SELECT untuk ambil semua data, lalu loop dengan `while` dan tampilkan dalam tabel HTML.',
+        'Buat juga tombol Edit dan Hapus di tiap baris — ini yang bikin CRUD-mu keliatan lengkap.',
+      ]},
+      { h: '4. Halaman Update (Edit Data)', p: [
+        'Halaman edit biasanya butuh ID dari data yang diklik. Ambil ID lewat URL (`$_GET`), tampilkan data lama di form, lalu UPDATE pas di-submit.',
+        'Pastikan query UPDATE-nya pakai WHERE id, biar cuma data yang dipilih yang berubah.',
+      ]},
+      { h: '5. Halaman Delete (Hapus Data)', p: [
+        'Cukup query DELETE dengan WHERE id. Tambahkan konfirmasi JavaScript (`confirm()`) biar nggak kehapus nggak sengaja.',
+        'Selesai! Kamu udah punya CRUD lengkap yang siap dikumpulin.',
+      ]},
+      { h: 'Error Umum & Solusinya', p: [
+        'Error paling sering: koneksi gagal (cek nama database & password), query salah (cek nama kolom), dan data nggak masuk (cek apakah form pakai method POST dan name-nya sesuai).',
+        'Kalau masih mentok setelah coba semua ini, engineer JokiTugasIT.id bisa bantu review dan perbaiki CRUD-mu — gratis dicek dulu.',
+      ]},
+    ],
+  },
+  {
+    slug: 'cara-debug-error-react-js-pemula',
+    title: 'Cara Debug Error React JS untuk Pemula (Tanpa Panik)',
+    date: '2026-09-02',
+    excerpt: 'React error merah bikin panik? Tenang — ini cara membaca error React, memperbaikinya, dan tools yang bikin debugging jadi cepat.',
+    keywords: ['debug react js', 'error react js pemula', 'cara fix error react'],
+    readTime: 5,
+    sections: [
+      { h: 'Error React Bukan Akhir Dunia', p: [
+        'Setiap developer React — termasuk yang udah bertahun-tahun — pernah lihat layar merah. Error itu sebenarnya petunjuk, bukan hukuman. Kamu cuma perlu tahu cara membacanya.',
+      ]},
+      { h: '1. Baca Error dari Atas', p: [
+        'Error React biasanya punya 3 bagian: pesan utama (jelas, misal "Cannot read properties of undefined"), lokasi file & baris, dan stack trace.',
+        'Mulai dari pesan utama dulu — 90% kasus, pesan itu sudah bilang apa masalahnya.',
+      ]},
+      { h: '2. Error Paling Umum: "Cannot read properties of undefined"', p: [
+        'Ini artinya kamu akses properti dari data yang masih `undefined` atau `null`. Contoh: `user.name` padahal `user` belum diisi.',
+        'Solusi: pastikan data sudah ada sebelum di-render. Pakai optional chaining (`user?.name`) atau kondisi `if (user)`.',
+      ]},
+      { h: '3. Error "Element type is invalid"', p: [
+        'Biasanya karena import komponen yang salah — nama beda, atau lupa export default. Cek import & export komponen kamu.',
+      ]},
+      { h: '4. Pakai React DevTools', p: [
+        'Install React DevTools di browser. Ini ngasih kamu panel Components & Profiler yang super membantu buat lihat state dan props tiap komponen secara live.',
+        'Dengan DevTools, kamu bisa lihat data apa yang masuk ke komponen dan kenapa render-nya salah.',
+      ]},
+      { h: '5. Tips: Console.log Strategis', p: [
+        'Jangan takut pakai `console.log()`. Log data yang masuk, log hasil fungsi, log state — ini cara tercepat nemuin titik error.',
+        'Bandingkan apa yang kamu harapkan vs apa yang keluar di console. Bedanya itu sumber masalahnya.',
+      ]},
+      { h: 'Masih Mentok? Bantuan Siap', p: [
+        'Kalau error React-mu makin rumit (state management, hooks, atau integrasi API) dan deadline mepet, engineer JokiTugasIT.id bisa bantu debug sampai beres.',
+        'Kirim screenshot error + kode kamu, gratis dicek dulu.',
+      ]},
+    ],
+  },
+  {
+    slug: 'contoh-program-java-tugas-kuliah',
+    title: 'Contoh Program Java untuk Tugas Kuliah + Cara Menjalankannya',
+    date: '2026-09-02',
+    excerpt: 'Bingung mulai program Java buat tugas? Ini contoh program sederhana (input-output, percabangan, perulangan, array) lengkap dengan cara menjalankannya.',
+    keywords: ['contoh program java', 'program java tugas kuliah', 'belajar java dasar'],
+    readTime: 5,
+    sections: [
+      { h: 'Java Buat Tugas Kuliah: Mulai dari Mana?', p: [
+        'Java sering jadi bahasa pertama di kampus — dan sering bikin pusing pertama kali. Padahal pola dasarnya simpel: input, proses, output.',
+      ]},
+      { h: '1. Struktur Dasar Program Java', p: [
+        'Setiap program Java punya class utama dengan method `main`. File harus dinamai sama dengan nama class-nya.',
+        'Contoh: class `HaloDunia` harus disimpan di file `HaloDunia.java`, lalu di-compile dengan `javac` dan dijalankan dengan `java`.',
+      ]},
+      { h: '2. Input & Output Dasar', p: [
+        'Pakai `Scanner` untuk input dari keyboard dan `System.out.println()` untuk output. Ini dua hal paling dasar yang pasti dipakai di tugas.',
+      ]},
+      { h: '3. Percabangan (If-Else) & Perulangan (Loop)', p: [
+        'If-else buat pengambilan keputusan (contoh: nilai >= 60 = lulus). For/while buat perulangan (contoh: tampilkan angka 1-100).',
+        'Kombinasi keduanya udah bisa nyelesain mayoritas tugas Java semester awal.',
+      ]},
+      { h: '4. Array & Manipulasi Data', p: [
+        'Array buat nyimpan banyak data sekaligus. Contoh tugas umum: cari nilai tertinggi, rata-rata, atau urutkan data.',
+        'Coba pahami dulu cara akses index array — dari situ semua tugas data jadi lebih gampang.',
+      ]},
+      { h: '5. Cara Menjalankan di Eclipse / NetBeans / Terminal', p: [
+        'Di IDE (Eclipse/NetBeans): buat project baru, tambah class, tulis kode, klik Run. Di terminal: `javac NamaFile.java` lalu `java NamaFile`.',
+        'Error paling umum pemula: lupa titik koma, nama file beda sama class, atau salah import Scanner.',
+      ]},
+      { h: 'Butuh Bantuan Lebih?', p: [
+        'Kalau tugas Java-mu lebih kompleks (OOP, GUI Swing, atau koneksi database) dan kamu mentok, JokiTugasIT.id bisa bantu — dari review kode, perbaiki error, sampai pendampingan.',
+        'Ceritain aja masalahmu, gratis dicek dulu.',
+      ]},
+    ],
+  },
+]
 ]
 
 export function getPost(slug) {
