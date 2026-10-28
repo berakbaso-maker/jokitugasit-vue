@@ -5,7 +5,7 @@ import BottomNavBar from '../components/BottomNavBar.vue'
 import FooterBar from '../components/FooterBar.vue'
 import { waLink } from '../lib/api'
 
-const WA_TEXT = 'Halo JokiTugasIT.id, saya butuh bantuan project web.'
+const WA_TEXT = 'Halo jokitugasit.my.id, saya butuh bantuan project web.'
 
 const problems = [
   { icon: 'route', title: 'Error 404 / Route Rusak', desc: 'Udah bener nulis route di Laravel tapi tetep not found? Kita benerin hitungan menit.', color: 'bg-error-container text-urgency-red' },

@@ -182,48 +182,57 @@ function setMetaTag(attr, key, content) {
 
 router.afterEach((to) => {
   const titles = {
-    landing: 'Jasa Bantu Tugas IT & Coding - JokiTugasIT.id',
-    services: 'Layanan Jasa Bantu Tugas IT - JokiTugasIT.id',
-    'how-it-works': 'Cara Kerja Jasa Bantu Tugas IT - JokiTugasIT.id',
-    about: 'Tentang Kami - JokiTugasIT.id',
-    faq: 'Tanya Jawab - JokiTugasIT.id',
-    'joki-tugas-kuliah': 'Joki Tugas Kuliah IT Umum - JokiTugasIT.id',
-    'joki-skripsi': 'Joki Skripsi IT & Final Project - JokiTugasIT.id',
-    'joki-mobile': 'Joki Tugas Mobile App - Fix Bug UI & API Hari Ini - JokiTugasIT.id',
-    'joki-web': 'Joki Project Web - Fix Error & CRUD - JokiTugasIT.id',
-    'solusi-tugas': 'Direktori Solusi Tugas IT Mahasiswa - JokiTugasIT.id',
-    'joki-database-api': 'Joki Database & API - Fix Query & Integrasi - JokiTugasIT.id',
-    'joki-desktop': 'Joki Aplikasi Desktop - Java C++ Python - JokiTugasIT.id',
-    'joki-data-science': 'Joki Data Science & AI - Analisis & ML - JokiTugasIT.id',
-    'joki-design': 'Joki Desain UI/UX - Figma & Prototype - JokiTugasIT.id',
-    'joki-debug': 'Jasa Debug & Benerin Error Kode - JokiTugasIT.id',
-    'pricing': 'Harga Jasa Bantu Tugas IT - Mulai Rp20rb - JokiTugasIT.id',
-    'testimonials': 'Testimoni Jasa Bantu Tugas IT - JokiTugasIT.id',
-    'blog': 'Blog Tips Ngoding & Bantuan Tugas IT - JokiTugasIT.id',
-    'blog-post': 'Artikel - JokiTugasIT.id',
-    'request-submit': 'Kirim Project - JokiTugasIT.id',
-    'request-success': 'Request Success - JokiTugasIT.id',
-    login: 'Login Engineer - JokiTugasIT.id',
-    dashboard: 'Engineer Dashboard - JokiTugasIT.id',
-    requests: 'Requests - JokiTugasIT.id',
-    instagram: 'Instagram Command Center - JokiTugasIT.id',
-    settings: 'Settings - JokiTugasIT.id',
-    'request-detail': 'Request Detail - JokiTugasIT.id',
-    earnings: 'Earnings Dashboard - JokiTugasIT.id',
+    landing: 'Jasa Bantu Tugas IT & Coding - jokitugasit.my.id',
+    services: 'Layanan Jasa Bantu Tugas IT - jokitugasit.my.id',
+    'how-it-works': 'Cara Kerja Jasa Bantu Tugas IT - jokitugasit.my.id',
+    about: 'Tentang Kami - jokitugasit.my.id',
+    faq: 'Tanya Jawab - jokitugasit.my.id',
+    'joki-tugas-kuliah': 'Joki Tugas Kuliah IT Umum - jokitugasit.my.id',
+    'joki-skripsi': 'Joki Skripsi IT & Final Project - jokitugasit.my.id',
+    'joki-mobile': 'Joki Tugas Mobile App - Fix Bug UI & API Hari Ini - jokitugasit.my.id',
+    'joki-web': 'Joki Project Web - Fix Error & CRUD - jokitugasit.my.id',
+    'solusi-tugas': 'Direktori Solusi Tugas IT Mahasiswa - jokitugasit.my.id',
+    'joki-database-api': 'Joki Database & API - Fix Query & Integrasi - jokitugasit.my.id',
+    'joki-desktop': 'Joki Aplikasi Desktop - Java C++ Python - jokitugasit.my.id',
+    'joki-data-science': 'Joki Data Science & AI - Analisis & ML - jokitugasit.my.id',
+    'joki-design': 'Joki Desain UI/UX - Figma & Prototype - jokitugasit.my.id',
+    'joki-debug': 'Jasa Debug & Benerin Error Kode - jokitugasit.my.id',
+    'pricing': 'Harga Jasa Bantu Tugas IT - Mulai Rp20rb - jokitugasit.my.id',
+    'testimonials': 'Testimoni Jasa Bantu Tugas IT - jokitugasit.my.id',
+    'blog': 'Blog Tips Ngoding & Bantuan Tugas IT - jokitugasit.my.id',
+    'blog-post': 'Artikel - jokitugasit.my.id',
+    'request-submit': 'Kirim Project - jokitugasit.my.id',
+    'request-success': 'Request Success - jokitugasit.my.id',
+    login: 'Login Engineer - jokitugasit.my.id',
+    dashboard: 'Engineer Dashboard - jokitugasit.my.id',
+    requests: 'Requests - jokitugasit.my.id',
+    instagram: 'Instagram Command Center - jokitugasit.my.id',
+    settings: 'Settings - jokitugasit.my.id',
+    'request-detail': 'Request Detail - jokitugasit.my.id',
+    earnings: 'Earnings Dashboard - jokitugasit.my.id',
   }
-  const title = titles[to.name] || 'JokiTugasIT.id - Jasa Bantu Tugas IT'
+  const title = titles[to.name] || 'jokitugasit.my.id - Jasa Bantu Tugas IT'
   document.title = title
   const url = 'https://jokitugasit.my.id' + to.path
   setMetaTag('property', 'og:title', title)
   setMetaTag('property', 'og:url', url)
   setMetaTag('name', 'twitter:title', title)
 
+  // Dynamic canonical update for SPA routing
+  let canonical = document.querySelector('link[rel="canonical"]')
+  if (!canonical) {
+    canonical = document.createElement('link')
+    canonical.setAttribute('rel', 'canonical')
+    document.head.appendChild(canonical)
+  }
+  canonical.setAttribute('href', url)
+
   // Per-page meta description
   const descriptions = {
     landing: 'Jasa bantu tugas IT dan coding untuk mahasiswa: web, aplikasi mobile, database, debug error, skripsi, dan tugas kuliah. Mulai Rp20rb, konsultasi gratis, tanpa daftar.',
     services: 'Layanan jasa bantu tugas IT lengkap: bikin website, aplikasi mobile & desktop, database & API, data science, debug error, skripsi, dan desain UI/UX.',
-    'how-it-works': 'Cara kerja JokiTugasIT.id: kirim tugas, konsultasi gratis via WhatsApp, nego harga, deal, dan beres. Proses transparan dengan nomor tiket.',
-    about: 'Kenalan dengan engineer JokiTugasIT.id: 5+ tahun pengalaman, alumni Ilmu Komputer, spesialisasi backend, frontend, mobile, dan DevOps.',
+    'how-it-works': 'Cara kerja jokitugasit.my.id: kirim tugas, konsultasi gratis via WhatsApp, nego harga, deal, dan beres. Proses transparan dengan nomor tiket.',
+    about: 'Kenalan dengan engineer jokitugasit.my.id: 5+ tahun pengalaman, alumni Ilmu Komputer, spesialisasi backend, frontend, mobile, dan DevOps.',
     faq: 'Pertanyaan umum tentang jasa bantu tugas IT: harga mulai Rp20rb, cara bayar DP, keamanan, revisi, deadline, dan cara cek status order.',
     'joki-tugas-kuliah': 'Joki tugas kuliah IT: pemrograman dasar, algoritma, struktur data, basis data. Bantu mahasiswa yang mentok ngoding. Konsultasi gratis.',
     'joki-skripsi': 'Joki skripsi IT dan final project: debug kode AI, integrasi API, fitur belum selesai, persiapan demo & deploy. Pendampingan sampai sidang.',
@@ -236,11 +245,11 @@ router.afterEach((to) => {
     'joki-design': 'Joki desain UI/UX: Figma, prototype, design system. Desain modern, responsive, dan siap slicing ke kode. Tampilan premium.',
     'joki-debug': 'Jasa debug & benerin error kode: kode ChatGPT error, runtime/build error, logic salah. Dicari akar masalahnya sampai benar-benar jalan.',
     pricing: 'Harga jasa bantu tugas IT transparan: Quick Fix mulai Rp20rb, Debugging mulai Rp30rb, AI Code Rescue mulai Rp50rb. Bisa ajukan budget sendiri.',
-    testimonials: 'Testimoni mahasiswa yang dibantu JokiTugasIT.id: CRUD PHP, Flutter, skripsi, debug error, database. Cerita nyata, rating 4.9/5.',
+    testimonials: 'Testimoni mahasiswa yang dibantu jokitugasit.my.id: CRUD PHP, Flutter, skripsi, debug error, database. Cerita nyata, rating 4.9/5.',
     blog: 'Blog tips ngoding & bantuan tugas IT: cara debug error, tutorial CRUD PHP, contoh program Java, dan cara pilih jasa bantu tugas yang aman.',
     'blog-post': 'Artikel tips dan tutorial seputar tugas IT, debugging, dan pemrograman untuk mahasiswa Indonesia.',
     'request-submit': 'Kirim project atau tugas IT: isi form 30 detik, tanpa daftar, tanpa login. Dapat nomor tiket dan cek status kapan saja.',
-    'request-track': 'Cek status order JokiTugasIT: masukkan nomor tiket untuk lihat progres pengerjaan tugas IT kamu.',
+    'request-track': 'Cek status order jokitugasit.my.id: masukkan nomor tiket untuk lihat progres pengerjaan tugas IT kamu.',
   }
   setMetaTag('name', 'description', descriptions[to.name] || descriptions.landing)
   setMetaTag('property', 'og:description', descriptions[to.name] || descriptions.landing)

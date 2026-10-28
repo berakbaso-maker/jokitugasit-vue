@@ -5,7 +5,7 @@ import BottomNavBar from '../components/BottomNavBar.vue'
 import FooterBar from '../components/FooterBar.vue'
 import { waLink } from '../lib/api'
 
-const WA_TEXT = 'Halo JokiTugasIT.id, saya butuh bantuan tugas kuliah IT (dasar pemrograman).'
+const WA_TEXT = 'Halo jokitugasit.my.id, saya butuh bantuan tugas kuliah IT (dasar pemrograman).'
 
 const painPoints = [
   { icon: 'error', title: 'Tugas Numpuk', desc: 'Beberapa tugas datang bersamaan dan semua deadline-nya mepet.' },

@@ -5,7 +5,7 @@ import BottomNavBar from '../components/BottomNavBar.vue'
 import FooterBar from '../components/FooterBar.vue'
 import { waLink } from '../lib/api'
 
-const WA_TEXT = 'Halo JokiTugasIT.id, saya mau konsultasi langsung dengan engineer.'
+const WA_TEXT = 'Halo jokitugasit.my.id, saya mau konsultasi langsung dengan engineer.'
 
 const specializations = [
   { icon: 'dns', title: 'Backend', desc: 'Robust APIs, database architecture, dan server-side logic yang scalable.' },

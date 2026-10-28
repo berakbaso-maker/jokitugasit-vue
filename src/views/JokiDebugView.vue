@@ -5,7 +5,7 @@ import BottomNavBar from '../components/BottomNavBar.vue'
 import FooterBar from '../components/FooterBar.vue'
 import { waLink } from '../lib/api'
 
-const WA_TEXT = 'Halo JokiTugasIT.id, saya butuh bantuan debug kode yang error.'
+const WA_TEXT = 'Halo jokitugasit.my.id, saya butuh bantuan debug kode yang error.'
 
 const problems = [
   { icon: 'bug_report', title: 'Error dari ChatGPT', desc: 'Kode hasil AI yang error, logic muter-muter, atau susah dipahami.', color: 'bg-error-container text-urgency-red' },

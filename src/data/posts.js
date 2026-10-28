@@ -1,4 +1,4 @@
-// Artikel blog JokiTugasIT.id - konten SEO long-tail
+// Artikel blog jokitugasit.my.id - konten SEO long-tail
 // Posisi: bantuan belajar, debugging, review, konsultasi - bukan jaminan nilai/kelulusan
 export const posts = [
   {
@@ -34,7 +34,7 @@ export const posts = [
         'Coba tambahkan `print()` atau `console.log()` di beberapa titik buat lihat nilai variabel — ini cara paling efektif nemuin logic error.',
       ]},
       { h: 'Masih Mentok? Bantuan Engineer Siap', p: [
-        'Kalau udah coba semua cara di atas tapi kode masih error dan deadline makin deket, nggak perlu panik. Engineer JokiTugasIT.id bisa bantu cari akar masalahnya, perbaiki, sampai kode kamu bener-bener jalan.',
+        'Kalau udah coba semua cara di atas tapi kode masih error dan deadline makin deket, nggak perlu panik. Engineer jokitugasit.my.id bisa bantu cari akar masalahnya, perbaiki, sampai kode kamu bener-bener jalan.',
         'Kamu tinggal ceritain masalahnya — screenshot error, kode yang bermasalah, atau brief tugas. Gratis dicek dulu, baru kita bahas solusinya.',
       ]},
     ],
@@ -53,7 +53,7 @@ export const posts = [
       ]},
       { h: '1. Cek Transparansi Proses', p: [
         'Jasa yang aman selalu transparan: ada alur jelas, ada nomor tiket/order, dan kamu bisa cek status pengerjaan kapan aja. Kalau cuma "kirim dulu, nanti kabarin", waspada.',
-        'Di JokiTugasIT.id, setiap request dapat nomor referensi (contoh: JT1234) yang bisa dicek statusnya di halaman Cek Status.',
+        'Di jokitugasit.my.id, setiap request dapat nomor referensi (contoh: JT1234) yang bisa dicek statusnya di halaman Cek Status.',
       ]},
       { h: '2. Komunikasi Langsung ke Engineer', p: [
         'Jasa yang aman ngasih kamu akses langsung ke orang yang ngerjain — bukan cuma CS yang muter-muter. Kamu bisa tanya progress, diskusi detail, dan minta revisi langsung.',
@@ -73,7 +73,7 @@ export const posts = [
       ]},
       { h: 'Kesimpulan', p: [
         'Intinya: pilih jasa yang transparan, bisa diajak komunikasi langsung, ada bukti kerja, dan pembayarannya wajar. Dengan begitu tugas kamu beres dan kamu juga belajar dari prosesnya.',
-        'Kalau kamu lagi cari bantuan yang aman buat tugas IT, JokiTugasIT.id siap bantu — konsultasi gratis, cek project gratis, dan kamu bisa pantau statusnya sendiri.',
+        'Kalau kamu lagi cari bantuan yang aman buat tugas IT, jokitugasit.my.id siap bantu — konsultasi gratis, cek project gratis, dan kamu bisa pantau statusnya sendiri.',
       ]},
     ],
   },
@@ -111,7 +111,7 @@ export const posts = [
       ]},
       { h: 'Error Umum & Solusinya', p: [
         'Error paling sering: koneksi gagal (cek nama database & password), query salah (cek nama kolom), dan data nggak masuk (cek apakah form pakai method POST dan name-nya sesuai).',
-        'Kalau masih mentok setelah coba semua ini, engineer JokiTugasIT.id bisa bantu review dan perbaiki CRUD-mu — gratis dicek dulu.',
+        'Kalau masih mentok setelah coba semua ini, engineer jokitugasit.my.id bisa bantu review dan perbaiki CRUD-mu — gratis dicek dulu.',
       ]},
     ],
   },
@@ -146,7 +146,7 @@ export const posts = [
         'Bandingkan apa yang kamu harapkan vs apa yang keluar di console. Bedanya itu sumber masalahnya.',
       ]},
       { h: 'Masih Mentok? Bantuan Siap', p: [
-        'Kalau error React-mu makin rumit (state management, hooks, atau integrasi API) dan deadline mepet, engineer JokiTugasIT.id bisa bantu debug sampai beres.',
+        'Kalau error React-mu makin rumit (state management, hooks, atau integrasi API) dan deadline mepet, engineer jokitugasit.my.id bisa bantu debug sampai beres.',
         'Kirim screenshot error + kode kamu, gratis dicek dulu.',
       ]},
     ],
@@ -182,7 +182,7 @@ export const posts = [
         'Error paling umum pemula: lupa titik koma, nama file beda sama class, atau salah import Scanner.',
       ]},
       { h: 'Butuh Bantuan Lebih?', p: [
-        'Kalau tugas Java-mu lebih kompleks (OOP, GUI Swing, atau koneksi database) dan kamu mentok, JokiTugasIT.id bisa bantu — dari review kode, perbaiki error, sampai pendampingan.',
+        'Kalau tugas Java-mu lebih kompleks (OOP, GUI Swing, atau koneksi database) dan kamu mentok, jokitugasit.my.id bisa bantu — dari review kode, perbaiki error, sampai pendampingan.',
         'Ceritain aja masalahmu, gratis dicek dulu.',
       ]},
     ],

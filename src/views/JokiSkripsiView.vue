@@ -5,7 +5,7 @@ import BottomNavBar from '../components/BottomNavBar.vue'
 import FooterBar from '../components/FooterBar.vue'
 import { waLink } from '../lib/api'
 
-const WA_TEXT = 'Halo JokiTugasIT.id, saya butuh bantuan skripsi / tugas akhir IT.'
+const WA_TEXT = 'Halo jokitugasit.my.id, saya butuh bantuan skripsi / tugas akhir IT.'
 
 const problems = [
   { icon: 'sos', title: 'Code Hasil AI Berantakan', desc: 'Code dari ChatGPT atau Cursor error, logic muter-muter, dan susah dipahami dosen.', color: 'bg-error-container text-urgency-red' },

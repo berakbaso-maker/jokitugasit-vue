@@ -1,5 +1,5 @@
 -- =============================================================
--- JokiTugasIT.id — Supabase Schema (PostgreSQL)
+-- jokitugasit.my.id — Supabase Schema (PostgreSQL)
 -- Jalankan di: Supabase Dashboard > SQL Editor > New query
 -- Urutan: taruh isi file ini, lalu seed.sql di kueri yang sama
 -- (blok di bawah tabel bisa dijalankan berurutan dalam satu script).

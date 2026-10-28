@@ -5,7 +5,7 @@ import BottomNavBar from '../components/BottomNavBar.vue'
 import FooterBar from '../components/FooterBar.vue'
 import { waLink } from '../lib/api'
 
-const WA_TEXT = 'Halo JokiTugasIT.id, saya butuh bantuan tugas mobile app.'
+const WA_TEXT = 'Halo jokitugasit.my.id, saya butuh bantuan tugas mobile app.'
 
 const problems = [
   { icon: 'link_off', title: 'API Gak Nyambung', desc: 'Data dari backend gak mau muncul di aplikasi? Error CORS, null check, atau response parsing bermasalah.', color: 'bg-error-container text-urgency-red' },

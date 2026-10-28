@@ -5,7 +5,7 @@ import BottomNavBar from '../components/BottomNavBar.vue'
 import FooterBar from '../components/FooterBar.vue'
 import { waLink } from '../lib/api'
 
-const WA_TEXT = 'Halo JokiTugasIT.id, saya butuh bantuan desain UI/UX.'
+const WA_TEXT = 'Halo jokitugasit.my.id, saya butuh bantuan desain UI/UX.'
 
 const problems = [
   { icon: 'palette', title: 'Desain Kurang Menarik', desc: 'Tampilan jadul, warna nggak konsisten, atau layout berantakan.', color: 'bg-error-container text-urgency-red' },

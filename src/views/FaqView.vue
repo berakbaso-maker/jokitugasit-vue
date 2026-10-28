@@ -6,7 +6,7 @@ import BottomNavBar from '../components/BottomNavBar.vue'
 import FooterBar from '../components/FooterBar.vue'
 import { waLink } from '../lib/api'
 
-const WA_TEXT = 'Halo JokiTugasIT.id, saya mau tanya tentang layanan kalian.'
+const WA_TEXT = 'Halo jokitugasit.my.id, saya mau tanya tentang layanan kalian.'
 
 const faqs = [
   { q: 'Berapa harga jasa bantu tugas IT?', a: 'Mulai dari Rp10 ribu tergantung tingkat kesulitan dan deadline. Semua transparan, diskusi dulu sebelum deal, nggak ada biaya tersembunyi.' },

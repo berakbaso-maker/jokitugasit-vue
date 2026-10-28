@@ -1,4 +1,4 @@
--- JokiTugasIT.id — Dummy requests untuk pengujian seluruh status
+-- jokitugasit.my.id — Dummy requests untuk pengujian seluruh status
 -- Jalankan di Supabase SQL Editor setelah schema.sql
 -- Aman dijalankan ulang: konflik order_no diabaikan.
 insert into public.requests

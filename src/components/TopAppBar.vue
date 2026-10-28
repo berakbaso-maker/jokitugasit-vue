@@ -14,7 +14,7 @@ import { RouterLink } from 'vue-router'
           >terminal</span
         >
         <span class="text-headline-md font-headline-md font-extrabold text-primary dark:text-primary-fixed tracking-tight">
-          JokiTugasIT.id
+          jokitugasit.my.id
         </span>
       </RouterLink>
       <nav class="flex items-center gap-8 font-label-bold text-label-bold">

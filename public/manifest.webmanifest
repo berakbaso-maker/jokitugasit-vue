@@ -1,6 +1,6 @@
 {
-  "name": "JokiTugasIT.id - Jasa Bantu Tugas IT",
-  "short_name": "JokiTugasIT",
+  "name": "jokitugasit.my.id - Jasa Bantu Tugas IT",
+  "short_name": "jokitugasit.my.id",
   "description": "Jasa bantu tugas IT dan coding: web, aplikasi mobile, database, debug error, sampai tugas kuliah. Harga ramah mahasiswa.",
   "start_url": "/",
   "display": "standalone",

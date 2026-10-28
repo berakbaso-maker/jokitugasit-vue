@@ -5,7 +5,7 @@ import BottomNavBar from '../components/BottomNavBar.vue'
 import FooterBar from '../components/FooterBar.vue'
 import { waLink } from '../lib/api'
 
-const WA_TEXT = 'Halo JokiTugasIT.id, saya butuh bantuan aplikasi desktop.'
+const WA_TEXT = 'Halo jokitugasit.my.id, saya butuh bantuan aplikasi desktop.'
 
 const problems = [
   { icon: 'bug_report', title: 'Program Error / Crash', desc: 'Runtime error, null pointer, atau program langsung close saat dijalankan.', color: 'bg-error-container text-urgency-red' },

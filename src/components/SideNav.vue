@@ -33,7 +33,7 @@ async function handleKeluar() {
     <!-- Mobile top bar -->
     <header class="md:hidden bg-surface-white shadow-sm z-50 flex justify-between items-center h-16 px-gutter">
       <RouterLink to="/dashboard" class="text-headline-md font-headline-md font-extrabold text-primary">
-        JokiTugasIT.id
+        jokitugasit.my.id
       </RouterLink>
       <button class="text-electric-blue" @click="handleKeluar" title="Keluar">
         <span class="material-symbols-outlined">logout</span>
@@ -43,7 +43,7 @@ async function handleKeluar() {
     <!-- Desktop sidebar -->
     <aside class="hidden md:flex flex-col h-screen py-4 bg-surface-white shadow-2xl fixed inset-y-0 left-0 w-64 z-[60]">
       <div class="px-6 pb-5 border-b border-border-subtle">
-        <h1 class="text-headline-md font-headline-md font-extrabold text-electric-blue mb-1">JokiTugasIT.id</h1>
+        <h1 class="text-headline-md font-headline-md font-extrabold text-electric-blue mb-1">jokitugasit.my.id</h1>
         <p class="font-label-sm text-label-sm text-secondary">Teman Ngoding Engineer</p>
         <div class="flex items-center gap-2 mt-3">
           <div class="w-2 h-2 rounded-full bg-success-green pulse-dot"></div>

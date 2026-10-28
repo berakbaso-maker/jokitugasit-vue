@@ -122,7 +122,7 @@ const typeColor = (c) => {
                 <p class="font-body-md font-medium flex items-center gap-2">
                   +62 {{ request.whatsapp }}
                   <a
-                    :href="waLink('62' + request.whatsapp, `Halo ${request.customer_name}, ini engineer JokiTugasIT.id untuk ${request.order_no}.`)"
+                    :href="waLink('62' + request.whatsapp, `Halo ${request.customer_name}, ini engineer jokitugasit.my.id untuk ${request.order_no}.`)"
                     target="_blank"
                     rel="noopener"
                     class="text-electric-blue hover:text-primary transition-colors inline-flex items-center"
@@ -219,7 +219,7 @@ const typeColor = (c) => {
 
             <div class="space-y-3">
               <a
-                :href="waLink('62' + (request.whatsapp || ''), `Halo ${request.customer_name}, ini engineer JokiTugasIT.id untuk ${request.order_no}.`)"
+                :href="waLink('62' + (request.whatsapp || ''), `Halo ${request.customer_name}, ini engineer jokitugasit.my.id untuk ${request.order_no}.`)"
                 target="_blank"
                 rel="noopener"
                 class="w-full bg-[#25D366] hover:bg-[#1EBE5D] text-white font-label-bold text-label-bold py-3 rounded-xl flex items-center justify-center gap-2 active:scale-95 transition-all shadow-md"

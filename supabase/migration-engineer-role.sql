@@ -1,4 +1,4 @@
--- JokiTugasIT.id — Enforce engineer-only access
+-- jokitugasit.my.id — Enforce engineer-only access
 -- Jalankan di Supabase SQL Editor.
 
 create or replace function public.handle_new_user()

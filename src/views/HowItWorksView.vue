@@ -5,7 +5,7 @@ import BottomNavBar from '../components/BottomNavBar.vue'
 import FooterBar from '../components/FooterBar.vue'
 import { waLink } from '../lib/api'
 
-const WA_TEXT = 'Halo JokiTugasIT.id, saya mau tanya cara kerja jasa bantu tugas IT.'
+const WA_TEXT = 'Halo jokitugasit.my.id, saya mau tanya cara kerja jasa bantu tugas IT.'
 
 const steps = [
   { num: '01', icon: 'send', title: 'Kirim', desc: 'Isi form 30 detik atau langsung chat WhatsApp. Nggak perlu daftar, nggak perlu login.' },

@@ -1,5 +1,5 @@
 -- =============================================================
--- JokiTugasIT.id — Seed Data (contoh)
+-- jokitugasit.my.id — Seed Data (contoh)
 -- Jalankan SETELAH schema.sql (dalam kueri yang sama).
 -- =============================================================
 
@@ -37,7 +37,7 @@ join (
 -- =============================================================
 -- Catatan membuat akun engineer demo:
 -- Buat user lewat Supabase Auth > Add user (email + password),
--- misal engineer@jokitugasit.id / password kuat.
+-- misal engineer@jokitugasit.my.id / password kuat.
 -- Trigger handle_new_user akan otomatis membuat row di profiles
 -- dengan role 'engineer'.
 -- =============================================================

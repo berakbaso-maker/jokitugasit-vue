@@ -1,4 +1,4 @@
--- Instagram operations schema for JokiTugasIT.id.
+-- Instagram operations schema for jokitugasit.my.id.
 -- Run after supabase/schema.sql in Supabase SQL Editor.
 
 create table if not exists public.ig_events (

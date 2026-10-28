@@ -30,7 +30,7 @@ export default async function handler(req, res) {
 
   const html = `<div style="font-family:Arial,sans-serif;max-width:520px;margin:auto;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden">
     <div style="background:#2563EB;padding:24px;text-align:center">
-      <h2 style="color:#fff;margin:0">JokiTugasIT.id</h2>
+      <h2 style="color:#fff;margin:0">jokitugasit.my.id</h2>
       <p style="color:#dbeafe;margin:4px 0 0">Project kamu sudah masuk 👌</p>
     </div>
     <div style="padding:24px">
@@ -47,7 +47,7 @@ export default async function handler(req, res) {
       <a href="${trackUrl}" style="display:block;text-align:center;background:#2563EB;color:#fff;padding:14px;border-radius:10px;text-decoration:none;font-weight:bold;margin:20px 0">🔍 Cek Status Request</a>
       <p style="color:#64748b;font-size:14px">Engineer kami akan segera menghubungimu via WhatsApp untuk diskusi detail &amp; harga.</p>
     </div>
-    <div style="background:#f8fafc;padding:16px;text-align:center;color:#94a3b8;font-size:12px">© 2026 JokiTugasIT.id - Dibuat dengan ❤️ untuk Mahasiswa</div>
+    <div style="background:#f8fafc;padding:16px;text-align:center;color:#94a3b8;font-size:12px">© 2026 jokitugasit.my.id - Dibuat dengan ❤️ untuk Mahasiswa</div>
   </div>`
 
   try {

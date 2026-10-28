@@ -5,7 +5,7 @@ import BottomNavBar from '../components/BottomNavBar.vue'
 import FooterBar from '../components/FooterBar.vue'
 import { waLink } from '../lib/api'
 
-const WA_TEXT = 'Halo JokiTugasIT.id, saya butuh bantuan data science / AI.'
+const WA_TEXT = 'Halo jokitugasit.my.id, saya butuh bantuan data science / AI.'
 
 const problems = [
   { icon: 'analytics', title: 'Analisis Data Rumit', desc: 'Data kotor, format beda-beda, atau bingung mulai analisis dari mana.', color: 'bg-error-container text-urgency-red' },

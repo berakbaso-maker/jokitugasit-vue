@@ -5,7 +5,7 @@ import BottomNavBar from '../components/BottomNavBar.vue'
 import FooterBar from '../components/FooterBar.vue'
 import { waLink } from '../lib/api'
 
-const WA_TEXT = 'Halo JokiTugasIT.id, saya butuh bantuan database & API.'
+const WA_TEXT = 'Halo jokitugasit.my.id, saya butuh bantuan database & API.'
 
 const problems = [
   { icon: 'table_view', title: 'Skema Database Kacau', desc: 'Tabel nggak jelas relasinya, normalisasi salah, atau query makin lama makin lemot.', color: 'bg-error-container text-urgency-red' },

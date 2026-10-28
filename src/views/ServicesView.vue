@@ -5,7 +5,7 @@ import BottomNavBar from '../components/BottomNavBar.vue'
 import FooterBar from '../components/FooterBar.vue'
 import { waLink } from '../lib/api'
 
-const WA_TEXT = 'Halo JokiTugasIT.id, saya butuh bantuan untuk project IT saya.'
+const WA_TEXT = 'Halo jokitugasit.my.id, saya butuh bantuan untuk project IT saya.'
 
 const services = [
   {

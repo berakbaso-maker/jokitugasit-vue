@@ -5,7 +5,7 @@ import BottomNavBar from '../components/BottomNavBar.vue'
 import FooterBar from '../components/FooterBar.vue'
 import { waLink } from '../lib/api'
 
-const WA_TEXT = 'Halo JokiTugasIT.id, saya cari solusi tugas IT saya.'
+const WA_TEXT = 'Halo jokitugasit.my.id, saya cari solusi tugas IT saya.'
 
 const categories = [
   { icon: 'web', title: 'Web Development', link: '/joki-project-web', color: 'bg-primary-fixed/40 text-electric-blue',

@@ -6,7 +6,7 @@ import BottomNavBar from '../components/BottomNavBar.vue'
 import FooterBar from '../components/FooterBar.vue'
 import { waLink } from '../lib/api'
 
-const WA_TEXT = 'Halo JokiTugasIT.id, saya mau diskusi harga project.'
+const WA_TEXT = 'Halo jokitugasit.my.id, saya mau diskusi harga project.'
 
 const packages = [
   {
@@ -43,7 +43,7 @@ function submitBudget() {
     budgetMsg.value = 'Isi budget dan cerita masalahnya dulu ya.'
     return
   }
-  const text = `Halo JokiTugasIT.id, budget saya Rp${budgetForm.value.budget.trim()}. ${budgetForm.value.problem.trim()}`
+  const text = `Halo jokitugasit.my.id, budget saya Rp${budgetForm.value.budget.trim()}. ${budgetForm.value.problem.trim()}`
   window.open(waLink('6285166337257', text), '_blank')
   budgetMsg.value = ''
 }
