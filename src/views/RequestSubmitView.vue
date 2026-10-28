@@ -1,10 +1,10 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import TopAppBar from '../components/TopAppBar.vue'
 import BottomNavBar from '../components/BottomNavBar.vue'
 import FooterBar from '../components/FooterBar.vue'
-import { createRequest, uploadAttachment, CATEGORY_LABELS, DEADLINE_LABELS } from '../lib/api'
+import { createRequest, uploadAttachment, getPartnerByCode, CATEGORY_LABELS, DEADLINE_LABELS } from '../lib/api'
 
 const router = useRouter()
 
@@ -36,12 +36,39 @@ const form = ref({
   deadline: 'besok',
   deadline_date: '',
   link: '',
+  referral_code: '',
 })
 
 const file = ref(null)
 const fileLabel = ref('ZIP, PNG, JPG maksimal 10MB')
 const submitting = ref(false)
 const errorMsg = ref('')
+
+// Referral code validation
+const referralStatus = ref('') // '' | 'checking' | 'valid' | 'invalid'
+const referralPartnerName = ref('')
+let referralDebounce = null
+
+watch(() => form.value.referral_code, (val) => {
+  clearTimeout(referralDebounce)
+  const code = (val || '').trim().toUpperCase()
+  if (!code || code.length < 5) {
+    referralStatus.value = ''
+    referralPartnerName.value = ''
+    return
+  }
+  referralStatus.value = 'checking'
+  referralDebounce = setTimeout(async () => {
+    const partner = await getPartnerByCode(code)
+    if (partner) {
+      referralStatus.value = 'valid'
+      referralPartnerName.value = partner.full_name
+    } else {
+      referralStatus.value = 'invalid'
+      referralPartnerName.value = ''
+    }
+  }, 600)
+})
 
 function onFileChange(e) {
   const selected = e.target.files?.[0]
@@ -83,6 +110,7 @@ async function handleSubmit() {
     const payload = {
       order_no: orderNo,
       customer_name: form.value.customer_name.trim(),
+      email: form.value.email.trim() || null,
       whatsapp: form.value.whatsapp.trim(),
       category: form.value.category,
       description: form.value.description.trim(),
@@ -90,6 +118,7 @@ async function handleSubmit() {
       deadline_date: form.value.deadline === 'fleksibel' ? form.value.deadline_date : null,
       link: form.value.link.trim() || null,
       file_url: fileUrl,
+      referral_code: referralStatus.value === 'valid' ? form.value.referral_code.trim().toUpperCase() : null,
       status: 'new',
     }
     const created = await createRequest(payload)
@@ -280,6 +309,37 @@ async function handleSubmit() {
                   type="tel"
                 />
               </div>
+            </div>
+
+            <!-- Referral Code (Opsional) -->
+            <div class="border-t border-border-subtle pt-5">
+              <label class="block font-label-bold text-label-bold text-on-background mb-1" for="referral_code">
+                Kode Referral
+                <span class="ml-1 font-normal text-on-surface-variant text-[11px]">(opsional — dari teman yang mereferensikan)</span>
+              </label>
+              <div class="relative">
+                <input
+                  id="referral_code"
+                  v-model="form.referral_code"
+                  class="w-full rounded-xl border bg-surface-container-lowest px-4 py-3 text-body-md outline-none transition-all placeholder:text-outline-variant font-mono uppercase tracking-widest"
+                  :class="{
+                    'border-border-subtle focus:border-electric-blue focus:ring-1 focus:ring-electric-blue': referralStatus === '' || referralStatus === 'checking',
+                    'border-success-green ring-1 ring-success-green/40': referralStatus === 'valid',
+                    'border-urgency-red ring-1 ring-urgency-red/40': referralStatus === 'invalid',
+                  }"
+                  placeholder="REF-XXXXX"
+                  type="text"
+                  maxlength="12"
+                />
+                <span v-if="referralStatus === 'checking'" class="absolute right-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-on-surface-variant animate-spin text-[20px]">progress_activity</span>
+                <span v-else-if="referralStatus === 'valid'" class="absolute right-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-success-green text-[20px]" style="font-variation-settings: 'FILL' 1">check_circle</span>
+                <span v-else-if="referralStatus === 'invalid'" class="absolute right-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-urgency-red text-[20px]" style="font-variation-settings: 'FILL' 1">cancel</span>
+              </div>
+              <p v-if="referralStatus === 'valid'" class="text-xs text-success-green mt-1.5 flex items-center gap-1">
+                <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1">check_circle</span>
+                Kode valid! Direferensikan oleh <strong>{{ referralPartnerName }}</strong>
+              </p>
+              <p v-else-if="referralStatus === 'invalid'" class="text-xs text-urgency-red mt-1.5">Kode tidak ditemukan. Periksa kembali.</p>
             </div>
 
             <!-- Error -->

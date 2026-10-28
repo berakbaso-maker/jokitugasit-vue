@@ -98,3 +98,67 @@ export const DEADLINE_LABELS = {
   besok: 'Besok',
   fleksibel: 'Fleksibel',
 }
+
+// ---------- PARTNER REFERRAL ----------
+
+export async function createPartner(payload) {
+  const { data, error } = await supabase.from('partners').insert(payload).select().single()
+  if (error) throw error
+  return data
+}
+
+export async function listPartners() {
+  const { data, error } = await supabase
+    .from('partners')
+    .select('*')
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return data
+}
+
+export async function updatePartner(id, patch) {
+  const { data, error } = await supabase.from('partners').update(patch).eq('id', id).select().single()
+  if (error) throw error
+  return data
+}
+
+export async function getPartnerByCode(code) {
+  if (!code || code.trim().length < 3) return null
+  const { data, error } = await supabase
+    .from('partners')
+    .select('id,full_name,referral_code,status')
+    .eq('referral_code', code.trim().toUpperCase())
+    .eq('status', 'active')
+    .maybeSingle()
+  if (error) return null
+  return data
+}
+
+export function generateReferralCode(name) {
+  const clean = (name || 'partner').replace(/[^a-zA-Z]/g, '').slice(0, 6).toUpperCase()
+  const num = String(Math.floor(10 + Math.random() * 90))
+  return `REF-${clean}${num}`
+}
+
+// ---------- COMMISSION TRACKING ----------
+
+export async function listReferralRequests() {
+  const { data, error } = await supabase
+    .from('requests')
+    .select('*')
+    .not('referral_code', 'is', null)
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return data
+}
+
+export async function markCommissionPaid(requestId) {
+  const { data, error } = await supabase
+    .from('requests')
+    .update({ commission_paid: true })
+    .eq('id', requestId)
+    .select()
+    .single()
+  if (error) throw error
+  return data
+}

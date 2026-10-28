@@ -110,6 +110,11 @@ const router = createRouter({
       component: () => import('../views/BlogPostView.vue'),
     },
     {
+      path: '/partner',
+      name: 'partner',
+      component: () => import('../views/PartnerView.vue'),
+    },
+    {
       path: '/track',
       name: 'request-track',
       component: () => import('../views/TrackRequestView.vue'),
@@ -149,6 +154,12 @@ const router = createRouter({
       path: '/earnings',
       name: 'earnings',
       component: () => import('../views/EarningsView.vue'),
+      meta: { requiresEngineer: true },
+    },
+    {
+      path: '/engineer/partners',
+      name: 'partner-management',
+      component: () => import('../views/PartnerManagementView.vue'),
       meta: { requiresEngineer: true },
     },
     {
@@ -250,6 +261,7 @@ router.afterEach((to) => {
     'blog-post': 'Artikel tips dan tutorial seputar tugas IT, debugging, dan pemrograman untuk mahasiswa Indonesia.',
     'request-submit': 'Kirim project atau tugas IT: isi form 30 detik, tanpa daftar, tanpa login. Dapat nomor tiket dan cek status kapan saja.',
     'request-track': 'Cek status order jokitugasit.my.id: masukkan nomor tiket untuk lihat progres pengerjaan tugas IT kamu.',
+    partner: 'Daftar jadi Partner Referral jokitugasit.my.id. Komisi 10% per project yang berhasil. Rekomendasikan ke teman yang mentok ngoding, tanpa modal, tanpa keahlian teknis.',
   }
   setMetaTag('name', 'description', descriptions[to.name] || descriptions.landing)
   setMetaTag('property', 'og:description', descriptions[to.name] || descriptions.landing)

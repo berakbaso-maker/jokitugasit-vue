@@ -420,6 +420,37 @@ onBeforeUnmount(() => {
           </div>
         </div>
       </section>
+
+      <!-- Partner Referral CTA Section -->
+      <section class="py-16 md:py-20 px-gutter">
+        <div class="max-w-container-max-width mx-auto">
+          <div class="relative overflow-hidden bg-gradient-to-r from-electric-blue via-primary to-tertiary rounded-3xl p-8 md:p-12 text-white">
+            <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle at 10% 50%, #fff 1px, transparent 1px), radial-gradient(circle at 90% 20%, #fff 1px, transparent 1px); background-size: 30px 30px;"></div>
+            <div class="relative flex flex-col md:flex-row items-center justify-between gap-8">
+              <div class="flex-1">
+                <div class="inline-flex items-center gap-1.5 bg-white/15 border border-white/25 rounded-full px-3 py-1 text-[12px] font-bold mb-4">
+                  <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1">monetization_on</span>
+                  Program Partner Referral
+                </div>
+                <h2 class="text-2xl md:text-3xl font-bold mb-3">Punya Teman yang Mentok Ngoding?</h2>
+                <p class="text-white/80 mb-0 max-w-xl">
+                  Rekomendasikan ke engineer jokitugasit.my.id dan kamu dapat
+                  <span class="text-tertiary-fixed font-bold">komisi 10%</span> per transaksi yang berhasil.
+                  Tanpa modal, tanpa keahlian ngoding.
+                </p>
+              </div>
+              <div class="flex flex-col sm:flex-row md:flex-col gap-3 flex-shrink-0">
+                <RouterLink to="/partner"
+                  class="inline-flex items-center justify-center gap-2 bg-white text-electric-blue font-label-bold text-label-bold px-7 py-3.5 rounded-xl hover:shadow-lg hover:-translate-y-0.5 transition-all">
+                  <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1">how_to_reg</span>
+                  Daftar Jadi Partner
+                </RouterLink>
+                <div class="text-center text-white/60 text-xs pt-1">Gratis · Komisi cair 24 jam</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
 
     <!-- Floating action (mobile) -->
