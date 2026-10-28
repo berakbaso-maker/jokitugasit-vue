@@ -1,6 +1,6 @@
 <script setup>
 import { ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, RouterLink } from 'vue-router'
 import TopAppBar from '../components/TopAppBar.vue'
 import BottomNavBar from '../components/BottomNavBar.vue'
 import FooterBar from '../components/FooterBar.vue'
@@ -24,7 +24,7 @@ const categories = [
 const deadlines = [
   { label: 'Hari Ini', sub: '(Mendesak)', icon: 'local_fire_department', value: 'hari_ini', fill: true },
   { label: 'Besok', sub: '(Normal)', icon: 'event', value: 'besok', fill: true },
-  { label: 'Bisa Pilih Tanggal', sub: '(Sesuka Kamu)', icon: 'calendar_month', value: 'fleksibel', fill: false },
+  { label: 'Pilih Tanggal', sub: '(Fleksibel)', icon: 'calendar_month', value: 'fleksibel', fill: false },
 ]
 
 const form = ref({
@@ -70,6 +70,21 @@ watch(() => form.value.referral_code, (val) => {
   }, 600)
 })
 
+// Auto-clean WhatsApp number input (hilangkan awalan 0 atau 62 agar sinkron dengan +62)
+watch(() => form.value.whatsapp, (val) => {
+  if (!val) return
+  let cleaned = String(val).replace(/[^0-9]/g, '')
+  if (cleaned.startsWith('62')) {
+    cleaned = cleaned.slice(2)
+  }
+  if (cleaned.startsWith('0')) {
+    cleaned = cleaned.replace(/^0+/, '')
+  }
+  if (cleaned !== val) {
+    form.value.whatsapp = cleaned
+  }
+})
+
 function onFileChange(e) {
   const selected = e.target.files?.[0]
   file.value = selected || null
@@ -107,11 +122,12 @@ async function handleSubmit() {
     }
 
     const orderNo = generateOrderNo()
+    const cleanWa = '62' + form.value.whatsapp.replace(/^0+/, '')
     const payload = {
       order_no: orderNo,
       customer_name: form.value.customer_name.trim(),
       email: form.value.email.trim() || null,
-      whatsapp: form.value.whatsapp.trim(),
+      whatsapp: cleanWa,
       category: form.value.category,
       description: form.value.description.trim(),
       deadline: form.value.deadline,
@@ -131,7 +147,7 @@ async function handleSubmit() {
         body: JSON.stringify({
           orderNo: created.order_no,
           customerName: form.value.customer_name.trim(),
-          whatsapp: form.value.whatsapp.trim(),
+          whatsapp: cleanWa,
           category: form.value.category,
           deadline: form.value.deadline,
           deadlineDate: form.value.deadline === 'fleksibel' ? form.value.deadline_date : null,
@@ -179,28 +195,45 @@ async function handleSubmit() {
   <div class="bg-background text-on-background font-body-md flex flex-col min-h-screen antialiased">
     <TopAppBar />
 
-    <main class="flex-grow flex flex-col items-center justify-start pt-8 pb-section-gap-mobile md:pb-section-gap-desktop px-4 sm:px-gutter w-full">
+    <!-- Mobile Header Bar (Sticky Top khusus tampilan mobile) -->
+    <header class="md:hidden sticky top-0 z-40 bg-surface-white/95 backdrop-blur-md border-b border-border-subtle px-4 py-3 flex items-center justify-between">
+      <RouterLink to="/" class="flex items-center gap-1.5 text-secondary hover:text-on-surface text-sm font-label-bold transition-colors">
+        <span class="material-symbols-outlined text-[20px]">arrow_back</span>
+        <span>Kembali</span>
+      </RouterLink>
+      <div class="flex items-center gap-1.5">
+        <span class="material-symbols-outlined text-electric-blue text-[20px]" style="font-variation-settings: 'FILL' 1">terminal</span>
+        <span class="font-extrabold text-sm text-primary tracking-tight">jokitugasit</span>
+      </div>
+      <div class="flex items-center gap-1 bg-surface-container-high px-2 py-1 rounded-full text-[11px] text-secondary font-medium">
+        <span class="w-1.5 h-1.5 rounded-full bg-success-green animate-pulse"></span>
+        <span>Online</span>
+      </div>
+    </header>
+
+    <main class="flex-grow flex flex-col items-center justify-start pt-4 sm:pt-8 pb-32 sm:pb-section-gap-mobile md:pb-section-gap-desktop px-3 sm:px-gutter w-full">
       <div class="w-full max-w-2xl">
-        <div class="text-center mb-8">
-          <h1 class="font-display-hero-mobile md:font-display-hero text-display-hero-mobile md:text-display-hero text-on-background mb-2">Ceritain Aja Masalahmu</h1>
-          <p class="font-body-lg text-body-lg text-secondary">Gak perlu daftar, gak perlu ribet. Langsung ke engineer.</p>
-          <div class="inline-flex items-center gap-2 mt-4 bg-surface-white px-3 py-1.5 rounded-full shadow-sm border border-border-subtle">
+        <div class="text-center mb-6 sm:mb-8">
+          <h1 class="font-display-hero-mobile md:font-display-hero text-2xl sm:text-display-hero-mobile md:text-display-hero text-on-background mb-2">Ceritain Aja Masalahmu</h1>
+          <p class="font-body-md sm:font-body-lg text-sm sm:text-body-lg text-secondary">Gak perlu daftar, gak perlu ribet. Langsung ke engineer.</p>
+          <div class="inline-flex items-center gap-2 mt-3 bg-surface-white px-3 py-1.5 rounded-full shadow-sm border border-border-subtle">
             <span class="w-2.5 h-2.5 rounded-full bg-success-green animate-pulse"></span>
             <span class="font-label-sm text-label-sm text-on-surface-variant">Engineer siap bantu</span>
           </div>
         </div>
 
-        <div class="bg-surface-white rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] p-6 md:p-8">
-          <form class="space-y-6" @submit.prevent="handleSubmit">
+        <div class="bg-surface-white rounded-2xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] p-4 sm:p-6 md:p-8 border border-border-subtle/60">
+          <form class="space-y-5 sm:space-y-6" @submit.prevent="handleSubmit">
             <!-- Name -->
             <div>
               <label class="block font-label-bold text-label-bold text-on-background mb-2" for="customer_name">Nama kamu</label>
               <input
                 id="customer_name"
                 v-model="form.customer_name"
-                class="w-full rounded-xl border border-border-subtle bg-surface-container-lowest px-4 py-3 text-body-md focus:border-electric-blue focus:ring-1 focus:ring-electric-blue outline-none transition-shadow placeholder:text-outline-variant"
+                class="w-full rounded-xl border border-border-subtle bg-surface-container-lowest px-4 py-3 text-base focus:border-electric-blue focus:ring-1 focus:ring-electric-blue outline-none transition-shadow placeholder:text-outline-variant"
                 placeholder="Contoh: Budi Santoso"
                 type="text"
+                required
               />
             </div>
 
@@ -210,7 +243,7 @@ async function handleSubmit() {
               <input
                 id="email"
                 v-model="form.email"
-                class="w-full rounded-xl border border-border-subtle bg-surface-container-lowest px-4 py-3 text-body-md focus:border-electric-blue focus:ring-1 focus:ring-electric-blue outline-none transition-shadow placeholder:text-outline-variant"
+                class="w-full rounded-xl border border-border-subtle bg-surface-container-lowest px-4 py-3 text-base focus:border-electric-blue focus:ring-1 focus:ring-electric-blue outline-none transition-shadow placeholder:text-outline-variant"
                 placeholder="biar dapat kode booking di email"
                 type="email"
               />
@@ -219,25 +252,25 @@ async function handleSubmit() {
 
             <!-- 1. Upload Field -->
             <div>
-              <label class="block font-label-bold text-label-bold text-on-background mb-2">Upload File (Screenshot/ZIP) atau Link</label>
-              <label class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-border-subtle border-dashed rounded-xl hover:border-electric-blue transition-colors bg-surface-container-lowest cursor-pointer group">
+              <label class="block font-label-bold text-label-bold text-on-background mb-2">Upload File atau Link Project</label>
+              <label class="mt-1 flex justify-center px-4 py-4 sm:px-6 sm:py-5 border-2 border-border-subtle border-dashed rounded-xl hover:border-electric-blue transition-colors bg-surface-container-lowest cursor-pointer group">
                 <div class="space-y-1 text-center">
-                  <span class="material-symbols-outlined text-outline group-hover:text-electric-blue text-4xl mb-2">cloud_upload</span>
-                  <div class="flex text-sm text-on-surface-variant justify-center">
-                    <span class="relative cursor-pointer rounded-md font-medium text-electric-blue hover:text-primary focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-electric-blue">
-                      <span>{{ file ? 'Pilih file lain' : 'Pilih file' }}</span>
+                  <span class="material-symbols-outlined text-outline group-hover:text-electric-blue text-3xl sm:text-4xl mb-1">cloud_upload</span>
+                  <div class="flex text-sm text-on-surface-variant justify-center items-center">
+                    <span class="relative rounded-md font-semibold text-electric-blue group-hover:text-primary">
+                      <span>{{ file ? 'Ganti file terpilih' : 'Pilih file tugas' }}</span>
                       <input class="sr-only" id="file-upload" name="file-upload" type="file" accept=".zip,.png,.jpg,.jpeg,.pdf" @change="onFileChange" />
                     </span>
-                    <p class="pl-1">atau seret file ke sini</p>
+                    <span class="hidden sm:inline pl-1 text-secondary">atau seret file ke sini</span>
                   </div>
-                  <p class="text-xs text-outline">{{ fileLabel }}</p>
+                  <p class="text-xs text-outline truncate max-w-[240px] sm:max-w-md mx-auto">{{ fileLabel }}</p>
                 </div>
               </label>
-              <div class="mt-2">
+              <div class="mt-2.5">
                 <input
                   v-model="form.link"
-                  class="w-full rounded-xl border border-border-subtle bg-surface-container-lowest px-4 py-3 text-body-md focus:border-electric-blue focus:ring-1 focus:ring-electric-blue outline-none transition-shadow placeholder:text-outline-variant"
-                  placeholder="Atau tempel link repo / Drive di sini..."
+                  class="w-full rounded-xl border border-border-subtle bg-surface-container-lowest px-4 py-3 text-base focus:border-electric-blue focus:ring-1 focus:ring-electric-blue outline-none transition-shadow placeholder:text-outline-variant"
+                  placeholder="Atau tempel link repo / Google Drive / Figma..."
                   type="url"
                 />
               </div>
@@ -245,12 +278,15 @@ async function handleSubmit() {
 
             <!-- 2. Category Selector -->
             <div>
-              <label class="block font-label-bold text-label-bold text-on-background mb-2">Jenis Tugas</label>
-              <div class="flex overflow-x-auto no-scrollbar gap-2 pb-2">
+              <div class="flex items-center justify-between mb-2">
+                <label class="block font-label-bold text-label-bold text-on-background">Jenis Tugas</label>
+                <span class="text-[11px] text-secondary">Pilih satu</span>
+              </div>
+              <div class="flex flex-wrap gap-2">
                 <label v-for="c in categories" :key="c.value" class="cursor-pointer">
                   <input v-model="form.category" class="peer sr-only" name="category" type="radio" :value="c.value" />
                   <div
-                    class="px-4 py-2 rounded-full border border-border-subtle bg-surface-white text-secondary font-label-sm text-label-sm peer-checked:bg-primary-container peer-checked:text-on-primary-container peer-checked:border-primary-container transition-colors whitespace-nowrap"
+                    class="px-3.5 py-2 rounded-full border border-border-subtle bg-surface-white text-secondary font-label-sm text-label-sm peer-checked:bg-primary-container peer-checked:text-on-primary-container peer-checked:border-primary-container transition-all hover:border-electric-blue active:scale-95 text-center min-h-[38px] flex items-center justify-center select-none"
                   >
                     {{ c.label }}
                   </div>
@@ -264,25 +300,29 @@ async function handleSubmit() {
               <textarea
                 id="description"
                 v-model="form.description"
-                class="w-full rounded-xl border border-border-subtle bg-surface-container-lowest px-4 py-3 text-body-md focus:border-electric-blue focus:ring-1 focus:ring-electric-blue outline-none transition-shadow placeholder:text-outline-variant resize-none"
+                class="w-full rounded-xl border border-border-subtle bg-surface-container-lowest px-4 py-3 text-base focus:border-electric-blue focus:ring-1 focus:ring-electric-blue outline-none transition-shadow placeholder:text-outline-variant resize-none"
                 placeholder="Jelaskan error, fitur yang ingin dibuat, atau instruksi tugas dari dosen..."
                 rows="4"
+                required
               ></textarea>
             </div>
 
             <!-- 4. Deadline Selector -->
             <div>
               <label class="block font-label-bold text-label-bold text-on-background mb-2">Deadline</label>
-              <div class="grid grid-cols-3 gap-3">
+              <div class="grid grid-cols-3 gap-2 sm:gap-3">
                 <label v-for="d in deadlines" :key="d.value" class="cursor-pointer relative">
                   <input v-model="form.deadline" class="peer sr-only" name="deadline" type="radio" :value="d.value" />
-                  <div class="h-full flex flex-col items-center justify-center p-3 rounded-xl border border-border-subtle bg-surface-white text-secondary peer-checked:bg-primary-fixed peer-checked:text-on-primary-fixed peer-checked:border-electric-blue transition-all">
-                    <span class="material-symbols-outlined mb-1" :style="{ fontVariationSettings: d.fill ? `'FILL' 1` : `'FILL' 0` }">{{ d.icon }}</span>
-                    <span class="font-label-sm text-label-sm text-center">{{ d.label }}<br /><span class="text-[10px] opacity-70">{{ d.sub }}</span></span>
+                  <div class="h-full min-h-[88px] flex flex-col justify-between items-center text-center p-2 sm:p-3 rounded-xl border border-border-subtle bg-surface-white text-secondary peer-checked:bg-primary-fixed peer-checked:text-on-primary-fixed peer-checked:border-electric-blue transition-all">
+                    <span class="material-symbols-outlined text-2xl mb-1" :style="{ fontVariationSettings: d.fill ? `'FILL' 1` : `'FILL' 0` }">{{ d.icon }}</span>
+                    <div class="flex flex-col items-center justify-center">
+                      <span class="font-label-bold text-xs sm:text-sm leading-tight">{{ d.label }}</span>
+                      <span class="text-[10px] sm:text-xs opacity-75 mt-0.5">{{ d.sub }}</span>
+                    </div>
                   </div>
                 </label>
               </div>
-              <div v-if="form.deadline === 'fleksibel'" class="mt-4 rounded-xl border border-electric-blue/30 bg-primary-fixed/40 p-4">
+              <div v-if="form.deadline === 'fleksibel'" class="mt-4 rounded-xl border border-electric-blue/30 bg-primary-fixed/40 p-3 sm:p-4">
                 <label class="block font-label-bold text-label-bold text-on-background mb-2" for="deadline_date">Pilih tanggal deadline</label>
                 <input
                   id="deadline_date"
@@ -290,7 +330,7 @@ async function handleSubmit() {
                   type="date"
                   :min="new Date().toISOString().slice(0, 10)"
                   required
-                  class="w-full rounded-lg border border-border-subtle bg-surface-white px-4 py-3 text-body-md text-on-surface focus:border-electric-blue focus:ring-1 focus:ring-electric-blue outline-none"
+                  class="w-full rounded-lg border border-border-subtle bg-surface-white px-4 py-3 text-base text-on-surface focus:border-electric-blue focus:ring-1 focus:ring-electric-blue outline-none"
                 />
                 <p class="text-xs text-secondary mt-2">Tanggal ini membantu engineer menentukan prioritas pengerjaan.</p>
               </div>
@@ -300,15 +340,18 @@ async function handleSubmit() {
             <div>
               <label class="block font-label-bold text-label-bold text-on-background mb-2" for="whatsapp">Nomor WhatsApp aktif</label>
               <div class="relative">
-                <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-on-surface-variant font-body-md">+62</span>
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-on-surface-variant font-medium text-base select-none">+62</span>
                 <input
                   id="whatsapp"
                   v-model="form.whatsapp"
-                  class="w-full rounded-xl border border-border-subtle bg-surface-container-lowest pl-12 pr-4 py-3 text-body-md focus:border-electric-blue focus:ring-1 focus:ring-electric-blue outline-none transition-shadow placeholder:text-outline-variant"
+                  class="w-full rounded-xl border border-border-subtle bg-surface-container-lowest pl-14 pr-4 py-3 text-base focus:border-electric-blue focus:ring-1 focus:ring-electric-blue outline-none transition-shadow placeholder:text-outline-variant"
                   placeholder="81234567890"
                   type="tel"
+                  inputmode="numeric"
+                  required
                 />
               </div>
+              <p class="text-xs text-secondary mt-1.5">Engineer akan langsung menghubungi via WhatsApp untuk estimasi & deal.</p>
             </div>
 
             <!-- Referral Code (Opsional) -->
@@ -321,7 +364,7 @@ async function handleSubmit() {
                 <input
                   id="referral_code"
                   v-model="form.referral_code"
-                  class="w-full rounded-xl border bg-surface-container-lowest px-4 py-3 text-body-md outline-none transition-all placeholder:text-outline-variant font-mono uppercase tracking-widest"
+                  class="w-full rounded-xl border bg-surface-container-lowest px-4 py-3 text-base outline-none transition-all placeholder:text-outline-variant font-mono uppercase tracking-widest"
                   :class="{
                     'border-border-subtle focus:border-electric-blue focus:ring-1 focus:ring-electric-blue': referralStatus === '' || referralStatus === 'checking',
                     'border-success-green ring-1 ring-success-green/40': referralStatus === 'valid',
@@ -363,7 +406,7 @@ async function handleSubmit() {
             <!-- CTA -->
             <div class="pt-1">
               <button
-                class="w-full bg-electric-blue text-surface-white font-label-bold text-label-bold py-4 rounded-xl flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 transition-all shadow-md min-h-[44px] disabled:opacity-60 disabled:active:scale-100"
+                class="w-full bg-electric-blue text-surface-white font-label-bold text-label-bold py-4 rounded-xl flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 transition-all shadow-md min-h-[48px] disabled:opacity-60 disabled:active:scale-100"
                 type="submit"
                 :disabled="submitting"
               >
