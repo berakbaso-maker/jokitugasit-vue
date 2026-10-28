@@ -117,11 +117,19 @@ onBeforeUnmount(() => {
               <img
                 class="w-10 h-10 rounded-full border-2 border-surface-white object-cover"
                 alt="Mahasiswa pria"
+                width="40"
+                height="40"
+                loading="lazy"
+                decoding="async"
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuAVAjGHtHooawJHDgPHrFwfL060vMliRPwVusWrlQ1oeAsqsWbjMzAinuAREcKvX-VtluVNWJI9hPP-cWhXemI5hTygcT9SD_KksjarTFDTVe3ntYoD8-IxcjBzOqZgPZCPIoY-mTZUlvoOk30JwxRi5O2n7ddDP8G359cYao10efZn0hAM_QRH4Y7x30_aZ7I--nmzIHFAGqmliIyi4Og1bwj7-oE2bWAiZRsSe14w40z8FhSudpz5"
               />
               <img
                 class="w-10 h-10 rounded-full border-2 border-surface-white object-cover"
                 alt="Mahasiswi"
+                width="40"
+                height="40"
+                loading="lazy"
+                decoding="async"
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuCqT7ciwFPpX_nkc9ZhGHL9m925emBY7pgdJE_BtnU7ntr5ejbmY5M5MJFTVJO-7Ch_qUTXxJcfimyWxQIDKAmOujpShsvtOx34f50jCqLVjLfxNqJvuRi1hl9EGO5w5Ystu6alyTI_GFxReKrhVirsMDVkaS9eM9cjxPUmfrti6DUFT48Kzbcb6ztqy3oyzMHq6EFSu22ZAA0473pIflYvKpFeY6tckQw0SdLmB0jALUGmq9OPaYAZ"
               />
               <div class="w-10 h-10 rounded-full border-2 border-surface-white bg-surface-container-high flex items-center justify-center text-label-sm font-label-sm text-secondary">
@@ -384,6 +392,10 @@ onBeforeUnmount(() => {
             <img
               class="w-48 h-48 md:w-64 md:h-64 rounded-full object-cover border-4 border-surface-white shadow-lg"
               alt="Engineer JokiTugasIT"
+              width="256"
+              height="256"
+              loading="lazy"
+              decoding="async"
               src="https://lh3.googleusercontent.com/aida-public/AB6AXuDR8RkLI8_HBU4ssWVtUwGtrTtUwVrnu6ATXMjApcpX6tEXsgv63arNTK4UHyIL2rTfCOXc76-S8CzZhHa5gCrLqvjxnI-9hL2U9mmviC9OvFsA2hXb-tz4Lxbaq5C-JtEZ9kkf7BXFfvb-FNyzFmOyadu8EI_0_jQGMIw7PtGeyQbBYrOX7rpENsCCIKZc8b_piKWRueDw4IfOlhyPT60Y7Hl5r5zi_MkHdnKzdxEsibTRQOOCsLuN"
             />
             <div class="absolute bottom-4 right-4 bg-surface-white px-3 py-1.5 rounded-full border border-border-subtle shadow-md flex items-center gap-2">

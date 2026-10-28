@@ -206,12 +206,22 @@ fi
 CURRENT_SHA=$(git rev-parse --short HEAD 2>/dev/null || echo "N/A")
 step_info "Commit SHA saat ini: ${CURRENT_SHA}"
 
-# Push to origin/main to trigger Vercel CI/CD
-step_info "Pushing commit ke origin/main untuk men-trigger Vercel build..."
+# Push to origin/main to keep repository synchronized
+step_info "Pushing commit ke origin/main..."
 PUSH_RES=$(git push origin "${CURRENT_BRANCH}" 2>&1) || {
   step_warn "Push warning: ${PUSH_RES}"
 }
-step_info "Vercel Webhook / GitHub Action dipicu untuk commit ${CURRENT_SHA}"
+
+# Deploy langsung ke Vercel Production
+if command -v vercel >/dev/null 2>&1; then
+  step_info "Menjalankan Vercel CLI deploy ke Production (--prod)..."
+  VERCEL_DEPLOY_OUT=$(vercel --prod --yes 2>&1) || {
+    step_warn "Vercel CLI warning: ${VERCEL_DEPLOY_OUT}"
+  }
+  step_info "Vercel production build & deploy selesai!"
+else
+  step_warn "Vercel CLI tidak terpasang di PATH. Mengandalkan Vercel Webhook Git."
+fi
 
 T4_END=$(date +%s)
 step_done "4" "$(( T4_END - T4_START ))" "Vercel Deployment Triggered"
