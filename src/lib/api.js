@@ -162,3 +162,39 @@ export async function markCommissionPaid(requestId) {
   if (error) throw error
   return data
 }
+
+export async function getPartnerOverview(code) {
+  if (!code) return null
+  const cleanCode = code.trim().toUpperCase()
+  const { data: partner, error: pErr } = await supabase
+    .from('partners')
+    .select('*')
+    .eq('referral_code', cleanCode)
+    .maybeSingle()
+  if (pErr || !partner) return null
+
+  const { data: requests } = await supabase
+    .from('requests')
+    .select('order_no, category, status, quote_amount, commission_paid, created_at')
+    .eq('referral_code', cleanCode)
+    .order('created_at', { ascending: false })
+
+  const reqList = requests || []
+  const totalEarned = reqList
+    .filter(r => r.commission_paid && r.quote_amount)
+    .reduce((sum, r) => sum + (r.quote_amount * 0.1), 0)
+  const pendingEarned = reqList
+    .filter(r => !r.commission_paid && ['done', 'paid', 'review'].includes(r.status) && r.quote_amount)
+    .reduce((sum, r) => sum + (r.quote_amount * 0.1), 0)
+
+  return {
+    partner,
+    requests: reqList,
+    stats: {
+      totalReferrals: reqList.length,
+      dealCount: reqList.filter(r => ['working', 'review', 'done', 'paid'].includes(r.status)).length,
+      totalEarned,
+      pendingEarned,
+    },
+  }
+}

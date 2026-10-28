@@ -3,9 +3,63 @@ import { ref, watch } from 'vue'
 import TopAppBar from '../components/TopAppBar.vue'
 import BottomNavBar from '../components/BottomNavBar.vue'
 import FooterBar from '../components/FooterBar.vue'
-import { createPartner, getPartnerByCode, generateReferralCode, waLink } from '../lib/api'
+import {
+  createPartner,
+  getPartnerByCode,
+  generateReferralCode,
+  getPartnerOverview,
+  formatRupiah,
+  CATEGORY_LABELS,
+  STATUS_LABELS,
+  waLink,
+} from '../lib/api'
 
 const WA_ENGINEER = '6285166337257'
+
+// Tab: 'register' | 'check'
+const activeActionTab = ref('register')
+
+// Check commission portal state
+const checkInput = ref('')
+const checkLoading = ref(false)
+const checkError = ref('')
+const partnerData = ref(null)
+const copyPromoSuccess = ref(false)
+
+async function handleCheckPartner() {
+  checkError.value = ''
+  partnerData.value = null
+  const query = checkInput.value.trim().toUpperCase()
+  if (!query) {
+    checkError.value = 'Masukkan kode referral kamu terlebih dahulu.'
+    return
+  }
+  checkLoading.value = true
+  try {
+    const data = await getPartnerOverview(query)
+    if (!data) {
+      checkError.value = 'Kode referral tidak ditemukan atau belum aktif. Periksa kembali penulisannya.'
+      return
+    }
+    partnerData.value = data
+  } catch (err) {
+    checkError.value = err.message || 'Gagal memeriksa komisi. Coba lagi.'
+  } finally {
+    checkLoading.value = false
+  }
+}
+
+function copyPromoText() {
+  if (!partnerData.value) return
+  const code = partnerData.value.partner.referral_code
+  const text = `Halo temen-temen! Kalau kalian lagi mentok ngoding tugas kuliah, skripsi, error runtime, atau integrasi API, aku rekomendasiin pake jasa engineer di jokitugasit.my.id.
+
+Pake kode referralku "${code}" pas konsul biar diprioritasin sama engineernya. Hasilnya rapi, ada video penjelasan kode & bebas tanya jawab pas demo dosen! 👍
+Link: https://jokitugasit.my.id/request`
+  navigator.clipboard.writeText(text)
+  copyPromoSuccess.value = true
+  setTimeout(() => (copyPromoSuccess.value = false), 2500)
+}
 
 const form = ref({
   full_name: '',
@@ -215,9 +269,159 @@ function copyCode() {
         </div>
       </section>
 
-      <!-- Form Daftar -->
-      <section id="daftar" class="py-16 md:py-24 px-gutter bg-surface-white">
-        <div class="max-w-lg mx-auto">
+      <!-- Form Daftar / Cek Komisi -->
+      <section id="daftar" class="py-16 md:py-24 px-gutter bg-surface-white scroll-mt-20">
+        <div class="max-w-xl mx-auto">
+          <!-- Action Tabs -->
+          <div class="flex justify-center mb-8">
+            <div class="inline-flex p-1 rounded-xl bg-surface-container-high border border-border-subtle">
+              <button
+                @click="activeActionTab = 'register'"
+                class="px-5 py-2.5 rounded-lg text-xs sm:text-sm font-bold transition-all"
+                :class="activeActionTab === 'register' ? 'bg-surface-white text-electric-blue shadow-xs' : 'text-secondary hover:text-on-surface'"
+              >
+                Daftar Partner Baru
+              </button>
+              <button
+                @click="activeActionTab = 'check'"
+                class="px-5 py-2.5 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center gap-1.5"
+                :class="activeActionTab === 'check' ? 'bg-surface-white text-electric-blue shadow-xs' : 'text-secondary hover:text-on-surface'"
+              >
+                <span class="material-symbols-outlined text-[16px]">account_balance_wallet</span>
+                Cek Komisi Saya
+              </button>
+            </div>
+          </div>
+
+          <!-- TAB 2: CEK KOMISI & STATUS PARTNER -->
+          <div v-if="activeActionTab === 'check'" class="space-y-6">
+            <div class="text-center mb-6">
+              <h2 class="text-headline-md sm:text-headline-lg font-bold text-on-surface mb-2">Portal Transparansi Komisi Partner</h2>
+              <p class="text-secondary text-sm">Masukkan kode referral unikmu untuk cek status teman yang kamu bantu dan total komisi yang berhak kamu cairkan.</p>
+            </div>
+
+            <form @submit.prevent="handleCheckPartner" class="flex gap-2">
+              <input
+                v-model="checkInput"
+                type="text"
+                placeholder="Contoh: REF-BUDI10"
+                class="flex-1 rounded-xl border border-border-subtle bg-surface-container-lowest px-4 py-3 text-sm font-mono uppercase tracking-wider text-on-surface outline-none focus:border-electric-blue focus:ring-1 focus:ring-electric-blue"
+              />
+              <button
+                type="submit"
+                :disabled="checkLoading"
+                class="bg-electric-blue text-white px-5 py-3 rounded-xl font-bold text-sm hover:bg-primary transition-all disabled:opacity-60 flex items-center gap-1.5 shrink-0"
+              >
+                <span v-if="checkLoading" class="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
+                <span v-else class="material-symbols-outlined text-[18px]">search</span>
+                Cek
+              </button>
+            </form>
+
+            <div v-if="checkError" class="bg-error-container/40 text-on-error-container p-3.5 rounded-xl text-xs flex items-center gap-2">
+              <span class="material-symbols-outlined text-[18px]">error</span>
+              <span>{{ checkError }}</span>
+            </div>
+
+            <!-- Result Portal -->
+            <div v-if="partnerData" class="space-y-6 pt-2">
+              <div class="bg-gradient-to-br from-primary-fixed/30 to-secondary-fixed/20 p-5 sm:p-6 rounded-2xl border border-electric-blue/30">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-border-subtle/50">
+                  <div>
+                    <span class="text-xs font-semibold text-secondary uppercase tracking-wider">Partner Terverifikasi</span>
+                    <h3 class="text-lg font-extrabold text-on-surface">{{ partnerData.partner.full_name }}</h3>
+                    <p class="text-xs text-secondary mt-0.5">{{ partnerData.partner.campus || 'Mahasiswa IT' }} · Kode: <strong class="text-electric-blue font-mono">{{ partnerData.partner.referral_code }}</strong></p>
+                  </div>
+                  <button
+                    @click="copyPromoText"
+                    class="self-start sm:self-auto bg-surface-white border border-border-subtle hover:border-electric-blue text-electric-blue text-xs font-bold px-3 py-2 rounded-xl transition-all flex items-center gap-1.5 shadow-2xs"
+                  >
+                    <span class="material-symbols-outlined text-[16px]">share</span>
+                    {{ copyPromoSuccess ? '✓ Teks Tersalin!' : 'Salin Teks Rekomendasi' }}
+                  </button>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 text-center">
+                  <div class="bg-surface-white/80 backdrop-blur-xs p-3 rounded-xl border border-border-subtle">
+                    <div class="text-xs text-secondary mb-1">Teman Pakai</div>
+                    <div class="text-xl font-extrabold text-on-surface">{{ partnerData.stats.totalReferrals }}</div>
+                  </div>
+                  <div class="bg-surface-white/80 backdrop-blur-xs p-3 rounded-xl border border-border-subtle">
+                    <div class="text-xs text-secondary mb-1">Project Deal</div>
+                    <div class="text-xl font-extrabold text-electric-blue">{{ partnerData.stats.dealCount }}</div>
+                  </div>
+                  <div class="bg-surface-white/80 backdrop-blur-xs p-3 rounded-xl border border-border-subtle">
+                    <div class="text-xs text-secondary mb-1">Komisi Cair</div>
+                    <div class="text-xl font-extrabold text-success-green">{{ formatRupiah(partnerData.stats.totalEarned) }}</div>
+                  </div>
+                  <div class="bg-surface-white/80 backdrop-blur-xs p-3 rounded-xl border border-border-subtle">
+                    <div class="text-xs text-secondary mb-1">Menunggu Cair</div>
+                    <div class="text-xl font-extrabold text-urgency-red">{{ formatRupiah(partnerData.stats.pendingEarned) }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- List of Referred Requests -->
+              <div>
+                <h4 class="font-bold text-sm text-on-surface mb-3 flex items-center gap-1.5">
+                  <span class="material-symbols-outlined text-[18px] text-electric-blue">history</span>
+                  Riwayat Project Teman Kamu
+                </h4>
+                <div v-if="partnerData.requests.length === 0" class="text-center py-8 bg-surface-container-low rounded-xl text-xs text-secondary">
+                  Belum ada teman yang menggunakan kodemu. Bagikan kodemu ke grup angkatan sekarang!
+                </div>
+                <div v-else class="space-y-2">
+                  <div
+                    v-for="req in partnerData.requests"
+                    :key="req.order_no"
+                    class="bg-surface-container-lowest p-3.5 rounded-xl border border-border-subtle flex items-center justify-between text-xs"
+                  >
+                    <div>
+                      <div class="font-bold text-on-surface">Order #{{ req.order_no }} ({{ CATEGORY_LABELS[req.category] || req.category }})</div>
+                      <div class="text-secondary mt-0.5">Status: <span class="font-semibold text-on-surface">{{ STATUS_LABELS[req.status] || req.status }}</span></div>
+                    </div>
+                    <div class="text-right">
+                      <div v-if="req.quote_amount" class="font-extrabold text-electric-blue">
+                        Komisi: {{ formatRupiah(req.quote_amount * 0.1) }}
+                      </div>
+                      <span
+                        v-if="req.commission_paid"
+                        class="inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-success-green/10 text-success-green"
+                      >
+                        ✓ Sudah Ditransfer
+                      </span>
+                      <span
+                        v-else-if="['done', 'paid', 'review'].includes(req.status)"
+                        class="inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-yellow-500/10 text-yellow-600"
+                      >
+                        Menunggu Transfer (1x24 Jam)
+                      </span>
+                      <span
+                        v-else
+                        class="inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-medium text-secondary"
+                      >
+                        Dalam Proses
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-surface-container p-4 rounded-xl text-xs text-secondary flex items-start gap-2.5">
+                <span class="material-symbols-outlined text-[18px] text-electric-blue mt-0.5">info</span>
+                <div>
+                  Ada pertanyaan seputar pencairan komisi? Langsung chat ke WhatsApp Engineer:
+                  <a :href="waLink(WA_ENGINEER, `Halo, saya partner ${partnerData.partner.referral_code} mau tanya update komisi.`)" target="_blank" class="text-electric-blue font-bold underline ml-1">
+                    Hubungi via WhatsApp
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 1: FORM DAFTAR PARTNER BARU -->
+          <div v-else>
           <!-- Success State -->
           <div v-if="success" class="text-center">
             <div class="w-20 h-20 rounded-full bg-success-green/10 flex items-center justify-center mx-auto mb-6">
@@ -298,6 +502,7 @@ function copyCode() {
                 Data kamu aman dan tidak dibagikan ke pihak ketiga.
               </p>
             </form>
+          </div>
           </div>
         </div>
       </section>

@@ -4,6 +4,7 @@ import { RouterLink } from 'vue-router'
 import TopAppBar from '../components/TopAppBar.vue'
 import BottomNavBar from '../components/BottomNavBar.vue'
 import FooterBar from '../components/FooterBar.vue'
+import PriceEstimator from '../components/PriceEstimator.vue'
 import { waLink } from '../lib/api'
 
 const WA_TEXT = 'Halo jokitugasit.my.id, saya mau diskusi harga project.'
@@ -54,7 +55,7 @@ function submitBudget() {
     <TopAppBar />
     <main class="flex-1 w-full max-w-container-max-width mx-auto px-gutter py-12 md:py-20">
       <!-- Hero -->
-      <section class="text-center max-w-3xl mx-auto mb-14">
+      <section class="text-center max-w-3xl mx-auto mb-12">
         <div class="inline-flex items-center gap-2 bg-surface-white border border-border-subtle rounded-full px-4 py-1.5 shadow-sm mb-4">
           <span class="w-2.5 h-2.5 rounded-full bg-success-green animate-pulse-slow"></span>
           <span class="font-label-sm text-label-sm text-secondary">Engineer Siap Bantu</span>
@@ -62,12 +63,23 @@ function submitBudget() {
         <h1 class="font-display-hero-mobile md:font-display-hero text-display-hero-mobile md:text-display-hero font-bold text-on-surface mb-4">
           Harga Mahasiswa,<br /><span class="text-electric-blue">Kualitas Engineer.</span>
         </h1>
-        <p class="font-body-lg text-body-lg text-on-surface-variant max-w-xl mx-auto mb-7">Transparan, terjangkau, dan bisa disesuaikan dengan kantong mahasiswa. Pilih paket sesuai kebutuhan atau ajukan budget kamu sendiri.</p>
-        <a :href="waLink('6285166337257', WA_TEXT)" target="_blank" rel="noopener" class="inline-flex items-center gap-2 bg-electric-blue text-white font-label-bold text-label-bold px-7 py-3.5 rounded-xl shadow-md hover:bg-primary transition-colors">
+        <p class="font-body-lg text-body-lg text-on-surface-variant max-w-xl mx-auto mb-7">Transparan, terjangkau, dan bisa disesuaikan dengan kantong mahasiswa. Hitung estimasi langsung di bawah atau ajukan budget kamu sendiri.</p>
+        <a href="#estimator" class="inline-flex items-center gap-2 bg-electric-blue text-white font-label-bold text-label-bold px-7 py-3.5 rounded-xl shadow-md hover:bg-primary transition-colors">
           <span class="material-symbols-outlined">calculate</span>
-          Cek Estimasi Project Gratis
+          Hitung Estimasi Sekarang
         </a>
       </section>
+
+      <!-- Interactive Calculator Section -->
+      <section id="estimator" class="mb-16 scroll-mt-20">
+        <PriceEstimator />
+      </section>
+
+      <!-- Section Title for Packages -->
+      <div class="text-center max-w-xl mx-auto mb-8">
+        <h2 class="font-headline-lg text-headline-lg font-bold text-on-surface mb-2">Pilihan Paket Standar</h2>
+        <p class="text-sm text-secondary">Pilih paket layanan cepat sesuai kebutuhan umum tugas kuliah kamu.</p>
+      </div>
 
       <!-- Pricing Cards -->
       <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-16">

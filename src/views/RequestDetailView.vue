@@ -14,8 +14,11 @@ const errorMsg = ref('')
 const quote = ref('')
 const notes = ref('')
 const status = ref('consultation')
+const walkthroughUrl = ref('')
+const walkthroughNotes = ref('')
 const saving = ref(false)
 const savedMsg = ref('')
+const copySowSuccess = ref(false)
 
 const ROW_CLICKABLE_CLASS = 'bg-surface-white rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] p-6 hover:border hover:border-electric-blue hover:shadow-lg transition-all duration-200 border border-transparent'
 
@@ -27,6 +30,8 @@ async function load() {
       quote.value = request.value.quote_amount || ''
       notes.value = request.value.internal_notes || ''
       status.value = request.value.status || 'consultation'
+      walkthroughUrl.value = request.value.walkthrough_url || ''
+      walkthroughNotes.value = request.value.walkthrough_notes || ''
     }
   } catch (err) {
     errorMsg.value = err.message || 'Gagal memuat detail request.'
@@ -45,6 +50,8 @@ async function save() {
       status: status.value,
       quote_amount: quote.value ? Number(quote.value) : null,
       internal_notes: notes.value || null,
+      walkthrough_url: walkthroughUrl.value.trim() || null,
+      walkthrough_notes: walkthroughNotes.value.trim() || null,
     }
     await updateRequest(request.value.id, patch)
     request.value = await getRequest(request.value.id)
@@ -55,6 +62,37 @@ async function save() {
   } finally {
     saving.value = false
   }
+}
+
+function copySowInvoice() {
+  if (!request.value) return
+  const q = Number(quote.value || request.value.quote_amount || 0)
+  const dp = Math.round(q / 2)
+  const sisa = q - dp
+  const text = `Halo ${request.value.customer_name}, terima kasih sudah konsultasi di jokitugasit.my.id! 👍
+
+Berikut rangkuman Penawaran & Scope of Work (SOW):
+• Nomor Tiket: #${request.value.order_no}
+• Kategori: ${CATEGORY_LABELS[request.value.category] || request.value.category}
+• Rincian Problem: ${request.value.description}
+• Total Investasi: ${q ? formatRupiah(q) : 'Sesuai kesepakatan'}
+• DP 50%: ${dp ? formatRupiah(dp) : '-'} (pengerjaan langsung dimulai setelah konfirmasi DP)
+• Pelunasan 50%: ${sisa ? formatRupiah(sisa) : '-'} (setelah hasil dicek via video walkthrough / screenshot)
+
+Garansi Layanan:
+✓ Free pendampingan & konsultasi persiapan demo dosen
+✓ Garansi perbaikan jika ada runtime error saat presentasi
+
+Rekening Pembayaran DP:
+• BCA: 1234567890 a.n Engineer
+• GoPay / OVO / Dana: 085166337257
+(Kirim bukti transfer ke WhatsApp ini ya)
+
+Mohon konfirmasi jika sepakat dengan SOW di atas agar pengerjaan segera dimulai. Terima kasih!`
+
+  navigator.clipboard.writeText(text)
+  copySowSuccess.value = true
+  setTimeout(() => (copySowSuccess.value = false), 2500)
 }
 
 async function setStatus(next) {
@@ -196,6 +234,16 @@ const typeColor = (c) => {
               <textarea v-model="notes" class="w-full rounded-xl border-border-subtle focus:border-electric-blue focus:ring focus:ring-electric-blue/20 transition-all font-body-md p-3 min-h-[100px]" placeholder="Note for yourself..."></textarea>
             </div>
 
+            <div class="mb-5">
+              <label class="block text-label-bold font-label-bold mb-1.5 text-xs">Video Walkthrough URL (Loom/Drive)</label>
+              <input v-model="walkthroughUrl" class="w-full rounded-xl border border-border-subtle focus:border-electric-blue focus:ring focus:ring-electric-blue/20 transition-all text-xs p-2.5 bg-surface-container-lowest" placeholder="https://loom.com/share/..." type="url" />
+            </div>
+
+            <div class="mb-5">
+              <label class="block text-label-bold font-label-bold mb-1.5 text-xs">Catatan Logika & Cheatsheet Dosen</label>
+              <textarea v-model="walkthroughNotes" class="w-full rounded-xl border border-border-subtle focus:border-electric-blue focus:ring focus:ring-electric-blue/20 transition-all text-xs p-2.5 min-h-[70px] bg-surface-container-lowest" placeholder="Penjelasan cara kerja kode, konsep controller/model..."></textarea>
+            </div>
+
             <div class="mb-6">
               <label class="block text-label-bold font-label-bold mb-2">Update Status</label>
               <select v-model="status" class="w-full rounded-xl border-border-subtle focus:border-electric-blue focus:ring focus:ring-electric-blue/20 transition-all font-body-md p-3 bg-surface-white capitalize">
@@ -210,11 +258,19 @@ const typeColor = (c) => {
             <div v-if="savedMsg" class="mb-4 text-success-green font-label-bold text-sm">{{ savedMsg }}</div>
 
             <button
-              class="w-full bg-electric-blue hover:bg-primary text-white font-label-bold text-label-bold py-3 rounded-xl active:scale-95 transition-all shadow-md disabled:opacity-60 mb-4"
+              class="w-full bg-electric-blue hover:bg-primary text-white font-label-bold text-label-bold py-3 rounded-xl active:scale-95 transition-all shadow-md disabled:opacity-60 mb-3"
               :disabled="saving"
               @click="save"
             >
-              {{ saving ? 'Menyimpan...' : 'Simpan' }}
+              {{ saving ? 'Menyimpan...' : 'Simpan Perubahan' }}
+            </button>
+
+            <button
+              @click="copySowInvoice"
+              class="w-full bg-surface-white border-2 border-electric-blue text-electric-blue hover:bg-primary-fixed/20 font-label-bold text-xs py-3 rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-2xs mb-4"
+            >
+              <span class="material-symbols-outlined text-[18px]">receipt_long</span>
+              {{ copySowSuccess ? '✓ SOW & Invoice Tersalin!' : 'Salin SOW & Invoice DP 50% (WA)' }}
             </button>
 
             <div class="space-y-3">

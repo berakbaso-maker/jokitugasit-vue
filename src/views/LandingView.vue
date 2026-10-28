@@ -224,16 +224,17 @@ onBeforeUnmount(() => {
               <p class="font-body-md text-body-md text-on-surface-variant">Harga mahasiswa, kualitas tetap profesional.</p>
             </div>
           </div>
-          <div class="flex flex-wrap gap-3">
+          <div class="flex flex-wrap items-center gap-3">
             <span class="flex items-center gap-1 font-label-bold text-label-bold text-secondary bg-surface-container-lowest px-3 py-1.5 border border-border-subtle rounded-full shadow-sm">
               <span class="material-symbols-outlined text-[16px] text-success-green">check</span> Benerin Error
             </span>
             <span class="flex items-center gap-1 font-label-bold text-label-bold text-secondary bg-surface-container-lowest px-3 py-1.5 border border-border-subtle rounded-full shadow-sm">
               <span class="material-symbols-outlined text-[16px] text-success-green">check</span> Bikin Fitur
             </span>
-            <span class="flex items-center gap-1 font-label-bold text-label-bold text-secondary bg-surface-container-lowest px-3 py-1.5 border border-border-subtle rounded-full shadow-sm">
-              <span class="material-symbols-outlined text-[16px] text-success-green">check</span> Bikin Aplikasi
-            </span>
+            <RouterLink to="/harga" class="inline-flex items-center gap-1.5 bg-electric-blue text-white font-label-bold text-xs px-4 py-2 rounded-full shadow-xs hover:bg-primary transition-all">
+              <span class="material-symbols-outlined text-[15px]">calculate</span>
+              Kalkulator Estimasi
+            </RouterLink>
           </div>
         </div>
       </section>
