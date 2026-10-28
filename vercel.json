@@ -45,6 +45,9 @@
     }
   ],
   "functions": {
+    "api/notify-order.js": {
+      "maxDuration": 10
+    },
     "api/send-email.js": {
       "maxDuration": 10
     },

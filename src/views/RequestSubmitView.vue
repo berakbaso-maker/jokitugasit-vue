@@ -94,6 +94,27 @@ async function handleSubmit() {
     }
     const created = await createRequest(payload)
 
+    // Kirim notifikasi instan ke Telegram Engineer via Vercel Serverless Function (non-blocking)
+    try {
+      fetch('/api/notify-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderNo: created.order_no,
+          customerName: form.value.customer_name.trim(),
+          whatsapp: form.value.whatsapp.trim(),
+          category: form.value.category,
+          deadline: form.value.deadline,
+          deadlineDate: form.value.deadline === 'fleksibel' ? form.value.deadline_date : null,
+          description: form.value.description.trim(),
+          link: form.value.link.trim() || null,
+          fileUrl: fileUrl,
+        }),
+      }).catch((err) => console.warn('Telegram notification trigger warning:', err))
+    } catch (notifyErr) {
+      console.warn('Telegram notification error:', notifyErr)
+    }
+
     // Kirim email booking (opsional) — tidak menggagalkan alur jika gagal
     if (form.value.email.trim()) {
       try {

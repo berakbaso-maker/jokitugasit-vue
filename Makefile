@@ -3,11 +3,12 @@
 # Quick CLI automation for deployment, fresh builds, Supabase, and Vercel.
 # ==============================================================================
 
-.PHONY: help deploy fresh build clean dev preview health supabase-check vercel-deploy
+.PHONY: help deploy fresh build clean dev preview health supabase-check vercel-deploy test-telegram
 
 # Set default shell and PATH to include Homebrew node & tools
 SHELL := /bin/bash
-export PATH := /opt/homebrew/bin:/usr/local/bin:$(PATH)
+PATH := /opt/homebrew/bin:/usr/local/bin:$(PATH)
+export PATH
 
 # Colors
 C_RESET  := \033[0m
@@ -36,6 +37,7 @@ help:
 	@echo -e "  ${C_YELLOW}make preview${C_RESET}        Preview bundle production lokal"
 	@echo -e "  ${C_BLUE}make health${C_RESET}         Test status HTTP & response live domain"
 	@echo -e "  ${C_BLUE}make supabase-check${C_RESET} Audit kelengkapan skema & konfigurasi Supabase"
+	@echo -e "  ${C_BLUE}make test-telegram${C_RESET}  Uji kirim notifikasi alert order ke Telegram engineer"
 	@echo -e "  ${C_BLUE}make vercel-deploy${C_RESET}  Deploy cepat (git push origin main)"
 	@echo ""
 
@@ -52,21 +54,24 @@ clean:
 	@rm -rf dist node_modules/.vite .vercel/output
 	@echo -e "${C_GREEN}✓ Cache bersih (dist, .vite, .vercel/output)${C_RESET}"
 
+# Runner wrapper ensuring Node/NPM are accessible on macOS
+RUN := export PATH="/opt/homebrew/bin:/usr/local/bin:$$PATH";
+
 ## build: Fresh production build dengan vendor chunk splitting
 build: clean
 	@echo -e "${C_BLUE}🔨 Memulai fresh production build...${C_RESET}"
-	@npm run build
+	@$(RUN) npm run build
 	@echo -e "${C_GREEN}✓ Build berhasil dibuat di folder dist/${C_RESET}"
 
 ## dev: Jalankan server development Vite
 dev:
 	@echo -e "${C_GREEN}⚡ Memulai Vite Dev Server...${C_RESET}"
-	@npm run dev
+	@$(RUN) npm run dev
 
 ## preview: Preview build production di lokal
 preview:
 	@echo -e "${C_CYAN}👀 Memulai Vite Preview...${C_RESET}"
-	@npm run preview
+	@$(RUN) npm run preview
 
 ## health: Cek kesehatan live host production
 health:
@@ -94,3 +99,29 @@ vercel-deploy:
 	@echo -e "${C_BLUE}🚀 Memicu deployment Vercel via Git...${C_RESET}"
 	@git push origin main
 	@echo -e "${C_GREEN}✓ Commit telah ter-push ke origin/main!${C_RESET}"
+
+## test-telegram: Kirim notifikasi tes ke Telegram engineer
+test-telegram:
+	@echo -e "${C_BLUE}📱 Menguji endpoint /api/notify-order secara lokal...${C_RESET}"
+	@export PATH="/opt/homebrew/bin:/usr/local/bin:$$PATH"; node -e '\
+	import("./api/notify-order.js").then(async (m) => { \
+		const req = { \
+			method: "POST", \
+			body: { \
+				orderNo: "TEST888", \
+				customerName: "Mahasiswa Uji Coba", \
+				whatsapp: "6285166337257", \
+				category: "web", \
+				deadline: "hari_ini", \
+				description: "Testing notifikasi Telegram serverless jokitugasit.my.id (tanpa VPS)." \
+			} \
+		}; \
+		const res = { \
+			setHeader: () => {}, \
+			status: (code) => ({ \
+				json: (data) => console.log("Hasil Uji:", code, data) \
+			}) \
+		}; \
+		await m.default(req, res); \
+	}).catch(err => console.error(err)); \
+	'
