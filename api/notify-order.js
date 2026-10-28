@@ -28,8 +28,19 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'orderNo dan customerName wajib diisi' })
   }
 
-  const botToken = process.env.TELEGRAM_BOT_TOKEN
-  const chatId = process.env.TELEGRAM_NOTIFICATION_CHAT_ID
+  let botToken = process.env.TELEGRAM_BOT_TOKEN
+  let chatId = process.env.TELEGRAM_NOTIFICATION_CHAT_ID
+
+  // Fallback load .env jika berjalan di lingkungan Node lokal
+  if (!botToken || !chatId) {
+    try {
+      if (typeof process.loadEnvFile === 'function') {
+        process.loadEnvFile()
+        botToken = process.env.TELEGRAM_BOT_TOKEN
+        chatId = process.env.TELEGRAM_NOTIFICATION_CHAT_ID
+      }
+    } catch {}
+  }
 
   // Jika env belum diset, log dan return 200 agar flow frontend tidak terputus
   if (!botToken || !chatId) {
