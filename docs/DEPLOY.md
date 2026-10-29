@@ -43,6 +43,10 @@ make db-push
 > `supabase/schema.sql` lebih dulu (lihat `docs/OUTREACH-CRM.md` §1), baru
 > `make db-push`. Proyek produksi sudah punya schema, jadi biasanya tidak perlu.
 
+> **Seeder akun engineer** tidak disimpan di repo (berisi password plaintext).
+> Salinannya ada di `~/.config/jokitugasit/seed-engineer.sql` (chmod 600).
+> Jalankan manual via SQL Editor bila butuh membuat/menyetel ulang akun engineer.
+
 Atau buat manual sekali:
 
 ```bash
