@@ -1,8 +1,20 @@
 ---
-name: production-gate
-description: WAJIB dipakai untuk setiap perubahan kode, migration, test, atau deploy di repo jokitugasit-vue (Vue 3 + Supabase + Vercel). Gunakan sebelum mengedit file, sebelum commit, dan sebelum push ke produksi. Mencakup gate development, testing, keamanan, migration Supabase, deploy Vercel, verifikasi, dan rollback. Jika tugas menyentuh kode, data, atau deploy di repo ini, skill ini tidak boleh dilewati.
+name: jokitugasit-production-gate
+description: KHUSUS repo jokitugasit-vue. WAJIB dipakai untuk setiap perubahan kode, migration, test, atau deploy di repo ini (Vue 3 + Supabase + Vercel). Gunakan sebelum mengedit file, sebelum commit, dan sebelum push ke produksi. Mencakup gate development, testing, keamanan, migration Supabase, deploy Vercel, verifikasi, dan rollback. Jangan dipakai untuk repo lain.
 ---
-# Production Gate
+# Production Gate — jokitugasit-vue
+
+## Lingkup: hanya repo ini
+
+Skill ini **hanya berlaku di repo `jokitugasit-vue`**. Sebelum memakai:
+
+```bash
+git remote get-url origin 2>/dev/null | grep -q 'jokitugasit-vue' || echo "BUKAN repo ini"
+```
+
+- Jika remote bukan `jokitugasit-vue`, **jangan pakai skill ini** dan jangan terapkan aturannya ke repo lain.
+- Skill ini tinggal di `.opencode/skills/jokitugasit-production-gate/` (project scope) dan tidak dipasang di `~/.config/opencode/skills`.
+- ID unik: `jokitugasit-production-gate`; tidak menimpa skill global.
 
 ## Tujuan
 

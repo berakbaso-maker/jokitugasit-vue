@@ -129,7 +129,14 @@ pass "tidak ada .env/JWT/service role/token di $SCOPE + untracked"
 # ---------------------------------------------------------------- 3. file wajib
 step "Gate 3 — aturan & dokumentasi"
 [ -f AGENTS.md ] || fail "AGENTS.md hilang — aturan wajib repo tidak ada"
-[ -f .opencode/skills/production-gate/SKILL.md ] || fail "skill production-gate hilang"
+[ -f .opencode/skills/jokitugasit-production-gate/SKILL.md ] || fail "skill jokitugasit-production-gate hilang"
+# Skill ini harus repo-scoped, bukan global.
+if [ -d "$HOME/.config/opencode/skills/jokitugasit-production-gate" ]; then
+  fail "skill ini terpasang di global (~/.config/opencode/skills) — harus khusus repo"
+fi
+if ! git remote get-url origin 2>/dev/null | grep -q 'jokitugasit-vue'; then
+  fail "remote origin bukan jokitugasit-vue — gate ini hanya untuk repo ini"
+fi
 [ -f docs/OUTREACH-CRM.md ] || fail "docs/OUTREACH-CRM.md hilang"
 [ -f docs/PRD-OUTREACH.md ] || fail "docs/PRD-OUTREACH.md hilang"
 [ -f docs/DEPLOY.md ] || fail "docs/DEPLOY.md hilang"

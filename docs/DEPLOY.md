@@ -62,7 +62,7 @@ tidak tercakup bundle/test, fungsi kunci hilang, atau test/build gagal.
 `make redeploy` otomatis menjalankan gate statis sebagai langkah 0b.
 
 Aturan lengkapnya ada di `AGENTS.md` dan skill
-`.opencode/skills/production-gate/SKILL.md`.
+`.opencode/skills/jokitugasit-production-gate/SKILL.md`.
 
 ## Yang dijalankan script
 
