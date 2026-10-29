@@ -181,6 +181,143 @@ export async function listOutreachLogs(prospectId) {
   return data || []
 }
 
+// ---------- import batch & statistik ----------
+
+const PAGE_SIZE_MAX = 100
+
+function sanitizeSearch(value) {
+  // Buang karakter yang punya arti di filter PostgREST.
+  return String(value || '').trim().replace(/^@+/, '').replace(/[%,()]/g, ' ').trim()
+}
+
+/** Halaman prospek dengan filter di server, bukan di memori. */
+export async function listProspectsPage(filters = {}) {
+  const pageSize = Math.min(PAGE_SIZE_MAX, Math.max(1, Number(filters.pageSize) || 25))
+  const page = Math.max(1, Number(filters.page) || 1)
+  const from = (page - 1) * pageSize
+
+  let query = supabase
+    .from('prospects')
+    .select('*, target_accounts(ig_username, campus)', { count: 'exact' })
+    .order('first_seen_at', { ascending: false })
+    .range(from, from + pageSize - 1)
+
+  if (filters.status) query = query.eq('status', filters.status)
+  if (filters.campus) query = query.eq('campus', filters.campus)
+
+  const search = sanitizeSearch(filters.search)
+  if (search) {
+    query = query.or(`ig_username.ilike.%${search}%,display_name.ilike.%${search}%`)
+  }
+
+  const { data, error, count } = await query
+  if (error) throw error
+  return { rows: data || [], total: count || 0, page, pageSize }
+}
+
+/** Ambil semua baris untuk ekspor, dengan batas aman. */
+export async function listAllProspects(filters = {}) {
+  const pageSize = PAGE_SIZE_MAX
+  const maxPages = 40
+  let page = 1
+  let total = Infinity
+  let rows = []
+
+  while (rows.length < total && page <= maxPages) {
+    const result = await listProspectsPage({ ...filters, page, pageSize })
+    rows = rows.concat(result.rows)
+    total = result.total
+    if (!result.rows.length) break
+    page += 1
+  }
+
+  return rows
+}
+
+export async function importProspectsBatch({
+  fileName = null, rows, sourceAccount = null, permissionBasis = 'MANUAL_ENTRY', batchId = null,
+}) {
+  const { data, error } = await supabase.rpc('import_prospects_batch', {
+    p_file_name: fileName,
+    p_rows: rows,
+    p_source_account: sourceAccount,
+    p_permission_basis: permissionBasis,
+    p_batch_id: batchId,
+  })
+  if (error) throw error
+  return Array.isArray(data) ? data[0] : data
+}
+
+export async function listImportBatches(limit = 5) {
+  const { data, error } = await supabase
+    .from('import_batches')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(limit)
+  if (error) throw error
+  return data || []
+}
+
+/** Daftar kampus unik untuk filter. Kolomnya kecil, bukan data pribadi. */
+export async function listProspectCampuses() {
+  const { data, error } = await supabase
+    .from('prospects')
+    .select('campus')
+    .not('campus', 'is', null)
+    .limit(1000)
+  if (error) throw error
+  return [...new Set((data || []).map(r => r.campus).filter(Boolean))].sort()
+}
+
+export async function getProspectStats() {
+  const { data, error } = await supabase.rpc('prospect_stats')
+  if (error) throw error
+  const row = Array.isArray(data) ? data[0] : data
+  return row || { total: 0, in_queue: 0, contacted: 0, interested: 0, converted: 0, dnc: 0 }
+}
+
+/** Ubah prospek jadi proyek nyata dan tandai CONVERTED. */
+export async function convertProspectToRequest({
+  prospectId, category = 'web', description = '', quote = null,
+}) {
+  const { data, error } = await supabase.rpc('create_request_from_prospect', {
+    p_prospect_id: prospectId,
+    p_category: category,
+    p_description: description || null,
+    p_quote: quote === null || quote === '' ? null : Math.round(Number(quote)),
+  })
+  if (error) throw error
+  return Array.isArray(data) ? data[0] : data
+}
+
+/**
+ * Hapus prospek. Username bisa dimasukkan ke suppression list supaya
+ * import berikutnya tidak memunculkannya lagi (permintaan hapus data).
+ */
+export async function deleteProspect(prospectId, reason, { suppress = true } = {}) {
+  const { error } = await supabase.rpc('delete_prospect', {
+    p_prospect_id: prospectId,
+    p_reason: reason,
+    p_suppress: suppress,
+  })
+  if (error) throw error
+}
+
+export async function deleteTargetAccount(accountId) {
+  const { error } = await supabase.from('target_accounts').delete().eq('id', accountId)
+  if (error) throw error
+}
+
+export async function listSuppressions(limit = 100) {
+  const { data, error } = await supabase
+    .from('prospect_suppressions')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(limit)
+  if (error) throw error
+  return data || []
+}
+
 // ---------- templates ----------
 
 export async function listTemplates({ activeOnly = true } = {}) {

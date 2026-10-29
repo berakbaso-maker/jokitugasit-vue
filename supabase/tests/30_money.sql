@@ -109,6 +109,12 @@ begin
   if c.status <> 'PAID' or c.paid_at is null then
     raise exception 'FAIL: komisi tidak jadi PAID';
   end if;
+  if c.payment_proof <> 'https://bukti/1.png' then
+    raise exception 'FAIL: bukti pembayaran komisi tidak tersimpan';
+  end if;
+  if c.note <> 'transfer DANA' then
+    raise exception 'FAIL: catatan payout tidak tersimpan';
+  end if;
   if not (select commission_paid from public.requests where id = pid) then
     raise exception 'FAIL: kolom lama commission_paid tidak tersinkron';
   end if;

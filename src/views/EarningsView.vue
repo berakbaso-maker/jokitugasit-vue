@@ -1,35 +1,60 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import SideNav from '../components/SideNav.vue'
-import { listTransactions, formatRupiah } from '../lib/api'
+import {
+  listPayments, listCommissions, getAnalyticsOverview, formatRupiah,
+} from '../lib/api'
+import {
+  PAYMENT_KIND_LABELS, PAYMENT_STATUS_LABELS, summarizePayments,
+} from '../lib/money'
 
-const transactions = ref([])
+const payments = ref([])
+const commissions = ref([])
+const analytics = ref(null)
 const loading = ref(true)
+const error = ref('')
 
+const summary = computed(() => summarizePayments(payments.value))
+
+/**
+ * Angka kepala memakai RPC analytics supaya sama persis dengan
+ * Dashboard. Tidak ada penjumlahan omzet yang dilakukan di browser.
+ */
 const stats = computed(() => {
-  const all = transactions.value
-  const paid = all.filter((t) => t.status === 'paid')
-  const pending = all.filter((t) => t.status === 'pending')
-  const totalEarnings = paid.reduce((s, t) => s + (Number(t.amount) || 0), 0)
-  const pendingAmount = pending.reduce((s, t) => s + (Number(t.amount) || 0), 0)
+  const gross = Number(analytics.value?.gross_confirmed || 0)
+  const commissionPaid = Number(analytics.value?.commission_paid || 0)
   return {
-    totalEarnings,
-    pending: pendingAmount,
-    pendingCount: pending.length,
-    monthIncome: paid
-      .filter((t) => {
-        const d = t.created_at ? new Date(t.created_at) : new Date()
-        const now = new Date()
-        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
-      })
-      .reduce((s, t) => s + (Number(t.amount) || 0), 0),
-    successRate: all.length ? Math.round((paid.length / all.length) * 100) : 0,
-    completed: paid.length,
+    gross,
+    commissionPaid,
+    commissionUnpaid: Number(analytics.value?.commission_unpaid || 0),
+    beforeExpense: gross - commissionPaid,
+    refunded: summary.value.refunded,
+    paymentRows: payments.value.filter(p => p.status === 'CONFIRMED').length,
   }
 })
 
-const statusClass = (s) =>
-  s === 'paid' ? 'bg-success-green/10 text-success-green border border-success-green/20' : 'bg-surface-container-high text-secondary border border-outline-variant'
+const visiblePayments = computed(() => payments.value.slice(0, 50))
+
+const COMMISSION_LABELS = {
+  PENDING: 'Menunggu pelunasan',
+  ELIGIBLE: 'Siap dibayar',
+  PAID: 'Sudah dibayar',
+  VOID: 'Batal',
+  ADJUSTMENT: 'Perlu review',
+}
+
+const commissionClass = (s) => {
+  if (s === 'PAID') return 'bg-success-green/10 text-success-green border border-success-green/20'
+  if (s === 'ELIGIBLE') return 'bg-urgency-red/10 text-urgency-red border border-urgency-red/20'
+  if (s === 'ADJUSTMENT') return 'bg-amber-100 text-amber-700 border border-amber-200'
+  return 'bg-surface-container-high text-secondary border border-outline-variant'
+}
+
+const paymentClass = (s) => {
+  if (s === 'CONFIRMED') return 'bg-success-green/10 text-success-green'
+  if (s === 'VOID') return 'bg-error-container text-on-error-container'
+  return 'bg-surface-container text-on-surface-variant'
+}
 
 function fmtDate(iso) {
   if (!iso) return '-'
@@ -38,10 +63,20 @@ function fmtDate(iso) {
 
 onMounted(async () => {
   loading.value = true
+  error.value = ''
   try {
-    transactions.value = await listTransactions()
+    const [pays, comms, overview] = await Promise.all([
+      listPayments(),
+      listCommissions({ limit: 20 }),
+      getAnalyticsOverview(),
+    ])
+    payments.value = pays || []
+    commissions.value = comms || []
+    analytics.value = overview || null
   } catch (err) {
-    console.error(err)
+    error.value = err.message?.includes('relation') || err.code === '42P01'
+      ? 'Tabel pembayaran/komisi belum terpasang. Jalankan migration-money-schema.sql lalu migration-payment-flow.sql.'
+      : (err.message || 'Gagal memuat data pendapatan.')
   } finally {
     loading.value = false
   }
@@ -53,114 +88,167 @@ onMounted(async () => {
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
       <div>
         <h2 class="text-display-hero-mobile md:text-display-hero font-display-hero-mobile md:font-display-hero text-on-surface">Ringkasan Pendapatan</h2>
-        <p class="font-body-lg text-body-lg text-secondary mt-1">Pantau penghasilan dan tarik dana dengan mudah.</p>
+        <p class="font-body-lg text-body-lg text-secondary mt-1">
+          Dihitung dari pembayaran yang benar-benar tercatat, bukan dari status manual.
+        </p>
       </div>
-      <button class="bg-electric-blue text-surface-white font-label-bold text-label-bold px-6 py-3 rounded-lg hover:scale-[0.98] transition-transform shadow-soft flex items-center gap-2 w-full md:w-auto justify-center">
-        <span class="material-symbols-outlined">account_balance_wallet</span>
-        Tarik Dana
-      </button>
+      <RouterLink
+        to="/requests"
+        class="bg-electric-blue text-surface-white font-label-bold text-label-bold px-6 py-3 rounded-lg hover:scale-[0.98] transition-transform shadow-soft flex items-center gap-2 w-full md:w-auto justify-center"
+      >
+        <span class="material-symbols-outlined">add_card</span>
+        Catat Pembayaran
+      </RouterLink>
     </div>
 
-    <!-- Stats Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      <div class="bg-surface-white p-6 rounded-xl shadow-soft hover:shadow-[0_8px_30px_rgba(15,23,42,0.12)] hover:border hover:border-electric-blue transition-all group">
-        <div class="flex items-center justify-between mb-4">
-          <span class="font-label-bold text-label-bold text-secondary">Total Penghasilan</span>
-          <span class="material-symbols-outlined text-electric-blue bg-primary-fixed/30 p-2 rounded-lg group-hover:bg-primary-fixed/50 transition-colors">account_balance</span>
-        </div>
-        <div class="text-headline-lg font-headline-lg text-on-surface mb-1">{{ formatRupiah(stats.totalEarnings) }}</div>
-        <div class="font-label-sm text-label-sm text-success-green flex items-center gap-1">
-          <span class="material-symbols-outlined text-[14px]">trending_up</span> {{ stats.completed }} Project Selesai
-        </div>
-      </div>
-
-      <div class="bg-surface-white p-6 rounded-xl shadow-soft hover:shadow-[0_8px_30px_rgba(15,23,42,0.12)] hover:border hover:border-electric-blue transition-all group">
-        <div class="flex items-center justify-between mb-4">
-          <span class="font-label-bold text-label-bold text-secondary">Pembayaran Menunggu</span>
-          <span class="material-symbols-outlined text-electric-blue bg-primary-fixed/30 p-2 rounded-lg group-hover:bg-primary-fixed/50 transition-colors">schedule</span>
-        </div>
-        <div class="text-headline-lg font-headline-lg text-on-surface mb-1">{{ formatRupiah(stats.pending) }}</div>
-        <div class="font-label-sm text-label-sm text-secondary">Dari {{ stats.pendingCount }} project aktif</div>
-      </div>
-
-      <div class="bg-surface-white p-6 rounded-xl shadow-soft hover:shadow-[0_8px_30px_rgba(15,23,42,0.12)] hover:border hover:border-electric-blue transition-all group">
-        <div class="flex items-center justify-between mb-4">
-          <span class="font-label-bold font-label-bold text-secondary">Pendapatan Bulan Ini</span>
-          <span class="material-symbols-outlined text-electric-blue bg-primary-fixed/30 p-2 rounded-lg group-hover:bg-primary-fixed/50 transition-colors">calendar_month</span>
-        </div>
-        <div class="text-headline-lg font-headline-lg text-on-surface mb-1">{{ formatRupiah(stats.monthIncome) }}</div>
-        <div class="font-label-sm text-label-sm text-secondary">Bulan berjalan</div>
-      </div>
-
-      <div class="bg-surface-white p-6 rounded-xl shadow-soft hover:shadow-[0_8px_30px_rgba(15,23,42,0.12)] hover:border hover:border-electric-blue transition-all group">
-        <div class="flex items-center justify-between mb-4">
-          <span class="font-label-bold font-label-bold text-secondary">Tingkat Keberhasilan</span>
-          <span class="material-symbols-outlined text-electric-blue bg-primary-fixed/30 p-2 rounded-lg group-hover:bg-primary-fixed/50 transition-colors">verified</span>
-        </div>
-        <div class="text-headline-lg font-headline-lg text-on-surface mb-1">{{ stats.successRate }}%</div>
-        <div class="font-label-sm text-label-sm text-success-green">{{ stats.completed }} Project Selesai</div>
-      </div>
+    <div v-if="error" class="mb-6 rounded-xl border border-urgency-red/30 bg-error-container p-4 text-sm text-on-error-container">
+      {{ error }}
     </div>
 
-    <!-- Chart Area -->
-    <div class="bg-surface-white p-6 rounded-xl shadow-soft mb-8 border border-border-subtle/50">
-      <div class="flex justify-between items-center mb-6">
-        <h3 class="text-headline-md font-headline-md text-on-surface">Tren Pendapatan</h3>
-        <select class="bg-surface border-border-subtle rounded-lg font-label-sm text-label-sm px-3 py-2 text-secondary focus:ring-electric-blue focus:border-electric-blue">
-          <option>Bulanan</option>
-          <option>Mingguan</option>
-        </select>
-      </div>
-      <div class="w-full h-64 bg-surface-container-low rounded-lg flex items-center justify-center border border-dashed border-outline-variant">
-        <span class="text-secondary font-body-md text-body-md flex items-center gap-2">
-          <span class="material-symbols-outlined">bar_chart</span>
-          Area visualisasi grafik
-        </span>
-      </div>
+    <div v-if="loading" class="p-10 text-center">
+      <span class="material-symbols-outlined animate-spin text-electric-blue text-4xl">progress_activity</span>
     </div>
 
-    <!-- Transaksi Terbaru Table -->
-    <div class="bg-surface-white rounded-xl shadow-soft border border-border-subtle/50 overflow-hidden">
-      <div class="p-6 border-b border-border-subtle flex justify-between items-center">
-        <h3 class="text-headline-md font-headline-md text-on-surface">Transaksi Terbaru</h3>
-        <button class="text-electric-blue font-label-bold text-label-bold hover:underline">Lihat Semua</button>
+    <template v-else>
+      <!-- Stats Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="bg-surface-white p-6 rounded-xl shadow-soft hover:shadow-[0_8px_30px_rgba(15,23,42,0.12)] hover:border hover:border-electric-blue transition-all group">
+          <div class="flex items-center justify-between mb-4">
+            <span class="font-label-bold text-label-bold text-secondary">Omzet Terkonfirmasi</span>
+            <span class="material-symbols-outlined text-electric-blue bg-primary-fixed/30 p-2 rounded-lg group-hover:bg-primary-fixed/50 transition-colors">account_balance</span>
+          </div>
+          <div class="text-headline-lg font-headline-lg text-on-surface mb-1">{{ formatRupiah(stats.gross) }}</div>
+          <div class="font-label-sm text-label-sm text-secondary flex items-center gap-1">
+            <span class="material-symbols-outlined text-[14px]">receipt_long</span> {{ stats.paymentRows }} pembayaran · sebelum refund
+          </div>
+        </div>
+
+        <div class="bg-surface-white p-6 rounded-xl shadow-soft hover:shadow-[0_8px_30px_rgba(15,23,42,0.12)] hover:border hover:border-electric-blue transition-all group">
+          <div class="flex items-center justify-between mb-4">
+            <span class="font-label-bold text-label-bold text-secondary">Komisi Siap Dibayar</span>
+            <span class="material-symbols-outlined text-urgency-red bg-error-container/50 p-2 rounded-lg">pending_actions</span>
+          </div>
+          <div class="text-headline-lg font-headline-lg text-on-surface mb-1">{{ formatRupiah(stats.commissionUnpaid) }}</div>
+          <div class="font-label-sm text-label-sm text-secondary">Baru muncul setelah proyek lunas</div>
+        </div>
+
+        <div class="bg-surface-white p-6 rounded-xl shadow-soft hover:shadow-[0_8px_30px_rgba(15,23,42,0.12)] hover:border hover:border-electric-blue transition-all group">
+          <div class="flex items-center justify-between mb-4">
+            <span class="font-label-bold text-label-bold text-secondary">Komisi Sudah Dibayar</span>
+            <span class="material-symbols-outlined text-success-green bg-success-green/10 p-2 rounded-lg">paid</span>
+          </div>
+          <div class="text-headline-lg font-headline-lg text-on-surface mb-1">{{ formatRupiah(stats.commissionPaid) }}</div>
+          <div class="font-label-sm text-label-sm text-secondary">Dicatat di tabel komisi</div>
+        </div>
+
+        <div class="bg-surface-white p-6 rounded-xl shadow-soft hover:shadow-[0_8px_30px_rgba(15,23,42,0.12)] hover:border hover:border-electric-blue transition-all group">
+          <div class="flex items-center justify-between mb-4">
+            <span class="font-label-bold text-label-bold text-secondary">Sebelum Biaya Lain</span>
+            <span class="material-symbols-outlined text-electric-blue bg-primary-fixed/30 p-2 rounded-lg">trending_up</span>
+          </div>
+          <div class="text-headline-lg font-headline-lg text-on-surface mb-1">{{ formatRupiah(stats.beforeExpense) }}</div>
+          <div class="font-label-sm text-label-sm text-secondary">Omzet − komisi. Belum biaya/pajak.</div>
+        </div>
       </div>
 
-      <div v-if="loading" class="p-10 text-center">
-        <span class="material-symbols-outlined animate-spin text-electric-blue text-4xl">progress_activity</span>
+      <!-- Arus pembayaran -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div class="bg-surface-white p-5 rounded-xl border border-border-subtle">
+          <p class="text-label-sm text-secondary mb-1">Diterima (DP + pelunasan)</p>
+          <p class="text-headline-md font-bold">{{ formatRupiah(summary.paid) }}</p>
+        </div>
+        <div class="bg-surface-white p-5 rounded-xl border border-border-subtle">
+          <p class="text-label-sm text-secondary mb-1">Refund tercatat</p>
+          <p class="text-headline-md font-bold text-urgency-red">− {{ formatRupiah(summary.refunded) }}</p>
+        </div>
+        <div class="bg-surface-white p-5 rounded-xl border border-border-subtle">
+          <p class="text-label-sm text-secondary mb-1">Nilai bersih diterima</p>
+          <p class="text-headline-md font-bold text-success-green">{{ formatRupiah(summary.net) }}</p>
+        </div>
       </div>
 
-      <div v-else-if="transactions.length === 0" class="p-10 text-center">
-        <span class="material-symbols-outlined text-5xl text-outline-variant mb-2">account_balance</span>
-        <p class="text-body-md text-secondary">Belum ada transaksi.</p>
-      </div>
+      <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <!-- Payments -->
+        <div class="xl:col-span-2 bg-surface-white rounded-xl shadow-soft border border-border-subtle/50 overflow-hidden">
+          <div class="p-6 border-b border-border-subtle flex justify-between items-center">
+            <h3 class="text-headline-md font-headline-md text-on-surface">Pembayaran Terbaru</h3>
+            <RouterLink to="/requests" class="text-electric-blue font-label-bold text-label-bold hover:underline">Lihat Semua</RouterLink>
+          </div>
 
-      <div v-else class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
-          <thead>
-            <tr class="bg-surface border-b border-border-subtle">
-              <th class="p-4 font-label-sm text-label-sm text-secondary uppercase tracking-wider">ID</th>
-              <th class="p-4 font-label-sm text-label-sm text-secondary uppercase tracking-wider">Customer</th>
-              <th class="p-4 font-label-sm text-label-sm text-secondary uppercase tracking-wider">Project</th>
-              <th class="p-4 font-label-sm text-label-sm text-secondary uppercase tracking-wider">Amount</th>
-              <th class="p-4 font-label-sm text-label-sm text-secondary uppercase tracking-wider">Date</th>
-              <th class="p-4 font-label-sm text-label-sm text-secondary uppercase tracking-wider">Status</th>
-            </tr>
-          </thead>
-          <tbody class="font-body-md text-body-md text-on-surface divide-y divide-border-subtle">
-            <tr v-for="t in transactions" :key="t.id" class="hover:bg-surface-container-low transition-colors">
-              <td class="p-4 font-label-bold text-label-bold text-secondary">{{ t.transaction_no }}</td>
-              <td class="p-4">{{ t.customer_name }}</td>
-              <td class="p-4">{{ t.project_label }}</td>
-              <td class="p-4 font-label-bold text-label-bold">{{ formatRupiah(t.amount) }}</td>
-              <td class="p-4 text-secondary">{{ fmtDate(t.created_at) }}</td>
-              <td class="p-4">
-                <span class="font-label-sm text-label-sm px-2 py-1 rounded-full capitalize" :class="statusClass(t.status)">{{ t.status }}</span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+          <div v-if="payments.length === 0" class="p-10 text-center">
+            <span class="material-symbols-outlined text-5xl text-outline-variant mb-2">account_balance</span>
+            <p class="text-body-md text-secondary">Belum ada pembayaran tercatat.</p>
+            <p class="text-label-sm text-outline mt-1">Buka detail request lalu catat DP atau pelunasan.</p>
+          </div>
+
+          <div v-else class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-surface border-b border-border-subtle">
+                  <th class="p-4 font-label-sm text-label-sm text-secondary uppercase tracking-wider">Order</th>
+                  <th class="p-4 font-label-sm text-label-sm text-secondary uppercase tracking-wider">Jenis</th>
+                  <th class="p-4 font-label-sm text-label-sm text-secondary uppercase tracking-wider">Nominal</th>
+                  <th class="p-4 font-label-sm text-label-sm text-secondary uppercase tracking-wider">Tanggal</th>
+                  <th class="p-4 font-label-sm text-label-sm text-secondary uppercase tracking-wider">Status</th>
+                </tr>
+              </thead>
+              <tbody class="font-body-md text-body-md text-on-surface divide-y divide-border-subtle">
+                <tr v-for="p in visiblePayments" :key="p.id" class="hover:bg-surface-container-low transition-colors">
+                  <td class="p-4 text-sm">
+                    <RouterLink v-if="p.request_id" :to="`/requests/${p.request_id}`" class="font-bold text-electric-blue hover:underline">
+                      {{ p.requests?.order_no || '—' }}
+                    </RouterLink>
+                    <span v-else class="font-bold">—</span>
+                    <span class="block text-[11px] text-secondary truncate">{{ p.requests?.customer_name }}</span>
+                  </td>
+                  <td class="p-4 text-sm">{{ PAYMENT_KIND_LABELS[p.kind] || p.kind }}</td>
+                  <td class="p-4 font-label-bold text-label-bold">{{ formatRupiah(p.amount) }}</td>
+                  <td class="p-4 text-secondary text-sm">{{ fmtDate(p.paid_at || p.created_at) }}</td>
+                  <td class="p-4">
+                    <span class="font-label-sm text-label-sm px-2 py-1 rounded-full" :class="paymentClass(p.status)">
+                      {{ PAYMENT_STATUS_LABELS[p.status] || p.status }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Commissions -->
+        <div class="bg-surface-white rounded-xl shadow-soft border border-border-subtle/50 overflow-hidden">
+          <div class="p-6 border-b border-border-subtle flex justify-between items-center">
+            <h3 class="text-headline-md font-headline-md text-on-surface">Komisi Referral</h3>
+            <RouterLink to="/engineer/partners" class="text-electric-blue font-label-bold text-label-bold hover:underline">Kelola</RouterLink>
+          </div>
+
+          <div v-if="commissions.length === 0" class="p-8 text-center">
+            <span class="material-symbols-outlined text-5xl text-outline-variant mb-2">handshake</span>
+            <p class="text-body-md text-secondary">Belum ada komisi.</p>
+            <p class="text-label-sm text-outline mt-1">Komisi muncul setelah proyek dengan kode referral lunas.</p>
+          </div>
+
+          <ul v-else class="divide-y divide-border-subtle">
+            <li v-for="c in commissions" :key="c.id" class="p-4">
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <p class="font-bold text-sm truncate">{{ c.partners?.full_name || 'Partner' }}</p>
+                  <p class="text-[11px] text-secondary font-mono">{{ c.partners?.referral_code }}</p>
+                  <p class="text-[11px] text-secondary mt-1">
+                    {{ c.requests?.order_no || '—' }} · {{ fmtDate(c.created_at) }}
+                  </p>
+                </div>
+                <div class="text-right shrink-0">
+                  <p class="font-bold text-sm">{{ formatRupiah(c.amount) }}</p>
+                  <span class="inline-block mt-1 text-[10px] px-2 py-0.5 rounded-full" :class="commissionClass(c.status)">
+                    {{ COMMISSION_LABELS[c.status] || c.status }}
+                  </span>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
       </div>
-    </div>
+    </template>
   </SideNav>
 </template>

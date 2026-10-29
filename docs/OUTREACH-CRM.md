@@ -3,6 +3,10 @@
 Modul internal untuk mendata akun angkatan, prospek, antrean DM, klien, proyek,
 pembayaran, dan komisi referral 10%. Bagian dari aplikasi `jokitugasit-vue`.
 
+Dokumen produk, alur kerja, model omzet, dan compliance matrix ada di
+[`PRD-OUTREACH.md`](./PRD-OUTREACH.md). Dokumen ini fokus pada teknis:
+schema, RLS, migration, dan aturan uang.
+
 **Bukan bot.** Tidak ada kredensial Instagram, tidak ada pengiriman DM otomatis,
 tidak ada scraping followers/following. Semua pesan dikirim manual oleh kamu dari
 aplikasi Instagram setelah disalin dari sini.
@@ -23,6 +27,13 @@ penting karena saling bergantung.
 | 5 | `migration-security-hardening.sql` | **wajib** — menutup kebocoran RLS |
 | 6 | `migration-outreach-schema.sql` | target accounts, prospek, template, log |
 | 7 | `migration-money-schema.sql` | payments, commissions, analytics, portal partner |
+| 8 | `migration-payment-flow.sql` | status proyek dari pembayaran, `void_payment` |
+| 9 | `migration-analytics-source.sql` | window analytics, kolom `requests.source` |
+| 10 | `migration-import-batches.sql` | audit import, statistik, konversi prospek |
+| 11 | `migration-referral-integrity.sql` | guard self-referral (nomor WhatsApp) |
+| 12 | `migration-data-rights.sql` | hapus prospek + suppression list |
+| 13 | `migration-project-details.sql` | kolom campus/stack proyek, analytics per kampus |
+| 14 | `migration-hardening.sql` | kode referral acak, bucket privat, chunk import |
 
 > Jika `ig-schema.sql` sudah pernah dijalankan, tetap jalankan nomor 5 karena
 > file itu juga mendefinisikan ulang `is_engineer()`.
@@ -46,6 +57,14 @@ memanggil `select * from requests` dan akan menampilkan halaman kosong.
   menambah permukaan serangan.
 - Pastikan akun engineer punya `profiles.role = 'engineer'`.
 - Backup harian aktif (Database → Backups).
+- Bucket `attachments` sekarang **privat** dengan batas 10 MB (PDF/ZIP/gambar/TXT).
+  Migration mencoba mengubah bucket + policy otomatis. Kalau project Anda belum
+  punya schema `storage` saat migration dijalankan, set manual di Dashboard:
+  bucket private, lalu policy select untuk `authenticated` dengan
+  `public.is_engineer()` dan insert untuk `anon`.
+- Lampiran baru disimpan sebagai **path** dan dibuka lewat signed URL (1 jam).
+  Data lama yang menyimpan URL publik tetap bisa dibuka, tetapi URL publik lama
+  akan berhenti bekerja setelah bucket dijadikan privat.
 
 ## 4. Menjalankan test
 
@@ -66,7 +85,8 @@ server PostgreSQL lokal. Tidak menyentuh Supabase production.
 
 Yang diuji antara lain: anon tidak bisa membaca tabel sensitif, DP tidak
 menghasilkan komisi, dua pembayaran tidak menggandakan komisi, refund mengurangi
-nilai eligible, dan status do-not-contact tidak bisa dilepas oleh import ulang.
+nilai eligible, void pembayaran mengembalikan status proyek, dan status
+do-not-contact tidak bisa dilepas oleh import ulang.
 
 ## 5. Aturan uang (jangan diubah tanpa test)
 
@@ -80,6 +100,25 @@ nilai eligible, dan status do-not-contact tidak bisa dilepas oleh import ulang.
 - `amount = eligible_amount × rate_bps / 10000` (integer division, truncate).
   10% dari Rp333.333 = Rp33.333.
 - `record_payment` idempoten lewat `idempotency_key`. Kirim kunci sama saat retry.
+- **Status `paid` diturunkan dari pembayaran**, bukan dari klik manual. Proyek
+  menjadi `paid` saat nilai bersih (pembayaran − refund) ≥ total. Kalau nilai
+  bersih turun di bawah total dan proyek punya jejak pembayaran, status kembali
+  `working` — refund penuh perlu ditutup manual karena status `cancelled` belum
+  ada di skema.
+- Proyek lama berstatus `paid` **tanpa** baris `payments` tidak pernah diturunkan
+  oleh sinkronisasi ini.
+- Salah input nominal diperbaiki lewat `void_payment(id, alasan)`: baris tidak
+  dihapus, status jadi `VOID`, alasan tersimpan, komisi dihitung ulang.
+- Payout komisi dicatat lewat `mark_commission_paid(id, bukti_url, catatan)`.
+  Bukti dan catatan tersimpan di `commissions.payment_proof` / `note` dan bisa
+  dibuka dari halaman partner. Rekap bisa difilter periode (semua/30 hari/bulan
+  ini) dan diekspor CSV.
+- Data partner (nama, WhatsApp, kampus, e-wallet, catatan) bisa diedit, tetapi
+  **kode referral tidak berubah** supaya atribusi proyek lama tetap sah.
+- **Self-referral ditolak.** Nomor WhatsApp klien dan partner dinormalisasi
+  (`0831...` = `62831...`). Kalau sama, kode referral tidak disimpan saat
+  request masuk, dan `recompute_commission` tidak akan pernah mencocokkan
+  partner tersebut.
 
 ## 6. Aturan prospek
 
@@ -91,6 +130,32 @@ nilai eligible, dan status do-not-contact tidak bisa dilepas oleh import ulang.
 - Antrean DM tidak pernah memuat prospek `DO_NOT_CONTACT` atau `NOT_INTERESTED`.
 - `log_outreach` menolak mencatat pesan ke prospek yang sudah minta jangan
   dihubungi.
+
+## 6b. Import, pagination, dan konversi
+
+- Setiap import lewat `import_prospects_batch(...)` menulis satu baris
+  `import_batches` (nama file, basis izin, jumlah baris, hasil validasi).
+  File mentah tidak disimpan.
+- File besar dikirim per 200 baris dengan `batch_id` yang sama; fungsi
+  mengakumulasi hitungan ke satu baris batch, bukan membuat batch baru.
+- Tabel prospek dipaginasi di server (25/halaman, filter status/kampus/cari
+  ikut di query). Ekspor mengambil semua halaman secara bertahap.
+- Prospek yang sudah sepakat bisa diubah jadi proyek lewat
+  `create_request_from_prospect(...)`: membuat `requests` dengan `source =
+  DIRECT_DM`, menautkan `prospect_id`, dan menandai prospek `CONVERTED`.
+  Prospek DNC ditolak, dan satu prospek hanya bisa dikonversi sekali
+  (unique index pada `requests.prospect_id`).
+- Statistik antrean (`prospect_stats()`) dihitung di database, bukan dari
+  daftar yang sudah diunduh browser.
+- **Hapus prospek** memakai `delete_prospect(id, alasan, suppress)`. Baris
+  prospek + log outreach dihapus, `requests.prospect_id` menjadi null. Kalau
+  `suppress = true`, username masuk `prospect_suppressions` (hanya username +
+  alasan, tanpa nama/kampus/nomor) sehingga import berikutnya melewatinya.
+  Untuk koreksi salah input, pilih `suppress = false`.
+- Akun target bisa diedit dan dihapus dari `/ops/targets`. Menghapus akun tidak
+  menghapus prospek; hanya `source_account_id` yang dikosongkan (FK set null).
+- Proyek punya kolom `campus` dan `stack` yang bisa diisi dari detail request.
+  Konversi prospek mengisi `campus` otomatis dari data prospek.
 
 ## 7. Yang sengaja tidak dibangun
 
@@ -109,7 +174,27 @@ nilai eligible, dan status do-not-contact tidak bisa dilepas oleh import ulang.
 - Tracking: `/track`, memakai RPC `track_request`.
 - Portal partner: `/partner`, memakai RPC `partner_portal` yang hanya
   mengembalikan data partner itu sendiri (tanpa WhatsApp/e-wallet).
-- Dashboard engineer: `/dashboard`, memuat `analytics_overview` + `analytics_funnel`.
+- Dashboard engineer: `/dashboard`, memuat `analytics_overview` +
+  `analytics_funnel` dengan filter periode (semua/30 hari/bulan ini), filter
+  kampus, dan breakdown sumber klien (`DIRECT_DM`, `ADMIN_SHARE`, `REFERRAL`,
+  `INBOUND`, `OTHER`).
+- Pendapatan: `/earnings`, membaca `payments` + `commissions` (bukan tabel
+  `transactions` lama). Detail proyek: `/requests/:id` punya panel pembayaran
+  untuk mencatat DP/pelunasan/refund dan membatalkan salah input.
+
+## 8b. Feature flag
+
+Modul CRM bisa dimatikan tanpa deploy ulang kode atau menghapus data:
+
+```bash
+# Vercel > Project > Settings > Environment Variables
+VITE_ENABLE_CRM=false
+```
+
+Efeknya: menu Antrean DM/Prospek/Akun Target/Template/Partner/Instagram hilang
+dari sidebar, dan route `/ops/*`, `/engineer/partners`, `/ig-leads` dialihkan ke
+`/dashboard`. Website publik, form request, tracking, portal partner, dan
+dashboard utama tetap berjalan. Default (variabel tidak diisi) adalah aktif.
 
 ## 9. Retensi data (kebijakan, bukan otomatis)
 
@@ -119,8 +204,9 @@ Username + kampus + nomor WhatsApp termasuk data pribadi. Usulan kebijakan:
 - Prospek `DO_NOT_CONTACT` disimpan minimal 24 bulan agar suppression tetap
   berlaku, lalu dianonimkan.
 - Data pembayaran/komisi disimpan sesuai kebutuhan pembukuan.
-- Permintaan penghapusan dari individu: hapus baris `prospects` dan tambahkan
-  username ke tabel suppression terpisah bila perlu.
+- Permintaan penghapusan dari individu: gunakan tombol **Hapus** dengan opsi
+  suppression (atau RPC `delete_prospect(id, alasan, true)`), sehingga username
+  tidak muncul lagi walau daftar diimpor ulang.
 
 Ini masih perlu ditinjau terhadap UU PDP 27/2022 dan ketentuan pemasaran
 elektronik yang berlaku. Bukan nasihat hukum.

@@ -1,13 +1,13 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import SideNav from '../components/SideNav.vue'
 import {
-  ACCOUNT_TYPE_LABELS,
   PERMISSION_BASIS_LABELS,
   PROSPECT_STATUS,
-  isValidUsername,
+  getProspectStats,
   listOutreachQueue,
-  listProspects,
+  listProspectCampuses,
+  listProspectsPage,
   listTemplates,
   listTargetAccounts,
   logOutreach,
@@ -25,6 +25,10 @@ const notice = ref('')
 
 const queue = ref([])
 const allProspects = ref([])
+const allTotal = ref(0)
+const allPage = ref(1)
+const allLoading = ref(false)
+const rpcStats = ref({ total: 0, in_queue: 0, contacted: 0, interested: 0, converted: 0, dnc: 0 })
 const templates = ref([])
 const accounts = ref([])
 
@@ -39,9 +43,7 @@ const copied = ref(false)
 
 const statusMeta = (s) => PROSPECT_STATUS[s] || PROSPECT_STATUS.NEW
 
-const campuses = computed(() =>
-  [...new Set([...queue.value, ...allProspects.value].map(p => p.campus).filter(Boolean))].sort()
-)
+const campuses = ref([])
 
 const filteredQueue = computed(() => {
   const q = search.value.trim().toLowerCase()
@@ -53,16 +55,8 @@ const filteredQueue = computed(() => {
   })
 })
 
-const filteredAll = computed(() => {
-  const q = search.value.trim().toLowerCase()
-  return allProspects.value.filter(p => {
-    if (campusFilter.value && p.campus !== campusFilter.value) return false
-    if (statusFilter.value && p.status !== statusFilter.value) return false
-    if (q && !String(p.ig_username).includes(q)
-      && !String(p.display_name || '').toLowerCase().includes(q)) return false
-    return true
-  })
-})
+// Server sudah memfilter; daftar ini hanya menampung hasil halaman yang dimuat.
+const filteredAll = computed(() => allProspects.value)
 
 const selectedTemplate = computed(() =>
   templates.value.find(t => t.id === selectedTemplateId.value) || templates.value[0] || null
@@ -76,35 +70,69 @@ const preview = computed(() => {
   })
 })
 
-const stats = computed(() => {
-  const all = allProspects.value
-  return {
-    queue: queue.value.length,
-    contacted: all.filter(p => p.status === 'CONTACTED').length,
-    interested: all.filter(p => ['INTERESTED_SERVICE', 'INTERESTED_REFERRAL'].includes(p.status)).length,
-    dnc: all.filter(p => p.do_not_contact).length,
-    converted: all.filter(p => p.status === 'CONVERTED').length,
+const stats = computed(() => ({
+  queue: Number(rpcStats.value.in_queue || 0),
+  contacted: Number(rpcStats.value.contacted || 0),
+  interested: Number(rpcStats.value.interested || 0),
+  dnc: Number(rpcStats.value.dnc || 0),
+  converted: Number(rpcStats.value.converted || 0),
+}))
+
+async function loadAll({ reset = true } = {}) {
+  allLoading.value = true
+  if (reset) allPage.value = 1
+  try {
+    const res = await listProspectsPage({
+      page: allPage.value,
+      pageSize: 50,
+      search: search.value,
+      campus: campusFilter.value,
+      status: statusFilter.value,
+    })
+    allTotal.value = res.total
+    allProspects.value = reset ? res.rows : allProspects.value.concat(res.rows)
+  } catch {
+    if (reset) {
+      allProspects.value = []
+      allTotal.value = 0
+    }
+  } finally {
+    allLoading.value = false
   }
+}
+
+function loadMore() {
+  allPage.value += 1
+  loadAll({ reset: false })
+}
+
+let filterTimer = null
+watch([search, campusFilter, statusFilter], () => {
+  clearTimeout(filterTimer)
+  filterTimer = setTimeout(() => loadAll(), 300)
 })
 
 async function load() {
   loading.value = true
   error.value = ''
   try {
-    const [q, all, tpl, acc] = await Promise.all([
+    const [q, tpl, acc, st, campusList] = await Promise.all([
       listOutreachQueue(),
-      listProspects(),
       listTemplates(),
       listTargetAccounts(),
+      getProspectStats(),
+      listProspectCampuses(),
     ])
     queue.value = q
-    allProspects.value = all
     templates.value = tpl
     accounts.value = acc
+    rpcStats.value = st
+    campuses.value = campusList
     if (!selectedTemplateId.value && tpl.length) selectedTemplateId.value = tpl[0].id
+    await loadAll()
   } catch (err) {
     error.value = err.message.includes('relation')
-      ? 'Schema outreach belum dipasang. Jalankan supabase/migration-outreach-schema.sql.'
+      ? 'Schema outreach belum dipasang. Jalankan supabase/migration-outreach-schema.sql dan migration-import-batches.sql.'
       : (err.message || 'Gagal memuat data outreach.')
   } finally {
     loading.value = false
@@ -224,7 +252,7 @@ onMounted(load)
           @click="tab = 'all'"
           :class="tab === 'all' ? 'bg-surface-white shadow text-on-surface' : 'text-on-surface-variant hover:text-on-surface'"
           class="px-5 py-2 rounded-lg font-bold text-sm transition-all">
-          Semua ({{ filteredAll.length }})
+          Semua ({{ allTotal }})
         </button>
       </div>
 
@@ -297,6 +325,20 @@ onMounted(load)
               Profil
             </button>
           </div>
+        </div>
+
+        <div v-if="tab === 'all'" class="text-center pt-1">
+          <button
+            v-if="allProspects.length < allTotal"
+            :disabled="allLoading"
+            @click="loadMore"
+            class="px-4 py-2 rounded-lg border border-outline-variant text-sm font-bold hover:bg-surface-container-low disabled:opacity-50"
+          >
+            {{ allLoading ? 'Memuat...' : `Muat lebih banyak (${allProspects.length}/${allTotal})` }}
+          </button>
+          <p v-else-if="allTotal > 0" class="text-xs text-on-surface-variant">
+            Semua {{ allTotal }} prospek sudah dimuat.
+          </p>
         </div>
       </div>
 

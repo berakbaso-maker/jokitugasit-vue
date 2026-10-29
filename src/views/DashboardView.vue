@@ -1,10 +1,10 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import SideNav from '../components/SideNav.vue'
 import {
-  listRequests, formatRupiah, DEADLINE_LABELS, STATUS_LABELS, CATEGORY_LABELS, waLink,
-  getAnalyticsOverview, getAnalyticsFunnel,
+  listRequests, formatRupiah, DEADLINE_LABELS, STATUS_LABELS, CATEGORY_LABELS, SOURCE_LABELS, waLink,
+  getAnalyticsOverview, getAnalyticsFunnel, getAnalyticsCampuses,
 } from '../lib/api'
 
 const router = useRouter()
@@ -13,6 +13,44 @@ const loading = ref(true)
 const analytics = ref(null)
 const funnel = ref([])
 const analyticsError = ref('')
+const period = ref('all') // all | 30d | month
+const campus = ref('')
+const campusOptions = ref([])
+
+const PERIOD_OPTIONS = [
+  { value: 'all', label: 'Semua' },
+  { value: '30d', label: '30 Hari' },
+  { value: 'month', label: 'Bulan Ini' },
+]
+
+function periodRange() {
+  if (period.value === 'all') return [null, null]
+  const today = new Date()
+  const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  if (period.value === 'month') {
+    return [iso(new Date(today.getFullYear(), today.getMonth(), 1)), iso(today)]
+  }
+  const from = new Date(today)
+  from.setDate(from.getDate() - 29)
+  return [iso(from), iso(today)]
+}
+
+const periodLabel = computed(() =>
+  PERIOD_OPTIONS.find(p => p.value === period.value)?.label || 'Semua'
+)
+
+const sourceRows = computed(() => {
+  const rows = Array.isArray(analytics.value?.source_breakdown)
+    ? [...analytics.value.source_breakdown]
+    : []
+  return rows
+    .map(r => ({ ...r, label: SOURCE_LABELS[r.source] || r.source }))
+    .sort((a, b) => Number(b.projects) - Number(a.projects))
+})
+
+const maxSourceProjects = computed(() =>
+  sourceRows.value.reduce((max, r) => Math.max(max, Number(r.projects) || 0), 0)
+)
 
 const stats = computed(() => {
   const all = requests.value
@@ -43,20 +81,13 @@ const pct = (value) => (value == null ? '—' : `${value.toFixed(1)}%`)
 
 const deadlineColor = (d) => (d === 'hari_ini' ? 'text-urgency-red' : 'text-on-surface')
 
-async function load() {
-  loading.value = true
-  try {
-    requests.value = await listRequests()
-  } catch (err) {
-    console.error(err)
-  } finally {
-    loading.value = false
-  }
-
+async function loadAnalytics() {
+  analyticsError.value = ''
+  const [from, to] = periodRange()
   try {
     const [overview, funnelRows] = await Promise.all([
-      getAnalyticsOverview(),
-      getAnalyticsFunnel(),
+      getAnalyticsOverview(from, to, campus.value || null),
+      getAnalyticsFunnel(from, to, campus.value || null),
     ])
     analytics.value = overview
     funnel.value = funnelRows || []
@@ -68,7 +99,32 @@ async function load() {
   }
 }
 
-onMounted(load)
+async function load() {
+  loading.value = true
+  try {
+    requests.value = await listRequests()
+  } catch (err) {
+    console.error(err)
+  } finally {
+    loading.value = false
+  }
+  await loadAnalytics()
+}
+
+async function loadCampuses() {
+  try {
+    campusOptions.value = await getAnalyticsCampuses()
+  } catch {
+    campusOptions.value = []
+  }
+}
+
+watch([period, campus], loadAnalytics)
+
+onMounted(() => {
+  loadCampuses()
+  load()
+})
 
 function goDetail(id) {
   router.push(`/requests/${id}`)
@@ -133,6 +189,34 @@ const statusClass = (s) => {
           </span>
         </div>
         <div class="text-display-hero-mobile font-headline-md font-extrabold text-on-error-container leading-none">{{ stats.deadlineToday }}</div>
+      </div>
+    </div>
+
+    <!-- Performa: filter periode -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+      <div>
+        <h2 class="text-headline-md font-headline-md font-bold">Performa</h2>
+        <p class="text-label-sm text-secondary">Semua metrik di bawah mengikuti periode yang dipilih.</p>
+      </div>
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+        <select
+          v-model="campus"
+          class="rounded-xl border border-outline-variant bg-surface-white px-3 py-2 text-xs font-bold text-on-surface-variant focus:outline-none focus:ring-2 focus:ring-electric-blue/40"
+        >
+          <option value="">Semua Kampus</option>
+          <option v-for="c in campusOptions" :key="c" :value="c">{{ c }}</option>
+        </select>
+        <div class="flex gap-1 bg-surface-container p-1 rounded-xl w-fit">
+          <button
+            v-for="opt in PERIOD_OPTIONS"
+            :key="opt.value"
+            @click="period = opt.value"
+            :class="period === opt.value ? 'bg-surface-white shadow text-on-surface' : 'text-on-surface-variant hover:text-on-surface'"
+            class="px-4 py-1.5 rounded-lg font-bold text-xs transition-all"
+          >
+            {{ opt.label }}
+          </button>
+        </div>
       </div>
     </div>
 
@@ -208,6 +292,34 @@ const statusClass = (s) => {
           <div>
             <p class="text-[11px] text-secondary">Prospek di antrean</p>
             <p class="font-bold">{{ analytics.prospects_queue }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sumber klien -->
+      <div class="bg-surface-white p-5 rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] lg:col-span-2">
+        <div class="flex items-baseline justify-between mb-1">
+          <h3 class="text-body-lg font-bold">Sumber Klien</h3>
+          <span class="text-[11px] text-secondary uppercase tracking-wide">{{ periodLabel }}</span>
+        </div>
+        <p class="text-label-sm text-secondary mb-4">
+          Proyek yang masuk pada periode ini. Omzet = pembayaran terkonfirmasi dari proyek tersebut.
+        </p>
+        <p v-if="!sourceRows.length" class="text-sm text-secondary">Belum ada data sumber.</p>
+        <div v-else class="space-y-3">
+          <div v-for="row in sourceRows" :key="row.source">
+            <div class="flex justify-between items-baseline gap-3 text-sm mb-1">
+              <span class="font-medium truncate">{{ row.label }}</span>
+              <span class="text-secondary text-[11px] text-right shrink-0">
+                {{ row.projects }} proyek · {{ row.completed }} lunas · {{ formatRupiah(row.gross) }}
+              </span>
+            </div>
+            <div class="h-2 rounded-full bg-surface-container overflow-hidden">
+              <div
+                class="h-full rounded-full bg-electric-blue"
+                :style="{ width: maxSourceProjects ? `${(Number(row.projects) / maxSourceProjects) * 100}%` : '0%' }"
+              ></div>
+            </div>
           </div>
         </div>
       </div>

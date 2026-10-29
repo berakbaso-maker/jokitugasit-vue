@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { crmEnabled } from '../lib/features'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -182,6 +183,12 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to) => {
+  // Modul CRM bisa dimatikan lewat VITE_ENABLE_CRM=false. Website publik,
+  // request, tracking, dan dashboard tetap berjalan.
+  if (to.meta.crm && !crmEnabled) {
+    return { name: 'dashboard' }
+  }
+
   if (to.meta.requiresEngineer) {
     const { useAuthStore } = await import('../stores/auth')
     const auth = useAuthStore()
@@ -235,6 +242,13 @@ router.afterEach((to) => {
     settings: 'Settings - jokitugasit.my.id',
     'request-detail': 'Request Detail - jokitugasit.my.id',
     earnings: 'Earnings Dashboard - jokitugasit.my.id',
+    'outreach-queue': 'Antrean DM - jokitugasit.my.id',
+    prospects: 'Prospek - jokitugasit.my.id',
+    'target-accounts': 'Akun Target - jokitugasit.my.id',
+    'dm-templates': 'Template DM - jokitugasit.my.id',
+    'partner-management': 'Partner Referral - jokitugasit.my.id',
+    partner: 'Program Partner Referral - jokitugasit.my.id',
+    'request-track': 'Cek Status Order - jokitugasit.my.id',
   }
   const title = titles[to.name] || 'jokitugasit.my.id - Jasa Bantu Tugas IT'
   document.title = title

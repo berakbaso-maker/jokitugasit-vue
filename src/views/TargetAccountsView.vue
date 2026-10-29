@@ -5,6 +5,7 @@ import {
   ACCOUNT_TYPE_LABELS,
   RELATIONSHIP_LABELS,
   createTargetAccount,
+  deleteTargetAccount,
   isValidUsername,
   listTargetAccounts,
   normalizeUsername,
@@ -16,13 +17,17 @@ const error = ref('')
 const notice = ref('')
 const accounts = ref([])
 
-const showAdd = ref(false)
-const form = ref({
+const showForm = ref(false)
+const editingId = ref(null)
+const formError = ref('')
+const savingForm = ref(false)
+const deletingId = ref('')
+
+const emptyForm = () => ({
   ig_username: '', campus: '', major: '', cohort_year: '',
   account_type: 'COHORT', admin_contact: '', notes: '',
 })
-const addError = ref('')
-const adding = ref(false)
+const form = ref(emptyForm())
 
 const counts = computed(() => ({
   total: accounts.value.length,
@@ -44,16 +49,39 @@ async function load() {
   }
 }
 
-async function addAccount() {
-  addError.value = ''
+function openAdd() {
+  editingId.value = null
+  form.value = emptyForm()
+  formError.value = ''
+  showForm.value = true
+}
+
+function openEdit(account) {
+  editingId.value = account.id
+  form.value = {
+    ig_username: account.ig_username,
+    campus: account.campus || '',
+    major: account.major || '',
+    cohort_year: account.cohort_year || '',
+    account_type: account.account_type || 'COHORT',
+    admin_contact: account.admin_contact || '',
+    notes: account.notes || '',
+  }
+  formError.value = ''
+  showForm.value = true
+}
+
+async function saveAccount() {
+  formError.value = ''
   const username = normalizeUsername(form.value.ig_username)
   if (!isValidUsername(username)) {
-    addError.value = 'Username Instagram tidak valid.'
+    formError.value = 'Username Instagram tidak valid.'
     return
   }
-  adding.value = true
+
+  savingForm.value = true
   try {
-    await createTargetAccount({
+    const payload = {
       ig_username: username,
       instagram_profile_url: `https://instagram.com/${username}/`,
       campus: form.value.campus.trim() || null,
@@ -62,20 +90,45 @@ async function addAccount() {
       account_type: form.value.account_type,
       admin_contact: form.value.admin_contact.trim() || null,
       notes: form.value.notes.trim() || null,
-    })
-    form.value = {
-      ig_username: '', campus: '', major: '', cohort_year: '',
-      account_type: 'COHORT', admin_contact: '', notes: '',
     }
-    showAdd.value = false
-    notice.value = `Akun @${username} ditambahkan.`
+
+    if (editingId.value) {
+      await updateTargetAccount(editingId.value, payload)
+      notice.value = `Akun @${username} diperbarui.`
+    } else {
+      await createTargetAccount(payload)
+      notice.value = `Akun @${username} ditambahkan.`
+    }
+
+    showForm.value = false
+    editingId.value = null
+    form.value = emptyForm()
     await load()
   } catch (err) {
-    addError.value = err.code === '23505'
-      ? 'Akun ini sudah terdaftar.'
-      : (err.message || 'Gagal menambah akun.')
+    formError.value = err.code === '23505'
+      ? 'Username ini sudah dipakai akun lain.'
+      : (err.message || 'Gagal menyimpan akun.')
   } finally {
-    adding.value = false
+    savingForm.value = false
+  }
+}
+
+async function removeAccount(account) {
+  const ok = window.confirm(
+    `Hapus akun target @${account.ig_username}?\n\nProspek yang bersumber dari akun ini tetap ada, tetapi tautan sumbernya dikosongkan.`,
+  )
+  if (!ok) return
+
+  deletingId.value = account.id
+  error.value = ''
+  try {
+    await deleteTargetAccount(account.id)
+    notice.value = `Akun @${account.ig_username} dihapus.`
+    await load()
+  } catch (err) {
+    error.value = err.message || 'Gagal menghapus akun.'
+  } finally {
+    deletingId.value = ''
   }
 }
 
@@ -107,7 +160,7 @@ onMounted(load)
           Akun angkatan/jurusan sebagai <strong>sumber</strong> prospek. Catat izin admin sebelum membagikan apa pun.
         </p>
       </div>
-      <button @click="showAdd = true" class="inline-flex items-center gap-2 bg-electric-blue text-white font-label-bold px-4 py-2.5 rounded-xl hover:bg-primary transition-colors shadow-sm">
+      <button @click="openAdd" class="inline-flex items-center gap-2 bg-electric-blue text-white font-label-bold px-4 py-2.5 rounded-xl hover:bg-primary transition-colors shadow-sm">
         <span class="material-symbols-outlined text-[20px]">add</span>
         Tambah Akun
       </button>
@@ -203,22 +256,35 @@ onMounted(load)
             >
               Menolak
             </button>
+            <button
+              @click="openEdit(a)"
+              class="text-xs font-bold px-3 py-1.5 rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-container-low"
+            >
+              Edit
+            </button>
+            <button
+              :disabled="deletingId === a.id"
+              @click="removeAccount(a)"
+              class="text-xs font-bold px-3 py-1.5 rounded-lg text-urgency-red hover:bg-error-container/50 disabled:opacity-50"
+            >
+              {{ deletingId === a.id ? 'Menghapus...' : 'Hapus' }}
+            </button>
           </div>
         </div>
         <p v-if="a.notes" class="text-xs text-on-surface-variant mt-3 pt-3 border-t border-border-subtle">{{ a.notes }}</p>
       </div>
     </div>
 
-    <!-- Add modal -->
-    <div v-if="showAdd" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4 py-8 overflow-y-auto" @click.self="showAdd = false">
+    <!-- Add / edit modal -->
+    <div v-if="showForm" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4 py-8 overflow-y-auto" @click.self="showForm = false">
       <div class="bg-surface-white rounded-2xl shadow-2xl p-6 w-full max-w-lg">
         <div class="flex items-center justify-between mb-5">
-          <h2 class="font-bold text-lg">Tambah Akun Target</h2>
-          <button @click="showAdd = false" class="text-on-surface-variant hover:text-on-surface">
+          <h2 class="font-bold text-lg">{{ editingId ? 'Edit Akun Target' : 'Tambah Akun Target' }}</h2>
+          <button @click="showForm = false" class="text-on-surface-variant hover:text-on-surface">
             <span class="material-symbols-outlined">close</span>
           </button>
         </div>
-        <form @submit.prevent="addAccount" class="space-y-4">
+        <form @submit.prevent="saveAccount" class="space-y-4">
           <div>
             <label class="text-label-sm text-on-surface-variant block mb-1">Username Instagram *</label>
             <input v-model="form.ig_username" type="text" required placeholder="hmif.kampus.2023" class="w-full rounded-xl border border-outline-variant bg-surface-container-low px-4 py-3 text-sm">
@@ -257,11 +323,11 @@ onMounted(load)
             <label class="text-label-sm text-on-surface-variant block mb-1">Catatan pendekatan</label>
             <textarea v-model="form.notes" rows="2" class="w-full rounded-xl border border-outline-variant bg-surface-container-low px-4 py-3 text-sm resize-none"></textarea>
           </div>
-          <p v-if="addError" class="text-sm text-urgency-red">{{ addError }}</p>
+          <p v-if="formError" class="text-sm text-urgency-red">{{ formError }}</p>
           <div class="flex gap-3 pt-2">
-            <button type="button" @click="showAdd = false" class="flex-1 px-4 py-2.5 rounded-xl border border-outline-variant font-bold text-sm">Batal</button>
-            <button type="submit" :disabled="adding" class="flex-1 px-4 py-2.5 rounded-xl bg-electric-blue text-white font-bold text-sm disabled:opacity-60">
-              {{ adding ? 'Menyimpan...' : 'Simpan' }}
+            <button type="button" @click="showForm = false" class="flex-1 px-4 py-2.5 rounded-xl border border-outline-variant font-bold text-sm">Batal</button>
+            <button type="submit" :disabled="savingForm" class="flex-1 px-4 py-2.5 rounded-xl bg-electric-blue text-white font-bold text-sm disabled:opacity-60">
+              {{ savingForm ? 'Menyimpan...' : (editingId ? 'Simpan Perubahan' : 'Simpan') }}
             </button>
           </div>
         </form>

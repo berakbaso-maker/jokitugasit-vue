@@ -12,6 +12,13 @@
 --   1. migration-security-hardening.sql
 --   2. migration-outreach-schema.sql
 --   3. migration-money-schema.sql
+--   4. migration-payment-flow.sql
+--   5. migration-analytics-source.sql
+--   6. migration-import-batches.sql
+--   7. migration-referral-integrity.sql
+--   8. migration-data-rights.sql
+--   9. migration-project-details.sql
+--  10. migration-hardening.sql
 -- =============================================================
 
 -- ============ migration-security-hardening.sql ============
@@ -1224,3 +1231,1671 @@ select * from (values
    'Baik kak, terima kasih sudah membalas. Saya tidak akan menghubungi lagi terkait penawaran ini. Semoga aktivitasnya lancar ya.', 5)
 ) as t(name, category, body, sort_order)
 where not exists (select 1 from public.dm_templates);
+
+-- ============ migration-payment-flow.sql ============
+
+-- =============================================================
+-- jokitugasit.my.id — Payment flow (Slice 1)
+-- Jalankan SETELAH migration-money-schema.sql.
+--
+-- Tujuan:
+--   1. Status proyek diturunkan dari tabel `payments`, bukan dari klik
+--      "Mark as Paid" yang bisa berbohong.
+--   2. Pembayaran yang salah input bisa dibatalkan (VOID) dengan alasan,
+--      tanpa menghapus baris dan tanpa menghilangkan audit.
+--   3. Data lama berstatus `paid` tanpa baris payments TIDAK disentuh
+--      supaya tidak ada status historis yang tiba-tiba mundur.
+--
+-- Semua pernyataan additive/idempoten.
+-- =============================================================
+
+-- ---------------------------------------------------------------
+-- 0. Audit untuk pembatalan pembayaran
+-- ---------------------------------------------------------------
+alter table public.payments
+  add column if not exists voided_at timestamptz,
+  add column if not exists void_reason text;
+
+-- ---------------------------------------------------------------
+-- 1. Sinkronkan requests.status dengan pembayaran yang benar-benar ada
+-- ---------------------------------------------------------------
+-- Aturan:
+--   * net = (pembayaran CONFIRMED selain REFUND) - (refund CONFIRMED)
+--   * net >= total  -> 'paid'
+--   * status sudah 'paid' tapi net < total dan proyek punya jejak
+--     pembayaran -> 'working' (perlu tindakan manual untuk refund penuh;
+--     status 'cancelled' belum ada di skema).
+--   * proyek tanpa baris payments sama sekali tidak pernah diturunkan.
+create or replace function public.sync_request_payment_status(p_request_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_total    bigint;
+  v_paid     bigint;
+  v_refunded bigint;
+  v_net      bigint;
+  v_status   text;
+  v_has_pay  boolean;
+begin
+  -- Boleh dipanggil engineer, atau proses server/migration (tanpa JWT).
+  if auth.uid() is not null and not public.is_engineer() then
+    raise exception 'AKSES_DITOLAK' using errcode = '42501';
+  end if;
+
+  select greatest(coalesce(quote_amount, 0) - coalesce(discount_amount, 0), 0),
+         status
+    into v_total, v_status
+  from public.requests
+  where id = p_request_id;
+
+  if not found then
+    raise exception 'PROYEK_TIDAK_DITEMUKAN' using errcode = 'P0002';
+  end if;
+
+  select coalesce(sum(amount) filter (where kind <> 'REFUND'), 0),
+         coalesce(sum(amount) filter (where kind = 'REFUND'), 0),
+         count(*) > 0
+    into v_paid, v_refunded, v_has_pay
+  from public.payments
+  where request_id = p_request_id and status = 'CONFIRMED';
+
+  v_net := greatest(v_paid - v_refunded, 0);
+
+  if v_total > 0 and v_net >= v_total then
+    update public.requests set status = 'paid'
+     where id = p_request_id and status <> 'paid';
+  elsif v_status = 'paid' and v_net < v_total and v_has_pay then
+    update public.requests set status = 'working'
+     where id = p_request_id and status = 'paid';
+  end if;
+end;
+$$;
+
+revoke all on function public.sync_request_payment_status(uuid) from public;
+
+-- ---------------------------------------------------------------
+-- 2. record_payment: perilaku lama + sinkron status
+--    (idempotency_key tetap sama; DP tetap belum eligible)
+-- ---------------------------------------------------------------
+create or replace function public.record_payment(
+  p_request_id      uuid,
+  p_kind            text,
+  p_amount          bigint,
+  p_idempotency_key text default null,
+  p_method          text default null,
+  p_proof_url       text default null,
+  p_paid_at         timestamptz default now(),
+  p_note            text default null
+)
+returns public.payments
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_row public.payments%rowtype;
+begin
+  if not public.is_engineer() then
+    raise exception 'AKSES_DITOLAK' using errcode = '42501';
+  end if;
+  if p_kind not in ('DP','SETTLEMENT','REFUND') then
+    raise exception 'JENIS_PEMBAYARAN_TIDAK_VALID' using errcode = '22023';
+  end if;
+  if p_amount is null or p_amount <= 0 then
+    raise exception 'NOMINAL_TIDAK_VALID' using errcode = '22023';
+  end if;
+
+  -- Idempotensi: kirim kunci yang sama dua kali -> kembalikan baris lama.
+  if p_idempotency_key is not null then
+    select * into v_row from public.payments where idempotency_key = p_idempotency_key;
+    if found then
+      perform public.recompute_commission_internal(v_row.request_id);
+      perform public.sync_request_payment_status(v_row.request_id);
+      return v_row;
+    end if;
+  end if;
+
+  insert into public.payments (request_id, kind, amount, status, method,
+                               proof_url, idempotency_key, paid_at, note)
+  values (p_request_id, p_kind, p_amount, 'CONFIRMED', p_method,
+          p_proof_url, p_idempotency_key, p_paid_at, p_note)
+  returning * into v_row;
+
+  perform public.recompute_commission_internal(p_request_id);
+  perform public.sync_request_payment_status(p_request_id);
+  return v_row;
+end;
+$$;
+
+revoke all on function public.record_payment(uuid, text, bigint, text, text, text, timestamptz, text) from public;
+grant execute on function public.record_payment(uuid, text, bigint, text, text, text, timestamptz, text) to authenticated;
+
+-- ---------------------------------------------------------------
+-- 3. void_payment: koreksi salah input, bukan hapus data
+-- ---------------------------------------------------------------
+create or replace function public.void_payment(
+  p_payment_id uuid,
+  p_reason     text
+)
+returns public.payments
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_row public.payments%rowtype;
+begin
+  if not public.is_engineer() then
+    raise exception 'AKSES_DITOLAK' using errcode = '42501';
+  end if;
+  if coalesce(btrim(p_reason), '') = '' then
+    raise exception 'ALASAN_WAJIB' using errcode = '22023';
+  end if;
+
+  select * into v_row from public.payments where id = p_payment_id for update;
+  if not found then
+    raise exception 'PEMBAYARAN_TIDAK_DITEMUKAN' using errcode = 'P0002';
+  end if;
+  if v_row.status <> 'CONFIRMED' then
+    raise exception 'PEMBAYARAN_TIDAK_AKTIF: status % tidak bisa dibatalkan', v_row.status
+      using errcode = '22023';
+  end if;
+
+  update public.payments
+     set status = 'VOID',
+         voided_at = now(),
+         void_reason = btrim(p_reason)
+   where id = p_payment_id
+  returning * into v_row;
+
+  perform public.recompute_commission_internal(v_row.request_id);
+  perform public.sync_request_payment_status(v_row.request_id);
+
+  return v_row;
+end;
+$$;
+
+revoke all on function public.void_payment(uuid, text) from public;
+grant execute on function public.void_payment(uuid, text) to authenticated;
+
+-- ---------------------------------------------------------------
+-- 4. Backfill defensif: proyek yang sudah punya pembayaran penuh tapi
+--    statusnya belum 'paid' (mis. diinput sebelum migration ini).
+--    Tidak menyentuh proyek tanpa baris payments.
+-- ---------------------------------------------------------------
+do $$
+declare
+  v_id uuid;
+begin
+  for v_id in
+    select distinct request_id from public.payments where status = 'CONFIRMED'
+  loop
+    perform public.sync_request_payment_status(v_id);
+  end loop;
+end;
+$$;
+
+-- ============ migration-analytics-source.sql ============
+
+-- =============================================================
+-- jokitugasit.my.id — Analytics window + sumber akuisisi
+-- Jalankan SETELAH migration-payment-flow.sql.
+--
+-- Perbaikan:
+--   1. analytics_overview(...) sebelumnya mengabaikan p_from/p_to untuk
+--      omzet dan komisi (selalu all-time) sementara proyek difilter.
+--      Sekarang semua metrik mengikuti periode yang sama.
+--   2. Tambah kolom requests.source supaya bisa membandingkan kanal
+--      (direct DM, admin share, referral, inbound website).
+--   3. create_public_request mengisi source otomatis dari kode referral.
+--
+-- Additive & idempoten.
+-- =============================================================
+
+-- ---------------------------------------------------------------
+-- 1. Kolom sumber akuisisi
+-- ---------------------------------------------------------------
+alter table public.requests
+  add column if not exists source text;
+
+do $$
+begin
+  alter table public.requests
+    add constraint requests_source_valid check (
+      source is null or source in ('DIRECT_DM','ADMIN_SHARE','REFERRAL','INBOUND','OTHER')
+    );
+exception when duplicate_object then null;
+end $$;
+
+-- Backfill jujur: semua request publik yang punya kode referral valid
+-- dianggap REFERRAL, sisanya INBOUND (form website). Tidak mengarang
+-- kanal yang tidak pernah tercatat.
+update public.requests
+   set source = case when referral_code is not null then 'REFERRAL' else 'INBOUND' end
+ where source is null;
+
+create index if not exists requests_source_idx on public.requests (source, created_at desc);
+
+-- ---------------------------------------------------------------
+-- 2. create_public_request: isi source dari kode referral
+-- ---------------------------------------------------------------
+create or replace function public.create_public_request(
+  p_customer_name text,
+  p_whatsapp      text,
+  p_description   text,
+  p_category      text default 'web',
+  p_deadline      text default 'besok',
+  p_deadline_date date default null,
+  p_link          text default null,
+  p_file_url      text default null,
+  p_email         text default null,
+  p_referral_code text default null
+)
+returns text
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_order_no text;
+  v_ref      text;
+  v_attempt  int := 0;
+begin
+  if coalesce(trim(p_customer_name), '') = '' then
+    raise exception 'NAMA_WAJIB' using errcode = '22023';
+  end if;
+  if coalesce(trim(p_whatsapp), '') = '' then
+    raise exception 'WHATSAPP_WAJIB' using errcode = '22023';
+  end if;
+  if coalesce(trim(p_description), '') = '' then
+    raise exception 'DESKRIPSI_WAJIB' using errcode = '22023';
+  end if;
+  if p_category not in ('web','mobile','desktop','database','ai','debug',
+                        'skripsi','tugas_kuliah','design','lainnya') then
+    raise exception 'KATEGORI_TIDAK_VALID' using errcode = '22023';
+  end if;
+  if p_deadline not in ('hari_ini','besok','fleksibel') then
+    raise exception 'DEADLINE_TIDAK_VALID' using errcode = '22023';
+  end if;
+  if p_deadline = 'fleksibel' and p_deadline_date is null then
+    raise exception 'TANGGAL_WAJIB' using errcode = '22023';
+  end if;
+
+  select upper(trim(p_referral_code)) into v_ref
+  from public.partners
+  where referral_code = upper(trim(coalesce(p_referral_code, '')))
+    and status = 'active';
+  if not found then v_ref := null; end if;
+
+  loop
+    v_attempt := v_attempt + 1;
+    v_order_no := 'JT' || lpad((floor(random() * 900000) + 100000)::int::text, 6, '0');
+    begin
+      insert into public.requests (
+        order_no, customer_name, whatsapp, email, category, description,
+        deadline, deadline_date, link, file_url, referral_code, source,
+        status, quote_amount, internal_notes
+      ) values (
+        v_order_no,
+        trim(p_customer_name),
+        trim(p_whatsapp),
+        nullif(trim(coalesce(p_email, '')), ''),
+        p_category,
+        trim(p_description),
+        p_deadline,
+        case when p_deadline = 'fleksibel' then p_deadline_date end,
+        nullif(trim(coalesce(p_link, '')), ''),
+        nullif(trim(coalesce(p_file_url, '')), ''),
+        v_ref,
+        case when v_ref is null then 'INBOUND' else 'REFERRAL' end,
+        'new',
+        null,
+        null
+      );
+      return v_order_no;
+    exception when unique_violation then
+      if v_attempt >= 8 then
+        raise exception 'GAGAL_MEMBUAT_ORDER' using errcode = '23505';
+      end if;
+    end;
+  end loop;
+end;
+$$;
+
+revoke all on function public.create_public_request(
+  text, text, text, text, text, date, text, text, text, text
+) from public;
+grant execute on function public.create_public_request(
+  text, text, text, text, text, date, text, text, text, text
+) to anon, authenticated;
+
+-- ---------------------------------------------------------------
+-- 3. analytics_overview: satu window untuk semua metrik
+-- ---------------------------------------------------------------
+create or replace function public.analytics_overview(
+  p_from date default null,
+  p_to   date default null
+)
+returns jsonb
+language plpgsql
+stable
+security definer
+set search_path = public
+as $$
+begin
+  if not public.is_engineer() then
+    raise exception 'AKSES_DITOLAK' using errcode = '42501';
+  end if;
+
+  return (
+  with windowed_requests as (
+    select * from public.requests
+    where (p_from is null or created_at >= p_from)
+      and (p_to   is null or created_at <  (p_to + 1))
+  ),
+  windowed_payments as (
+    select * from public.payments
+    where status = 'CONFIRMED'
+      and (p_from is null or coalesce(paid_at, created_at) >= p_from)
+      and (p_to   is null or coalesce(paid_at, created_at) <  (p_to + 1))
+  ),
+  windowed_commissions as (
+    select * from public.commissions
+    where (p_from is null or created_at >= p_from)
+      and (p_to   is null or created_at <  (p_to + 1))
+  ),
+  windowed_prospects as (
+    select * from public.prospects
+    where (p_from is null or created_at >= p_from)
+      and (p_to   is null or created_at <  (p_to + 1))
+  ),
+  windowed_logs as (
+    select * from public.outreach_logs
+    where (p_from is null or sent_at >= p_from)
+      and (p_to   is null or sent_at <  (p_to + 1))
+  ),
+  paid as (
+    select coalesce(sum(amount), 0) as gross
+    from windowed_payments
+    where kind <> 'REFUND'
+  ),
+  commission_totals as (
+    select
+      coalesce(sum(amount) filter (where status = 'PAID'), 0)     as paid,
+      coalesce(sum(amount) filter (where status = 'ELIGIBLE'), 0) as unpaid
+    from windowed_commissions
+  ),
+  by_source as (
+    select
+      coalesce(r.source, 'OTHER') as source,
+      count(distinct r.id) as projects,
+      count(distinct r.id) filter (where r.status = 'paid') as completed,
+      coalesce(sum(p.amount) filter (where p.kind <> 'REFUND'), 0) as gross
+    from windowed_requests r
+    left join public.payments p
+      on p.request_id = r.id and p.status = 'CONFIRMED'
+    group by coalesce(r.source, 'OTHER')
+  )
+  select jsonb_build_object(
+    'target_accounts',    (select count(*) from public.target_accounts),
+    'permission_granted', (select count(*) from public.target_accounts
+                            where relationship_status = 'PERMISSION_GRANTED'),
+    'prospects_total',    (select count(*) from windowed_prospects),
+    'prospects_queue',    (select count(*) from windowed_prospects
+                            where status in ('NEW','READY_TO_REVIEW')),
+    'prospects_dnc',      (select count(*) from windowed_prospects where do_not_contact),
+    'contacts_sent',      (select count(*) from windowed_logs where outcome = 'SENT'),
+    'responses',          (select count(*) from windowed_logs
+                            where outcome in ('REPLIED','INTERESTED_SERVICE',
+                                              'INTERESTED_REFERRAL','NOT_INTERESTED')),
+    'interested',         (select count(*) from windowed_logs
+                            where outcome in ('INTERESTED_SERVICE','INTERESTED_REFERRAL')),
+    'projects_total',     (select count(*) from windowed_requests),
+    'projects_completed', (select count(*) from windowed_requests where status = 'paid'),
+    'gross_confirmed',    (select gross from paid),
+    'commission_paid',    (select paid from commission_totals),
+    'commission_unpaid',  (select unpaid from commission_totals),
+    'active_partners',    (select count(*) from public.partners where status = 'active'),
+    'partners_with_deal', (select count(distinct partner_id) from windowed_commissions
+                            where status in ('ELIGIBLE','PAID')),
+    'source_breakdown',   coalesce(
+      (select jsonb_agg(
+                jsonb_build_object(
+                  'source',    source,
+                  'projects',  projects,
+                  'completed', completed,
+                  'gross',     gross
+                ) order by projects desc, source
+              )
+         from by_source),
+      '[]'::jsonb
+    )
+  ));
+end;
+$$;
+
+revoke all on function public.analytics_overview(date, date) from public;
+grant execute on function public.analytics_overview(date, date) to authenticated;
+
+-- ============ migration-import-batches.sql ============
+
+-- =============================================================
+-- jokitugasit.my.id — Import batch, statistik prospek, konversi klien
+-- Jalankan SETELAH migration-analytics-source.sql.
+--
+--   * import_batches: jejak setiap file/daftar yang diimpor, supaya
+--     sumber data bisa diaudit tanpa menyimpan file mentahnya.
+--   * prospect_stats(): angka untuk halaman antrean tanpa mengunduh
+--     seluruh tabel prospek ke browser.
+--   * create_request_from_prospect(): menghubungkan prospek ke proyek
+--     nyata sehingga atribusi sumber dan omzet bisa dilacak.
+--
+-- Additive & idempoten.
+-- =============================================================
+
+-- ---------------------------------------------------------------
+-- 1. import_batches
+-- ---------------------------------------------------------------
+create table if not exists public.import_batches (
+  id                 uuid primary key default gen_random_uuid(),
+  file_name          text,
+  source_account_id  uuid references public.target_accounts (id) on delete set null,
+  permission_basis   text not null default 'MANUAL_ENTRY'
+                     check (permission_basis in ('MANUAL_ENTRY','ADMIN_SHARED_LIST','INBOUND_OPT_IN')),
+  total_rows         int not null default 0,
+  inserted_count     int,
+  duplicate_in_file  int,
+  duplicate_existing int,
+  invalid_count      int,
+  suppressed_count   int,
+  created_by         uuid,
+  created_at         timestamptz not null default now()
+);
+
+create index if not exists import_batches_created_idx
+  on public.import_batches (created_at desc);
+
+alter table public.import_batches enable row level security;
+
+drop policy if exists import_batches_engineer_all on public.import_batches;
+create policy import_batches_engineer_all on public.import_batches
+  for all to authenticated using (public.is_engineer()) with check (public.is_engineer());
+
+-- FK opsional dari prospects.import_batch_id (data lama null, aman)
+do $$
+begin
+  alter table public.prospects
+    add constraint prospects_import_batch_fk
+    foreign key (import_batch_id) references public.import_batches (id) on delete set null;
+exception when duplicate_object then null;
+end $$;
+
+-- ---------------------------------------------------------------
+-- 2. Import + catat batch dalam satu transaksi
+--    (import_prospects yang lama tetap ada; ini hanya pembungkus)
+-- ---------------------------------------------------------------
+create or replace function public.import_prospects_batch(
+  p_file_name        text,
+  p_rows             jsonb,
+  p_source_account   uuid default null,
+  p_permission_basis text default 'MANUAL_ENTRY',
+  p_batch_id         uuid default null
+)
+returns table (
+  batch_id              uuid,
+  inserted_count        int,
+  duplicate_in_file     int,
+  duplicate_existing    int,
+  invalid_count         int,
+  suppressed_count      int,
+  invalid_samples       text[]
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_batch uuid := coalesce(p_batch_id, gen_random_uuid());
+  v_sum   record;
+begin
+  if not public.is_engineer() then
+    raise exception 'AKSES_DITOLAK' using errcode = '42501';
+  end if;
+  if jsonb_typeof(p_rows) <> 'array' then
+    raise exception 'FORMAT_TIDAK_VALID' using errcode = '22023';
+  end if;
+  if p_permission_basis not in ('MANUAL_ENTRY','ADMIN_SHARED_LIST','INBOUND_OPT_IN') then
+    raise exception 'BASIS_IZIN_TIDAK_VALID' using errcode = '22023';
+  end if;
+
+  insert into public.import_batches (
+    id, file_name, source_account_id, permission_basis, total_rows, created_by
+  ) values (
+    v_batch,
+    nullif(btrim(coalesce(p_file_name, '')), ''),
+    p_source_account,
+    p_permission_basis,
+    jsonb_array_length(p_rows),
+    auth.uid()
+  );
+
+  select * into v_sum
+  from public.import_prospects(p_rows, p_source_account, p_permission_basis, v_batch);
+
+  update public.import_batches ib
+     set inserted_count     = v_sum.inserted_count,
+         duplicate_in_file  = v_sum.duplicate_in_file,
+         duplicate_existing = v_sum.duplicate_existing,
+         invalid_count      = v_sum.invalid_count,
+         suppressed_count   = v_sum.suppressed_count
+   where ib.id = v_batch;
+
+  return query
+    select v_batch, v_sum.inserted_count, v_sum.duplicate_in_file,
+           v_sum.duplicate_existing, v_sum.invalid_count, v_sum.suppressed_count,
+           v_sum.invalid_samples;
+end;
+$$;
+
+revoke all on function public.import_prospects_batch(text, jsonb, uuid, text, uuid) from public;
+grant execute on function public.import_prospects_batch(text, jsonb, uuid, text, uuid) to authenticated;
+
+-- ---------------------------------------------------------------
+-- 3. Statistik prospek (dipakai halaman antrean tanpa full download)
+-- ---------------------------------------------------------------
+create or replace function public.prospect_stats()
+returns table (
+  total       bigint,
+  in_queue    bigint,
+  contacted   bigint,
+  interested  bigint,
+  converted   bigint,
+  dnc         bigint
+)
+language plpgsql
+stable
+security definer
+set search_path = public
+as $$
+begin
+  if not public.is_engineer() then
+    raise exception 'AKSES_DITOLAK' using errcode = '42501';
+  end if;
+
+  return query
+  select
+    count(*),
+    count(*) filter (where status in ('NEW','READY_TO_REVIEW')),
+    count(*) filter (where status = 'CONTACTED'),
+    count(*) filter (where status in ('INTERESTED_SERVICE','INTERESTED_REFERRAL')),
+    count(*) filter (where status = 'CONVERTED'),
+    count(*) filter (where do_not_contact)
+  from public.prospects;
+end;
+$$;
+
+revoke all on function public.prospect_stats() from public;
+grant execute on function public.prospect_stats() to authenticated;
+
+-- ---------------------------------------------------------------
+-- 4. Hubungkan prospek ke proyek nyata
+-- ---------------------------------------------------------------
+alter table public.requests
+  add column if not exists prospect_id uuid references public.prospects (id) on delete set null;
+
+create unique index if not exists requests_prospect_unique
+  on public.requests (prospect_id)
+  where prospect_id is not null;
+
+create or replace function public.create_request_from_prospect(
+  p_prospect_id uuid,
+  p_category    text default 'web',
+  p_description text default null,
+  p_quote       bigint default null
+)
+returns public.requests
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_prospect public.prospects%rowtype;
+  v_row      public.requests%rowtype;
+  v_order_no text;
+  v_attempt  int := 0;
+begin
+  if not public.is_engineer() then
+    raise exception 'AKSES_DITOLAK' using errcode = '42501';
+  end if;
+  if p_category not in ('web','mobile','desktop','database','ai','debug',
+                        'skripsi','tugas_kuliah','design','lainnya') then
+    raise exception 'KATEGORI_TIDAK_VALID' using errcode = '22023';
+  end if;
+  if p_quote is not null and p_quote < 0 then
+    raise exception 'NOMINAL_TIDAK_VALID' using errcode = '22023';
+  end if;
+
+  select * into v_prospect from public.prospects where id = p_prospect_id for update;
+  if not found then
+    raise exception 'PROSPEK_TIDAK_DITEMUKAN' using errcode = 'P0002';
+  end if;
+  if v_prospect.do_not_contact then
+    raise exception 'DNC_LOCKED: prospek ini meminta tidak dihubungi' using errcode = '42501';
+  end if;
+
+  if exists (select 1 from public.requests where prospect_id = p_prospect_id) then
+    raise exception 'PROSPEK_SUDAH_DIKONVERSI' using errcode = '23505';
+  end if;
+
+  loop
+    v_attempt := v_attempt + 1;
+    v_order_no := 'JT' || lpad((floor(random() * 900000) + 100000)::int::text, 6, '0');
+    begin
+      insert into public.requests (
+        order_no, customer_name, category, description, deadline,
+        status, quote_amount, source, prospect_id
+      ) values (
+        v_order_no,
+        coalesce(nullif(btrim(v_prospect.display_name), ''),
+                 '@' || v_prospect.ig_username::text),
+        p_category,
+        coalesce(nullif(btrim(p_description), ''),
+                 'Prospek dari outreach Instagram @' || v_prospect.ig_username::text),
+        'besok',
+        'consultation',
+        p_quote,
+        'DIRECT_DM',
+        p_prospect_id
+      )
+      returning * into v_row;
+      exit;
+    exception when unique_violation then
+      if v_attempt >= 8 then
+        raise exception 'GAGAL_MEMBUAT_ORDER' using errcode = '23505';
+      end if;
+    end;
+  end loop;
+
+  update public.prospects
+     set status = 'CONVERTED'
+   where id = p_prospect_id;
+
+  return v_row;
+end;
+$$;
+
+revoke all on function public.create_request_from_prospect(uuid, text, text, bigint) from public;
+grant execute on function public.create_request_from_prospect(uuid, text, text, bigint) to authenticated;
+
+-- ============ migration-referral-integrity.sql ============
+
+-- =============================================================
+-- jokitugasit.my.id — Integritas referral
+-- Jalankan SETELAH migration-import-batches.sql.
+--
+-- Mencegah self-referral: partner tidak mendapat komisi kalau nomor
+-- WhatsApp klien sama dengan nomor WhatsApp partner (dinormalisasi:
+-- buang non-digit, 0xxx -> 62xxx).
+--
+-- Guard ditegakkan di dua tempat:
+--   1. create_public_request  -> kode tidak disimpan kalau self-referral
+--   2. recompute_commission   -> tidak ada partner yang cocok, jadi
+--      komisi tidak pernah dibuat walau kode sudah terlanjur tersimpan.
+--
+-- Additive & idempoten.
+-- =============================================================
+
+-- ---------------------------------------------------------------
+-- 1. Normalisasi nomor telepon Indonesia
+-- ---------------------------------------------------------------
+create or replace function public.normalize_phone(p text)
+returns text
+language sql
+immutable
+as $$
+  select case
+    when d = '' then ''
+    when left(d, 1) = '0' then '62' || substr(d, 2)
+    when left(d, 2) = '62' then d
+    else d
+  end
+  from (select regexp_replace(coalesce(p, ''), '[^0-9]', '', 'g') as d) s;
+$$;
+
+revoke all on function public.normalize_phone(text) from public;
+grant execute on function public.normalize_phone(text) to authenticated;
+
+-- ---------------------------------------------------------------
+-- 2. create_public_request: tolak atribusi ke nomor partner sendiri
+-- ---------------------------------------------------------------
+create or replace function public.create_public_request(
+  p_customer_name text,
+  p_whatsapp      text,
+  p_description   text,
+  p_category      text default 'web',
+  p_deadline      text default 'besok',
+  p_deadline_date date default null,
+  p_link          text default null,
+  p_file_url      text default null,
+  p_email         text default null,
+  p_referral_code text default null
+)
+returns text
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_order_no text;
+  v_ref      text;
+  v_partner  public.partners%rowtype;
+  v_attempt  int := 0;
+begin
+  if coalesce(trim(p_customer_name), '') = '' then
+    raise exception 'NAMA_WAJIB' using errcode = '22023';
+  end if;
+  if coalesce(trim(p_whatsapp), '') = '' then
+    raise exception 'WHATSAPP_WAJIB' using errcode = '22023';
+  end if;
+  if coalesce(trim(p_description), '') = '' then
+    raise exception 'DESKRIPSI_WAJIB' using errcode = '22023';
+  end if;
+  if p_category not in ('web','mobile','desktop','database','ai','debug',
+                        'skripsi','tugas_kuliah','design','lainnya') then
+    raise exception 'KATEGORI_TIDAK_VALID' using errcode = '22023';
+  end if;
+  if p_deadline not in ('hari_ini','besok','fleksibel') then
+    raise exception 'DEADLINE_TIDAK_VALID' using errcode = '22023';
+  end if;
+  if p_deadline = 'fleksibel' and p_deadline_date is null then
+    raise exception 'TANGGAL_WAJIB' using errcode = '22023';
+  end if;
+
+  select * into v_partner
+  from public.partners
+  where referral_code = upper(trim(coalesce(p_referral_code, '')))
+    and status = 'active';
+
+  if found then
+    -- Self-referral: kode dibuang, bukan disimpan lalu dibatalkan diam-diam.
+    if public.normalize_phone(v_partner.whatsapp) = public.normalize_phone(p_whatsapp) then
+      v_ref := null;
+    else
+      v_ref := v_partner.referral_code;
+    end if;
+  else
+    v_ref := null;
+  end if;
+
+  loop
+    v_attempt := v_attempt + 1;
+    v_order_no := 'JT' || lpad((floor(random() * 900000) + 100000)::int::text, 6, '0');
+    begin
+      insert into public.requests (
+        order_no, customer_name, whatsapp, email, category, description,
+        deadline, deadline_date, link, file_url, referral_code, source,
+        status, quote_amount, internal_notes
+      ) values (
+        v_order_no,
+        trim(p_customer_name),
+        trim(p_whatsapp),
+        nullif(trim(coalesce(p_email, '')), ''),
+        p_category,
+        trim(p_description),
+        p_deadline,
+        case when p_deadline = 'fleksibel' then p_deadline_date end,
+        nullif(trim(coalesce(p_link, '')), ''),
+        nullif(trim(coalesce(p_file_url, '')), ''),
+        v_ref,
+        case when v_ref is null then 'INBOUND' else 'REFERRAL' end,
+        'new',
+        null,
+        null
+      );
+      return v_order_no;
+    exception when unique_violation then
+      if v_attempt >= 8 then
+        raise exception 'GAGAL_MEMBUAT_ORDER' using errcode = '23505';
+      end if;
+    end;
+  end loop;
+end;
+$$;
+
+revoke all on function public.create_public_request(
+  text, text, text, text, text, date, text, text, text, text
+) from public;
+grant execute on function public.create_public_request(
+  text, text, text, text, text, date, text, text, text, text
+) to anon, authenticated;
+
+-- ---------------------------------------------------------------
+-- 3. recompute_commission_internal: partner yang nomornya sama
+--    dengan klien tidak pernah cocok
+-- ---------------------------------------------------------------
+create or replace function public.recompute_commission_internal(p_request_id uuid)
+returns public.commissions
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_req        public.requests%rowtype;
+  v_partner_id uuid;
+  v_paid       bigint;
+  v_refunded   bigint;
+  v_total      bigint;
+  v_eligible   bigint;
+  v_row        public.commissions%rowtype;
+begin
+  select * into v_req from public.requests where id = p_request_id;
+  if not found then
+    raise exception 'PROYEK_TIDAK_DITEMUKAN' using errcode = 'P0002';
+  end if;
+
+  select id into v_partner_id
+  from public.partners
+  where referral_code = upper(trim(coalesce(v_req.referral_code, '')))
+    and status = 'active'
+    and public.normalize_phone(whatsapp) <> public.normalize_phone(coalesce(v_req.whatsapp, ''));
+
+  if v_partner_id is null then
+    update public.commissions
+       set status = 'VOID', eligible_amount = 0, updated_at = now()
+     where request_id = p_request_id
+       and status in ('PENDING','ELIGIBLE');
+    select * into v_row from public.commissions where request_id = p_request_id;
+    return v_row;
+  end if;
+
+  select coalesce(sum(amount), 0) into v_paid
+  from public.payments
+  where request_id = p_request_id and status = 'CONFIRMED' and kind <> 'REFUND';
+
+  select coalesce(sum(amount), 0) into v_refunded
+  from public.payments
+  where request_id = p_request_id and status = 'CONFIRMED' and kind = 'REFUND';
+
+  v_total := greatest(coalesce(v_req.quote_amount, 0) - coalesce(v_req.discount_amount, 0), 0);
+
+  if v_total > 0 and v_paid >= v_total then
+    v_eligible := greatest(v_total - v_refunded, 0);
+  else
+    v_eligible := 0;
+  end if;
+
+  insert into public.commissions (request_id, partner_id, eligible_amount, status)
+  values (p_request_id, v_partner_id, v_eligible,
+          case
+            when v_eligible > 0 then 'ELIGIBLE'
+            when v_refunded > 0 then 'VOID'
+            else 'PENDING'
+          end)
+  on conflict (request_id) do update
+    set partner_id = excluded.partner_id,
+        status = case
+                   when public.commissions.status = 'PAID' then
+                     case when excluded.eligible_amount <> public.commissions.eligible_amount
+                          then 'ADJUSTMENT' else 'PAID' end
+                   when public.commissions.status = 'ADJUSTMENT' then 'ADJUSTMENT'
+                   else excluded.status
+                 end,
+        eligible_amount = case
+                            when public.commissions.status in ('PAID','ADJUSTMENT')
+                              then public.commissions.eligible_amount
+                            else excluded.eligible_amount
+                          end,
+        updated_at = now()
+  returning * into v_row;
+
+  return v_row;
+end;
+$$;
+
+revoke all on function public.recompute_commission_internal(uuid) from public;
+
+-- ============ migration-data-rights.sql ============
+
+-- =============================================================
+-- jokitugasit.my.id — Data rights (hapus prospek + suppression)
+-- Jalankan SETELAH migration-referral-integrity.sql.
+--
+-- Kenapa ada tabel suppression terpisah:
+--   Menghapus baris prospek saja akan menghilangkan status
+--   do-not-contact. Import berikutnya bisa memunculkan lagi orang yang
+--   sudah minta dihapus. Jadi username disimpan minimal (tanpa nama,
+--   kampus, atau nomor) di `prospect_suppressions`.
+--
+-- Additive & idempoten.
+-- =============================================================
+
+-- ---------------------------------------------------------------
+-- 1. Daftar suppression (data minimal: username saja)
+-- ---------------------------------------------------------------
+create table if not exists public.prospect_suppressions (
+  ig_username citext primary key
+              check (ig_username ~ '^[a-z0-9._]{1,30}$'),
+  reason      text,
+  created_at  timestamptz not null default now(),
+  created_by  uuid
+);
+
+alter table public.prospect_suppressions enable row level security;
+
+drop policy if exists prospect_suppressions_engineer_all on public.prospect_suppressions;
+create policy prospect_suppressions_engineer_all on public.prospect_suppressions
+  for all to authenticated using (public.is_engineer()) with check (public.is_engineer());
+
+-- ---------------------------------------------------------------
+-- 2. Hapus prospek, opsional masukkan ke suppression
+-- ---------------------------------------------------------------
+create or replace function public.delete_prospect(
+  p_prospect_id uuid,
+  p_reason      text,
+  p_suppress    boolean default true
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_row public.prospects%rowtype;
+begin
+  if not public.is_engineer() then
+    raise exception 'AKSES_DITOLAK' using errcode = '42501';
+  end if;
+  if coalesce(btrim(p_reason), '') = '' then
+    raise exception 'ALASAN_WAJIB' using errcode = '22023';
+  end if;
+
+  select * into v_row from public.prospects where id = p_prospect_id for update;
+  if not found then
+    raise exception 'PROSPEK_TIDAK_DITEMUKAN' using errcode = 'P0002';
+  end if;
+
+  -- Prospek DNC selalu disimpan di suppression: menghapusnya tidak boleh
+  -- membuat orang yang menolak bisa diimpor ulang.
+  if p_suppress or v_row.do_not_contact then
+    insert into public.prospect_suppressions (ig_username, reason, created_by)
+    values (v_row.ig_username, btrim(p_reason), auth.uid())
+    on conflict (ig_username) do nothing;
+  end if;
+
+  -- outreach_logs ikut terhapus (on delete cascade);
+  -- requests.prospect_id menjadi null (on delete set null).
+  delete from public.prospects where id = p_prospect_id;
+end;
+$$;
+
+revoke all on function public.delete_prospect(uuid, text, boolean) from public;
+grant execute on function public.delete_prospect(uuid, text, boolean) to authenticated;
+
+-- ---------------------------------------------------------------
+-- 3. import_prospects: lewati username yang ada di suppression
+--    (fungsi lama diganti; perilaku lain tidak berubah)
+-- ---------------------------------------------------------------
+create or replace function public.import_prospects(
+  p_rows         jsonb,
+  p_source_account uuid default null,
+  p_permission_basis text default 'MANUAL_ENTRY',
+  p_batch_id     uuid default null
+)
+returns table (
+  inserted_count        int,
+  duplicate_in_file     int,
+  duplicate_existing    int,
+  invalid_count         int,
+  suppressed_count      int,
+  invalid_samples       text[]
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_row        jsonb;
+  v_username   text;
+  v_seen       text[] := '{}';
+  v_invalid    text[] := '{}';
+  v_ins        int := 0;
+  v_dup_file   int := 0;
+  v_dup_exist  int := 0;
+  v_suppressed int := 0;
+  v_existing   public.prospects%rowtype;
+begin
+  if not public.is_engineer() then
+    raise exception 'AKSES_DITOLAK' using errcode = '42501';
+  end if;
+  if jsonb_typeof(p_rows) <> 'array' then
+    raise exception 'FORMAT_TIDAK_VALID' using errcode = '22023';
+  end if;
+  if p_permission_basis not in ('MANUAL_ENTRY','ADMIN_SHARED_LIST','INBOUND_OPT_IN') then
+    raise exception 'BASIS_IZIN_TIDAK_VALID' using errcode = '22023';
+  end if;
+
+  for v_row in select * from jsonb_array_elements(p_rows) loop
+    v_username := public.normalize_ig_username(v_row ->> 'ig_username');
+
+    if v_username !~ '^[a-z0-9._]{1,30}$' then
+      v_invalid := v_invalid || coalesce(v_row ->> 'ig_username', '');
+      continue;
+    end if;
+
+    if v_username = any (v_seen) then
+      v_dup_file := v_dup_file + 1;
+      continue;
+    end if;
+    v_seen := v_seen || v_username;
+
+    -- Pernah dihapus atas permintaan pemilik data: jangan dibuat lagi.
+    if exists (select 1 from public.prospect_suppressions where ig_username = v_username) then
+      v_suppressed := v_suppressed + 1;
+      continue;
+    end if;
+
+    select * into v_existing from public.prospects where ig_username = v_username;
+
+    if found then
+      v_dup_exist := v_dup_exist + 1;
+
+      if v_existing.do_not_contact then
+        v_suppressed := v_suppressed + 1;
+        -- sengaja tidak mengubah apa pun: DNC harus tetap berlaku
+        continue;
+      end if;
+
+      update public.prospects set
+        display_name      = coalesce(display_name, nullif(btrim(coalesce(v_row ->> 'display_name', '')), '')),
+        campus            = coalesce(campus, nullif(btrim(coalesce(v_row ->> 'campus', '')), '')),
+        cohort_year       = coalesce(cohort_year, nullif(v_row ->> 'cohort_year', '')::int),
+        source_account_id = coalesce(source_account_id, p_source_account)
+      where id = v_existing.id;
+      continue;
+    end if;
+
+    insert into public.prospects (
+      ig_username, display_name, campus, cohort_year, permission_basis,
+      source_account_id, import_batch_id, collected_at
+    ) values (
+      v_username,
+      nullif(btrim(coalesce(v_row ->> 'display_name', '')), ''),
+      nullif(btrim(coalesce(v_row ->> 'campus', '')), ''),
+      nullif(v_row ->> 'cohort_year', '')::int,
+      p_permission_basis,
+      p_source_account,
+      p_batch_id,
+      now()
+    );
+    v_ins := v_ins + 1;
+  end loop;
+
+  return query select v_ins, v_dup_file, v_dup_exist, coalesce(array_length(v_invalid, 1), 0),
+                      v_suppressed, v_invalid;
+end;
+$$;
+
+revoke all on function public.import_prospects(jsonb, uuid, text, uuid) from public;
+grant execute on function public.import_prospects(jsonb, uuid, text, uuid) to authenticated;
+
+-- ============ migration-project-details.sql ============
+
+-- =============================================================
+-- jokitugasit.my.id — Detail proyek + analytics per kampus
+-- Jalankan SETELAH migration-data-rights.sql.
+--
+--   * requests.campus  -> dimensi kampus untuk proyek/omzet
+--   * requests.stack   -> stack teknologi yang dipakai proyek
+--   * analytics_overview & analytics_funnel menerima p_campus
+--   * analytics_campuses() -> daftar kampus untuk dropdown
+--
+-- Additive & idempoten.
+-- =============================================================
+
+-- ---------------------------------------------------------------
+-- 1. Kolom baru (nullable, tidak mengubah data lama)
+-- ---------------------------------------------------------------
+alter table public.requests
+  add column if not exists campus text,
+  add column if not exists stack text;
+
+create index if not exists requests_campus_idx on public.requests (campus, created_at desc);
+
+-- ---------------------------------------------------------------
+-- 2. Konversi prospek mengisi campus otomatis
+-- ---------------------------------------------------------------
+create or replace function public.create_request_from_prospect(
+  p_prospect_id uuid,
+  p_category    text default 'web',
+  p_description text default null,
+  p_quote       bigint default null
+)
+returns public.requests
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_prospect public.prospects%rowtype;
+  v_row      public.requests%rowtype;
+  v_order_no text;
+  v_attempt  int := 0;
+begin
+  if not public.is_engineer() then
+    raise exception 'AKSES_DITOLAK' using errcode = '42501';
+  end if;
+  if p_category not in ('web','mobile','desktop','database','ai','debug',
+                        'skripsi','tugas_kuliah','design','lainnya') then
+    raise exception 'KATEGORI_TIDAK_VALID' using errcode = '22023';
+  end if;
+  if p_quote is not null and p_quote < 0 then
+    raise exception 'NOMINAL_TIDAK_VALID' using errcode = '22023';
+  end if;
+
+  select * into v_prospect from public.prospects where id = p_prospect_id for update;
+  if not found then
+    raise exception 'PROSPEK_TIDAK_DITEMUKAN' using errcode = 'P0002';
+  end if;
+  if v_prospect.do_not_contact then
+    raise exception 'DNC_LOCKED: prospek ini meminta tidak dihubungi' using errcode = '42501';
+  end if;
+
+  if exists (select 1 from public.requests where prospect_id = p_prospect_id) then
+    raise exception 'PROSPEK_SUDAH_DIKONVERSI' using errcode = '23505';
+  end if;
+
+  loop
+    v_attempt := v_attempt + 1;
+    v_order_no := 'JT' || lpad((floor(random() * 900000) + 100000)::int::text, 6, '0');
+    begin
+      insert into public.requests (
+        order_no, customer_name, category, description, deadline,
+        status, quote_amount, source, prospect_id, campus
+      ) values (
+        v_order_no,
+        coalesce(nullif(btrim(v_prospect.display_name), ''),
+                 '@' || v_prospect.ig_username::text),
+        p_category,
+        coalesce(nullif(btrim(p_description), ''),
+                 'Prospek dari outreach Instagram @' || v_prospect.ig_username::text),
+        'besok',
+        'consultation',
+        p_quote,
+        'DIRECT_DM',
+        p_prospect_id,
+        v_prospect.campus
+      )
+      returning * into v_row;
+      exit;
+    exception when unique_violation then
+      if v_attempt >= 8 then
+        raise exception 'GAGAL_MEMBUAT_ORDER' using errcode = '23505';
+      end if;
+    end;
+  end loop;
+
+  update public.prospects
+     set status = 'CONVERTED'
+   where id = p_prospect_id;
+
+  return v_row;
+end;
+$$;
+
+revoke all on function public.create_request_from_prospect(uuid, text, text, bigint) from public;
+grant execute on function public.create_request_from_prospect(uuid, text, text, bigint) to authenticated;
+
+-- ---------------------------------------------------------------
+-- 3. analytics_overview: tambah p_campus
+-- ---------------------------------------------------------------
+drop function if exists public.analytics_overview(date, date);
+
+create or replace function public.analytics_overview(
+  p_from   date default null,
+  p_to     date default null,
+  p_campus text default null
+)
+returns jsonb
+language plpgsql
+stable
+security definer
+set search_path = public
+as $$
+begin
+  if not public.is_engineer() then
+    raise exception 'AKSES_DITOLAK' using errcode = '42501';
+  end if;
+
+  return (
+  with windowed_requests as (
+    select * from public.requests r
+    where (p_from is null or r.created_at >= p_from)
+      and (p_to   is null or r.created_at <  (p_to + 1))
+      and (p_campus is null or r.campus = p_campus)
+  ),
+  windowed_payments as (
+    select p.* from public.payments p
+    join public.requests r on r.id = p.request_id
+    where p.status = 'CONFIRMED'
+      and (p_from is null or coalesce(p.paid_at, p.created_at) >= p_from)
+      and (p_to   is null or coalesce(p.paid_at, p.created_at) <  (p_to + 1))
+      and (p_campus is null or r.campus = p_campus)
+  ),
+  windowed_commissions as (
+    select c.* from public.commissions c
+    join public.requests r on r.id = c.request_id
+    where (p_from is null or c.created_at >= p_from)
+      and (p_to   is null or c.created_at <  (p_to + 1))
+      and (p_campus is null or r.campus = p_campus)
+  ),
+  windowed_prospects as (
+    select * from public.prospects
+    where (p_from is null or created_at >= p_from)
+      and (p_to   is null or created_at <  (p_to + 1))
+      and (p_campus is null or campus = p_campus)
+  ),
+  windowed_logs as (
+    select l.* from public.outreach_logs l
+    join public.prospects pr on pr.id = l.prospect_id
+    where (p_from is null or l.sent_at >= p_from)
+      and (p_to   is null or l.sent_at <  (p_to + 1))
+      and (p_campus is null or pr.campus = p_campus)
+  ),
+  paid as (
+    select coalesce(sum(amount), 0) as gross
+    from windowed_payments
+    where kind <> 'REFUND'
+  ),
+  commission_totals as (
+    select
+      coalesce(sum(amount) filter (where status = 'PAID'), 0)     as paid,
+      coalesce(sum(amount) filter (where status = 'ELIGIBLE'), 0) as unpaid
+    from windowed_commissions
+  ),
+  by_source as (
+    select
+      coalesce(r.source, 'OTHER') as source,
+      count(distinct r.id) as projects,
+      count(distinct r.id) filter (where r.status = 'paid') as completed,
+      coalesce(sum(p.amount) filter (where p.kind <> 'REFUND'), 0) as gross
+    from windowed_requests r
+    left join public.payments p
+      on p.request_id = r.id and p.status = 'CONFIRMED'
+    group by coalesce(r.source, 'OTHER')
+  )
+  select jsonb_build_object(
+    'target_accounts',    (select count(*) from public.target_accounts
+                            where p_campus is null or campus = p_campus),
+    'permission_granted', (select count(*) from public.target_accounts
+                            where relationship_status = 'PERMISSION_GRANTED'
+                              and (p_campus is null or campus = p_campus)),
+    'prospects_total',    (select count(*) from windowed_prospects),
+    'prospects_queue',    (select count(*) from windowed_prospects
+                            where status in ('NEW','READY_TO_REVIEW')),
+    'prospects_dnc',      (select count(*) from windowed_prospects where do_not_contact),
+    'contacts_sent',      (select count(*) from windowed_logs where outcome = 'SENT'),
+    'responses',          (select count(*) from windowed_logs
+                            where outcome in ('REPLIED','INTERESTED_SERVICE',
+                                              'INTERESTED_REFERRAL','NOT_INTERESTED')),
+    'interested',         (select count(*) from windowed_logs
+                            where outcome in ('INTERESTED_SERVICE','INTERESTED_REFERRAL')),
+    'projects_total',     (select count(*) from windowed_requests),
+    'projects_completed', (select count(*) from windowed_requests where status = 'paid'),
+    'gross_confirmed',    (select gross from paid),
+    'commission_paid',    (select paid from commission_totals),
+    'commission_unpaid',  (select unpaid from commission_totals),
+    'active_partners',    (select count(*) from public.partners where status = 'active'),
+    'partners_with_deal', (select count(distinct partner_id) from windowed_commissions
+                            where status in ('ELIGIBLE','PAID')),
+    'source_breakdown',   coalesce(
+      (select jsonb_agg(
+                jsonb_build_object(
+                  'source',    source,
+                  'projects',  projects,
+                  'completed', completed,
+                  'gross',     gross
+                ) order by projects desc, source
+              )
+         from by_source),
+      '[]'::jsonb
+    )
+  ));
+end;
+$$;
+
+revoke all on function public.analytics_overview(date, date, text) from public;
+grant execute on function public.analytics_overview(date, date, text) to authenticated;
+
+-- ---------------------------------------------------------------
+-- 4. analytics_funnel: tambah p_campus
+-- ---------------------------------------------------------------
+drop function if exists public.analytics_funnel(date, date);
+
+create or replace function public.analytics_funnel(
+  p_from   date default null,
+  p_to     date default null,
+  p_campus text default null
+)
+returns table (
+  stage    text,
+  count    bigint,
+  ordering int
+)
+language plpgsql
+stable
+security definer
+set search_path = public
+as $$
+begin
+  if not public.is_engineer() then
+    raise exception 'AKSES_DITOLAK' using errcode = '42501';
+  end if;
+
+  return query
+  with base as (
+    select l.*
+    from public.outreach_logs l
+    join public.prospects pr on pr.id = l.prospect_id
+    where (p_from is null or l.sent_at >= p_from)
+      and (p_to   is null or l.sent_at <  (p_to + 1))
+      and (p_campus is null or pr.campus = p_campus)
+  )
+  select 'Dihubungi', count(*), 1 from base
+  union all
+  select 'Dibalas', count(*) filter (where outcome in
+    ('REPLIED','INTERESTED_SERVICE','INTERESTED_REFERRAL','NOT_INTERESTED')), 2 from base
+  union all
+  select 'Berminat', count(*) filter (where outcome in
+    ('INTERESTED_SERVICE','INTERESTED_REFERRAL')), 3 from base
+  union all
+  select 'Deal', (select count(*) from public.requests r
+                  where r.status in ('working','review','done','paid')
+                    and (p_from is null or r.created_at >= p_from)
+                    and (p_to is null or r.created_at < (p_to + 1))
+                    and (p_campus is null or r.campus = p_campus)), 4
+  order by 3;
+end;
+$$;
+
+revoke all on function public.analytics_funnel(date, date, text) from public;
+grant execute on function public.analytics_funnel(date, date, text) to authenticated;
+
+-- ---------------------------------------------------------------
+-- 5. Daftar kampus untuk dropdown dashboard
+-- ---------------------------------------------------------------
+create or replace function public.analytics_campuses()
+returns table (campus text)
+language plpgsql
+stable
+security definer
+set search_path = public
+as $$
+begin
+  if not public.is_engineer() then
+    raise exception 'AKSES_DITOLAK' using errcode = '42501';
+  end if;
+
+  return query
+  select distinct s.c from (
+    select r.campus as c from public.requests r where r.campus is not null
+    union
+    select p.campus as c from public.prospects p where p.campus is not null
+    union
+    select t.campus as c from public.target_accounts t where t.campus is not null
+  ) s
+  where btrim(s.c) <> ''
+  order by 1;
+end;
+$$;
+
+revoke all on function public.analytics_campuses() from public;
+grant execute on function public.analytics_campuses() to authenticated;
+
+-- ============ migration-hardening.sql ============
+
+-- =============================================================
+-- jokitugasit.my.id — Hardening
+-- Jalankan SETELAH migration-project-details.sql.
+--
+--   1. Kode referral baru: 8 karakter acak (bukan REF-NAMA+2 digit).
+--      Kode lama tetap berlaku; rotasi hanya lewat aksi eksplisit.
+--   2. Bucket `attachments` dibuat privat + batas ukuran/tipe.
+--      Frontend menyimpan path dan meminta signed URL saat dibuka.
+--   3. import_prospects_batch bisa menerima beberapa chunk dengan
+--      batch id yang sama (akumulasi, bukan baris baru).
+--
+-- Additive & idempoten.
+-- =============================================================
+
+-- ---------------------------------------------------------------
+-- 1. Generator kode referral
+-- ---------------------------------------------------------------
+create or replace function public.generate_referral_code()
+returns text
+language plpgsql
+volatile
+security definer
+set search_path = public
+as $$
+declare
+  v_alphabet text := 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  v_code     text;
+  v_i        int;
+  v_attempt  int;
+begin
+  for v_attempt in 1..8 loop
+    v_code := 'REF-';
+    for v_i in 1..8 loop
+      v_code := v_code || substr(v_alphabet, floor(random() * length(v_alphabet))::int + 1, 1);
+    end loop;
+
+    if not exists (select 1 from public.partners where referral_code = v_code) then
+      return v_code;
+    end if;
+  end loop;
+
+  raise exception 'GAGAL_MEMBUAT_KODE' using errcode = '23505';
+end;
+$$;
+
+revoke all on function public.generate_referral_code() from public;
+grant execute on function public.generate_referral_code() to authenticated;
+
+-- Rotasi kode: hanya engineer, dan hanya kalau diminta eksplisit.
+create or replace function public.rotate_partner_code(p_partner_id uuid)
+returns text
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_code text;
+begin
+  if not public.is_engineer() then
+    raise exception 'AKSES_DITOLAK' using errcode = '42501';
+  end if;
+  if not exists (select 1 from public.partners where id = p_partner_id) then
+    raise exception 'PARTNER_TIDAK_DITEMUKAN' using errcode = 'P0002';
+  end if;
+
+  v_code := public.generate_referral_code();
+  update public.partners set referral_code = v_code where id = p_partner_id;
+  return v_code;
+end;
+$$;
+
+revoke all on function public.rotate_partner_code(uuid) from public;
+grant execute on function public.rotate_partner_code(uuid) to authenticated;
+
+-- ---------------------------------------------------------------
+-- 2. Storage: bucket privat + batas file
+--    Aman dijalankan di database tanpa schema storage (test lokal).
+-- ---------------------------------------------------------------
+do $$
+begin
+  if exists (select 1 from pg_tables where schemaname = 'storage' and tablename = 'buckets') then
+    update storage.buckets
+       set public = false,
+           file_size_limit = 10485760, -- 10 MB
+           allowed_mime_types = array[
+             'application/pdf',
+             'application/zip',
+             'application/x-zip-compressed',
+             'image/png',
+             'image/jpeg',
+             'image/webp',
+             'text/plain'
+           ]::text[]
+     where id = 'attachments';
+  end if;
+end $$;
+
+do $$
+begin
+  if exists (select 1 from pg_tables where schemaname = 'storage' and tablename = 'objects') then
+    execute 'drop policy if exists "attachments_public_read" on storage.objects';
+    execute 'drop policy if exists "attachments_anon_upload" on storage.objects';
+    execute 'drop policy if exists "attachments_engineer_read" on storage.objects';
+
+    execute $sql$create policy "attachments_anon_upload" on storage.objects
+      for insert to anon
+      with check (bucket_id = 'attachments')$sql$;
+
+    execute $sql$create policy "attachments_engineer_read" on storage.objects
+      for select to authenticated
+      using (bucket_id = 'attachments' and public.is_engineer())$sql$;
+  end if;
+end $$;
+
+-- ---------------------------------------------------------------
+-- 4. Pendaftaran partner publik (menggantikan insert langsung yang
+--    selalu ditolak RLS). Kode dibuat di server.
+-- ---------------------------------------------------------------
+create or replace function public.register_partner(
+  p_full_name   text,
+  p_whatsapp    text,
+  p_campus      text default null,
+  p_ewallet_info text default null
+)
+returns table (partner_id uuid, referral_code text)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_name  text := btrim(coalesce(p_full_name, ''));
+  v_phone text := public.normalize_phone(p_whatsapp);
+  v_code  text;
+  v_id    uuid;
+begin
+  if char_length(v_name) < 2 or char_length(v_name) > 80 then
+    raise exception 'NAMA_TIDAK_VALID' using errcode = '22023';
+  end if;
+  if char_length(v_phone) < 9 or char_length(v_phone) > 15 then
+    raise exception 'WHATSAPP_TIDAK_VALID' using errcode = '22023';
+  end if;
+  if exists (
+    select 1 from public.partners where public.normalize_phone(whatsapp) = v_phone
+  ) then
+    raise exception 'WHATSAPP_SUDAH_TERDAFTAR' using errcode = '23505';
+  end if;
+
+  v_code := public.generate_referral_code();
+
+  insert into public.partners (full_name, whatsapp, campus, ewallet_info, referral_code, status)
+  values (
+    v_name,
+    v_phone,
+    nullif(btrim(coalesce(p_campus, '')), ''),
+    nullif(btrim(coalesce(p_ewallet_info, '')), ''),
+    v_code,
+    'active'
+  )
+  returning id into v_id;
+
+  return query select v_id, v_code;
+end;
+$$;
+
+revoke all on function public.register_partner(text, text, text, text) from public;
+grant execute on function public.register_partner(text, text, text, text) to anon, authenticated;
+
+-- ---------------------------------------------------------------
+-- 5. Import batch: dukung chunk dengan batch id yang sama
+-- ---------------------------------------------------------------
+create or replace function public.import_prospects_batch(
+  p_file_name        text,
+  p_rows             jsonb,
+  p_source_account   uuid default null,
+  p_permission_basis text default 'MANUAL_ENTRY',
+  p_batch_id         uuid default null
+)
+returns table (
+  batch_id              uuid,
+  inserted_count        int,
+  duplicate_in_file     int,
+  duplicate_existing    int,
+  invalid_count         int,
+  suppressed_count      int,
+  invalid_samples       text[]
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_batch    uuid := coalesce(p_batch_id, gen_random_uuid());
+  v_rows     int;
+  v_continue boolean;
+  v_sum      record;
+begin
+  if not public.is_engineer() then
+    raise exception 'AKSES_DITOLAK' using errcode = '42501';
+  end if;
+  if jsonb_typeof(p_rows) <> 'array' then
+    raise exception 'FORMAT_TIDAK_VALID' using errcode = '22023';
+  end if;
+  if p_permission_basis not in ('MANUAL_ENTRY','ADMIN_SHARED_LIST','INBOUND_OPT_IN') then
+    raise exception 'BASIS_IZIN_TIDAK_VALID' using errcode = '22023';
+  end if;
+
+  v_rows := jsonb_array_length(p_rows);
+  select exists (select 1 from public.import_batches where id = v_batch) into v_continue;
+
+  if not v_continue then
+    insert into public.import_batches (
+      id, file_name, source_account_id, permission_basis, total_rows, created_by
+    ) values (
+      v_batch,
+      nullif(btrim(coalesce(p_file_name, '')), ''),
+      p_source_account,
+      p_permission_basis,
+      0,
+      auth.uid()
+    );
+  end if;
+
+  select * into v_sum
+  from public.import_prospects(p_rows, p_source_account, p_permission_basis, v_batch);
+
+  update public.import_batches ib
+     set total_rows         = ib.total_rows + v_rows,
+         inserted_count     = coalesce(ib.inserted_count, 0) + v_sum.inserted_count,
+         duplicate_in_file  = coalesce(ib.duplicate_in_file, 0) + v_sum.duplicate_in_file,
+         duplicate_existing = coalesce(ib.duplicate_existing, 0) + v_sum.duplicate_existing,
+         invalid_count      = coalesce(ib.invalid_count, 0) + v_sum.invalid_count,
+         suppressed_count   = coalesce(ib.suppressed_count, 0) + v_sum.suppressed_count
+   where ib.id = v_batch;
+
+  return query
+    select v_batch, v_sum.inserted_count, v_sum.duplicate_in_file,
+           v_sum.duplicate_existing, v_sum.invalid_count, v_sum.suppressed_count,
+           v_sum.invalid_samples;
+end;
+$$;
+
+revoke all on function public.import_prospects_batch(text, jsonb, uuid, text, uuid) from public;
+grant execute on function public.import_prospects_batch(text, jsonb, uuid, text, uuid) to authenticated;

@@ -122,14 +122,34 @@ export function buildImportPreview(rawCsv) {
   }
 }
 
+/**
+ * Cegah CSV formula injection: sel yang dimulai dengan = + - @ TAB CR
+ * diberi prefiks apostrof supaya tidak dieksekusi spreadsheet.
+ */
+function neutralizeFormula(value) {
+  const text = value == null ? '' : String(value)
+  return /^[=+\-@\t\r]/.test(text) ? `'${text}` : text
+}
+
 export function toCsv(rows, columns) {
   const escape = (value) => {
-    const s = value == null ? '' : String(value)
+    const s = neutralizeFormula(value)
     return /[",\n]/.test(s) ? `"${s.replaceAll('"', '""')}"` : s
   }
   const lines = [columns.join(',')]
   rows.forEach(row => lines.push(columns.map(c => escape(row[c])).join(',')))
   return lines.join('\n')
+}
+
+/** Pecah baris jadi beberapa payload untuk import bertahap. */
+export function chunkRows(rows, size = 200) {
+  const list = Array.isArray(rows) ? rows : []
+  const perChunk = Math.max(1, Number(size) || 200)
+  const chunks = []
+  for (let i = 0; i < list.length; i += perChunk) {
+    chunks.push(list.slice(i, i + perChunk))
+  }
+  return chunks
 }
 
 export function downloadCsv(filename, content) {

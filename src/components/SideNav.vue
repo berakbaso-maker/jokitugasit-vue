@@ -1,23 +1,26 @@
 <script setup>
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import { crmEnabled } from '../lib/features'
 
 const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
 
-const navItems = [
+const ALL_NAV_ITEMS = [
   { label: 'Dasbor', icon: 'dashboard', to: '/dashboard' },
   { label: 'Permintaan', icon: 'list_alt', to: '/requests' },
-  { label: 'Antrean DM', icon: 'send', to: '/ops/outreach' },
-  { label: 'Prospek', icon: 'group', to: '/ops/prospects' },
-  { label: 'Akun Target', icon: 'school', to: '/ops/targets' },
-  { label: 'Template', icon: 'chat', to: '/ops/templates' },
-  { label: 'Partner', icon: 'group_add', to: '/engineer/partners' },
-  { label: 'Instagram', icon: 'photo_camera', to: '/ig-leads' },
+  { label: 'Antrean DM', icon: 'send', to: '/ops/outreach', crm: true },
+  { label: 'Prospek', icon: 'group', to: '/ops/prospects', crm: true },
+  { label: 'Akun Target', icon: 'school', to: '/ops/targets', crm: true },
+  { label: 'Template', icon: 'chat', to: '/ops/templates', crm: true },
+  { label: 'Partner', icon: 'group_add', to: '/engineer/partners', crm: true },
+  { label: 'Instagram', icon: 'photo_camera', to: '/ig-leads', crm: true },
   { label: 'Pendapatan', icon: 'payments', to: '/earnings' },
   { label: 'Pengaturan', icon: 'settings', to: '/settings' },
 ]
+
+const navItems = ALL_NAV_ITEMS.filter(item => crmEnabled || !item.crm)
 
 const isActive = (to) => route.path.startsWith(to)
 

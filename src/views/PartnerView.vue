@@ -4,8 +4,7 @@ import TopAppBar from '../components/TopAppBar.vue'
 import BottomNavBar from '../components/BottomNavBar.vue'
 import FooterBar from '../components/FooterBar.vue'
 import {
-  createPartner,
-  ensureUniqueReferralCode,
+  registerPartner,
   getPartnerOverview,
   formatRupiah,
   CATEGORY_LABELS,
@@ -112,21 +111,21 @@ async function handleSubmit() {
 
   submitting.value = true
   try {
-    // Kode unik dibuat dengan cek tabrakan, bukan sekadar menebak sekali.
-    const code = await ensureUniqueReferralCode(form.value.full_name)
-
     const waNum = wa.startsWith('0') ? '62' + wa.slice(1) : wa.startsWith('62') ? wa : '62' + wa
-    await createPartner({
-      full_name: form.value.full_name.trim(),
+    // Pendaftaran + pembuatan kode dilakukan di server (RPC), bukan insert
+    // langsung ke tabel yang dilindungi RLS.
+    const result = await registerPartner({
+      fullName: form.value.full_name.trim(),
       whatsapp: waNum,
       campus: form.value.campus.trim() || null,
-      ewallet_info: form.value.ewallet_info.trim() || null,
-      referral_code: code,
+      ewalletInfo: form.value.ewallet_info.trim() || null,
     })
-    generatedCode.value = code
+    generatedCode.value = result.referral_code
     success.value = true
   } catch (err) {
-    errorMsg.value = 'Terjadi kesalahan. Coba lagi atau hubungi engineer via WhatsApp.'
+    errorMsg.value = err.message?.includes('WHATSAPP_SUDAH_TERDAFTAR')
+      ? 'Nomor WhatsApp ini sudah terdaftar sebagai partner. Hubungi engineer jika perlu bantuan.'
+      : 'Terjadi kesalahan. Coba lagi atau hubungi engineer via WhatsApp.'
     console.error(err)
   } finally {
     submitting.value = false

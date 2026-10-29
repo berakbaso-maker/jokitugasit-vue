@@ -1,18 +1,26 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import SideNav from '../components/SideNav.vue'
 import {
   PERMISSION_BASIS_LABELS,
   PROSPECT_STATUS,
   clearDoNotContact,
+  convertProspectToRequest,
   createProspect,
+  deleteProspect,
+  getProspectStats,
+  importProspectsBatch,
   isValidUsername,
-  listProspects,
+  listAllProspects,
+  listImportBatches,
+  listProspectCampuses,
+  listProspectsPage,
   listTargetAccounts,
   normalizeUsername,
 } from '../lib/outreach'
-import { supabase } from '../lib/supabase'
-import { buildImportPreview, downloadCsv, toCsv } from '../lib/csv'
+import { buildImportPreview, chunkRows, downloadCsv, toCsv } from '../lib/csv'
+
+const PAGE_SIZE = 25
 
 const loading = ref(true)
 const error = ref('')
@@ -20,10 +28,18 @@ const notice = ref('')
 
 const prospects = ref([])
 const accounts = ref([])
+const campuses = ref([])
+const stats = ref({ total: 0, dnc: 0 })
+const total = ref(0)
+const page = ref(1)
 
 const search = ref('')
 const statusFilter = ref('')
 const campusFilter = ref('')
+
+const pageCount = computed(() => Math.max(1, Math.ceil(total.value / PAGE_SIZE)))
+const rangeStart = computed(() => (total.value === 0 ? 0 : (page.value - 1) * PAGE_SIZE + 1))
+const rangeEnd = computed(() => Math.min(page.value * PAGE_SIZE, total.value))
 
 // manual add
 const showAdd = ref(false)
@@ -40,43 +56,83 @@ const importBasis = ref('ADMIN_SHARED_LIST')
 const importPreview = ref(null)
 const importResult = ref(null)
 const importing = ref(false)
+const batches = ref([])
+const exporting = ref(false)
 
-const campuses = computed(() =>
-  [...new Set(prospects.value.map(p => p.campus).filter(Boolean))].sort()
-)
-
-const filtered = computed(() => {
-  const q = search.value.trim().toLowerCase()
-  return prospects.value.filter(p => {
-    if (statusFilter.value && p.status !== statusFilter.value) return false
-    if (campusFilter.value && p.campus !== campusFilter.value) return false
-    if (q && !String(p.ig_username).includes(q)
-      && !String(p.display_name || '').toLowerCase().includes(q)) return false
-    return true
-  })
-})
-
-const counts = computed(() => ({
-  total: prospects.value.length,
-  active: prospects.value.filter(p => !p.do_not_contact).length,
-  dnc: prospects.value.filter(p => p.do_not_contact).length,
-}))
+// konversi prospek -> proyek
+const convertTarget = ref(null)
+const convertForm = ref({ category: 'web', description: '', quote: '' })
+const convertError = ref('')
+const converting = ref(false)
+const convertResult = ref(null)
 
 const statusMeta = (s) => PROSPECT_STATUS[s] || PROSPECT_STATUS.NEW
+
+const counts = computed(() => ({
+  total: Number(stats.value.total || 0),
+  active: Number(stats.value.total || 0) - Number(stats.value.dnc || 0),
+  dnc: Number(stats.value.dnc || 0),
+}))
+
+let searchTimer = null
 
 async function load() {
   loading.value = true
   error.value = ''
   try {
-    ;[prospects.value, accounts.value] = await Promise.all([listProspects(), listTargetAccounts()])
+    const [paged, acc, st, campusesList] = await Promise.all([
+      listProspectsPage({
+        page: page.value,
+        pageSize: PAGE_SIZE,
+        search: search.value,
+        status: statusFilter.value,
+        campus: campusFilter.value,
+      }),
+      listTargetAccounts(),
+      getProspectStats(),
+      listProspectCampuses(),
+    ])
+    prospects.value = paged.rows
+    total.value = paged.total
+    accounts.value = acc
+    stats.value = st
+    campuses.value = campusesList
   } catch (err) {
     error.value = err.message.includes('relation')
-      ? 'Schema outreach belum dipasang. Jalankan supabase/migration-outreach-schema.sql.'
+      ? 'Schema outreach belum dipasang. Jalankan supabase/migration-outreach-schema.sql dan migration-import-batches.sql.'
       : (err.message || 'Gagal memuat prospek.')
   } finally {
     loading.value = false
   }
 }
+
+async function loadBatches() {
+  try {
+    batches.value = await listImportBatches(5)
+  } catch {
+    batches.value = []
+  }
+}
+
+function goPage(next) {
+  const target = Math.min(Math.max(1, next), pageCount.value)
+  if (target === page.value) return
+  page.value = target
+  load()
+}
+
+watch([campusFilter, statusFilter], () => {
+  page.value = 1
+  load()
+})
+
+watch(search, () => {
+  clearTimeout(searchTimer)
+  searchTimer = setTimeout(() => {
+    page.value = 1
+    load()
+  }, 350)
+})
 
 async function addProspect() {
   addError.value = ''
@@ -98,6 +154,7 @@ async function addProspect() {
     addForm.value = { ig_username: '', display_name: '', campus: '', cohort_year: '', source_account_id: '' }
     showAdd.value = false
     notice.value = `Prospek @${username} ditambahkan.`
+    page.value = 1
     await load()
   } catch (err) {
     addError.value = err.code === '23505'
@@ -131,20 +188,40 @@ async function commitImport() {
   importing.value = true
   error.value = ''
   try {
-    const { data, error: rpcError } = await supabase.rpc('import_prospects', {
-      p_rows: importPreview.value.rows.map(({ ig_username, display_name, campus, cohort_year }) => ({
+    const payloadRows = importPreview.value.rows.map(
+      ({ ig_username, display_name, campus, cohort_year }) => ({
         ig_username, display_name, campus, cohort_year,
-      })),
-      p_source_account: importSourceAccount.value || null,
-      p_permission_basis: importBasis.value,
-      p_batch_id: null,
-    })
-    if (rpcError) throw rpcError
+      }),
+    )
+    const batchId = typeof crypto !== 'undefined' && crypto.randomUUID
+      ? crypto.randomUUID()
+      : `batch-${Date.now()}`
 
-    const row = Array.isArray(data) ? data[0] : data
-    importResult.value = row
-    notice.value = `Import selesai: ${row.inserted_count} baru, ${row.duplicate_existing} sudah ada, ${row.suppressed_count} dibiarkan jangan-dihubungi.`
-    await load()
+    // Kirim bertahap supaya file besar tidak jadi satu payload raksasa.
+    const totals = {
+      inserted_count: 0, duplicate_in_file: 0, duplicate_existing: 0,
+      invalid_count: 0, suppressed_count: 0,
+    }
+
+    for (const chunk of chunkRows(payloadRows, 200)) {
+      const row = await importProspectsBatch({
+        fileName: importFileName.value || 'tempel-manual',
+        rows: chunk,
+        sourceAccount: importSourceAccount.value || null,
+        permissionBasis: importBasis.value,
+        batchId,
+      })
+      totals.inserted_count += Number(row.inserted_count || 0)
+      totals.duplicate_in_file += Number(row.duplicate_in_file || 0)
+      totals.duplicate_existing += Number(row.duplicate_existing || 0)
+      totals.invalid_count += Number(row.invalid_count || 0)
+      totals.suppressed_count += Number(row.suppressed_count || 0)
+    }
+
+    importResult.value = { ...totals, batch_id: batchId }
+    notice.value = `Import selesai: ${totals.inserted_count} baru, ${totals.duplicate_existing} sudah ada, ${totals.suppressed_count} dibiarkan jangan-dihubungi.`
+    page.value = 1
+    await Promise.all([load(), loadBatches()])
   } catch (err) {
     error.value = err.message || 'Gagal menyimpan hasil import.'
   } finally {
@@ -152,20 +229,34 @@ async function commitImport() {
   }
 }
 
-function exportCsv() {
-  const rows = filtered.value.map(p => ({
-    ig_username: p.ig_username,
-    display_name: p.display_name || '',
-    campus: p.campus || '',
-    cohort_year: p.cohort_year || '',
-    status: p.status,
-    do_not_contact: p.do_not_contact ? 'true' : 'false',
-    permission_basis: p.permission_basis,
-  }))
-  downloadCsv(
-    `prospek-${new Date().toISOString().slice(0, 10)}.csv`,
-    toCsv(rows, ['ig_username', 'display_name', 'campus', 'cohort_year', 'status', 'do_not_contact', 'permission_basis']),
-  )
+async function exportCsv() {
+  exporting.value = true
+  error.value = ''
+  try {
+    const rowsAll = await listAllProspects({
+      search: search.value,
+      status: statusFilter.value,
+      campus: campusFilter.value,
+    })
+    const rows = rowsAll.map(p => ({
+      ig_username: p.ig_username,
+      display_name: p.display_name || '',
+      campus: p.campus || '',
+      cohort_year: p.cohort_year || '',
+      status: p.status,
+      do_not_contact: p.do_not_contact ? 'true' : 'false',
+      permission_basis: p.permission_basis,
+    }))
+    downloadCsv(
+      `prospek-${new Date().toISOString().slice(0, 10)}.csv`,
+      toCsv(rows, ['ig_username', 'display_name', 'campus', 'cohort_year', 'status', 'do_not_contact', 'permission_basis']),
+    )
+    notice.value = `${rows.length} prospek diekspor.`
+  } catch (err) {
+    error.value = err.message || 'Gagal mengekspor prospek.'
+  } finally {
+    exporting.value = false
+  }
 }
 
 async function undoDnc(prospect) {
@@ -182,6 +273,60 @@ async function undoDnc(prospect) {
   }
 }
 
+async function removeProspect(prospect) {
+  const reason = window.prompt(
+    `Alasan menghapus @${prospect.ig_username}? (wajib, dicatat di database)`,
+  )
+  if (!reason || !reason.trim()) return
+
+  const suppress = prospect.do_not_contact
+    ? true
+    : window.confirm(
+      'Masukkan username ke suppression list?\n\nOK = ya, tidak akan muncul lagi saat import (untuk permintaan hapus data).\nBatal = hapus saja tanpa suppression (mis. salah input).',
+    )
+
+  error.value = ''
+  try {
+    await deleteProspect(prospect.id, reason.trim(), { suppress })
+    notice.value = suppress
+      ? `@${prospect.ig_username} dihapus dan masuk suppression list.`
+      : `@${prospect.ig_username} dihapus tanpa suppression.`
+    await load()
+  } catch (err) {
+    error.value = err.message || 'Gagal menghapus prospek.'
+  }
+}
+
+function openConvert(prospect) {
+  convertTarget.value = prospect
+  convertForm.value = { category: 'web', description: '', quote: '' }
+  convertError.value = ''
+  convertResult.value = null
+}
+
+async function submitConvert() {
+  if (!convertTarget.value) return
+  convertError.value = ''
+  converting.value = true
+  try {
+    const row = await convertProspectToRequest({
+      prospectId: convertTarget.value.id,
+      category: convertForm.value.category,
+      description: convertForm.value.description.trim(),
+      quote: convertForm.value.quote,
+    })
+    convertResult.value = row
+    notice.value = `Proyek ${row.order_no} dibuat dari @${convertTarget.value.ig_username}.`
+    await load()
+  } catch (err) {
+    convertError.value = err.message === 'PROSPEK_SUDAH_DIKONVERSI' || err.code === '23505'
+      ? 'Prospek ini sudah punya proyek.'
+      : (err.message || 'Gagal membuat proyek dari prospek.')
+  } finally {
+    converting.value = false
+  }
+}
+
 function closeImport() {
   showImport.value = false
   importCsvText.value = ''
@@ -190,7 +335,9 @@ function closeImport() {
   importResult.value = null
 }
 
-onMounted(load)
+onMounted(async () => {
+  await Promise.all([load(), loadBatches()])
+})
 </script>
 
 <template>
@@ -250,9 +397,9 @@ onMounted(load)
         <option value="">Semua Status</option>
         <option v-for="(meta, key) in PROSPECT_STATUS" :key="key" :value="key">{{ meta.label }}</option>
       </select>
-      <button @click="exportCsv" class="inline-flex items-center gap-2 rounded-xl border border-outline-variant px-4 py-2.5 text-sm font-bold hover:bg-surface-container-low">
+      <button @click="exportCsv" :disabled="exporting" class="inline-flex items-center gap-2 rounded-xl border border-outline-variant px-4 py-2.5 text-sm font-bold hover:bg-surface-container-low disabled:opacity-50">
         <span class="material-symbols-outlined text-[18px]">download</span>
-        Ekspor
+        {{ exporting ? 'Mengekspor...' : 'Ekspor' }}
       </button>
     </div>
 
@@ -260,7 +407,7 @@ onMounted(load)
       <span class="material-symbols-outlined text-[40px] animate-spin">progress_activity</span>
     </div>
 
-    <div v-else-if="filtered.length === 0" class="text-center py-16 bg-surface-white rounded-xl border border-border-subtle">
+    <div v-else-if="prospects.length === 0" class="text-center py-16 bg-surface-white rounded-xl border border-border-subtle">
       <span class="material-symbols-outlined text-[48px] mb-3 block text-on-surface-variant">group</span>
       <p class="font-bold">Belum ada prospek yang cocok.</p>
       <p class="text-sm text-on-surface-variant mt-1">Tambahkan manual atau impor CSV dari daftar berizin.</p>
@@ -279,7 +426,7 @@ onMounted(load)
           </tr>
         </thead>
         <tbody>
-          <tr v-for="p in filtered" :key="p.id" class="border-t border-border-subtle">
+          <tr v-for="p in prospects" :key="p.id" class="border-t border-border-subtle">
             <td class="px-4 py-3">
               <a :href="`https://instagram.com/${p.ig_username}/`" target="_blank" rel="noopener" class="font-bold text-electric-blue hover:underline">
                 @{{ p.ig_username }}
@@ -296,14 +443,108 @@ onMounted(load)
               {{ PERMISSION_BASIS_LABELS[p.permission_basis] || p.permission_basis }}
             </td>
             <td class="px-4 py-3 text-right">
-              <button v-if="p.do_not_contact" @click="undoDnc(p)" class="text-xs font-bold text-on-surface-variant hover:text-on-surface underline">
-                Lepas DNC
-              </button>
-              <span v-else class="text-xs text-on-surface-variant">—</span>
+              <div class="flex items-center justify-end gap-3">
+                <button
+                  v-if="!p.do_not_contact && p.status !== 'CONVERTED'"
+                  @click="openConvert(p)"
+                  class="text-xs font-bold text-electric-blue hover:underline whitespace-nowrap"
+                >
+                  Jadikan Klien
+                </button>
+                <span v-else-if="p.status === 'CONVERTED'" class="text-xs font-bold text-success-green whitespace-nowrap">
+                  Sudah klien
+                </span>
+                <button v-if="p.do_not_contact" @click="undoDnc(p)" class="text-xs font-bold text-on-surface-variant hover:text-on-surface underline whitespace-nowrap">
+                  Lepas DNC
+                </button>
+                <button @click="removeProspect(p)" class="text-xs font-bold text-urgency-red hover:underline whitespace-nowrap">
+                  Hapus
+                </button>
+              </div>
             </td>
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- Pagination -->
+    <div v-if="!loading && total > 0" class="flex items-center justify-between mt-4 text-sm">
+      <p class="text-on-surface-variant">
+        Menampilkan {{ rangeStart }}–{{ rangeEnd }} dari {{ total }} prospek
+      </p>
+      <div class="flex gap-2">
+        <button
+          :disabled="page <= 1"
+          @click="goPage(page - 1)"
+          class="px-4 py-2 rounded-lg border border-outline-variant font-bold disabled:opacity-40 hover:bg-surface-container-low"
+        >
+          Sebelumnya
+        </button>
+        <button
+          :disabled="page >= pageCount"
+          @click="goPage(page + 1)"
+          class="px-4 py-2 rounded-lg border border-outline-variant font-bold disabled:opacity-40 hover:bg-surface-container-low"
+        >
+          Berikutnya
+        </button>
+      </div>
+    </div>
+
+    <!-- Convert modal -->
+    <div v-if="convertTarget" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4" @click.self="convertTarget = null">
+      <div class="bg-surface-white rounded-2xl shadow-2xl p-6 w-full max-w-md">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="font-bold text-lg">Jadikan Klien</h2>
+          <button @click="convertTarget = null" class="text-on-surface-variant hover:text-on-surface">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+        <p class="text-sm text-on-surface-variant mb-4">
+          Prospek <span class="font-bold text-on-surface">@{{ convertTarget.ig_username }}</span>
+          akan diubah jadi proyek baru dan ditandai <span class="font-bold">Jadi Klien</span>.
+          Sumber otomatis <span class="font-mono text-xs">DIRECT_DM</span>.
+        </p>
+
+        <div v-if="convertResult" class="rounded-xl bg-success-green/10 border border-success-green/30 p-4 text-sm">
+          <p class="font-bold mb-1">Proyek {{ convertResult.order_no }} dibuat.</p>
+          <RouterLink :to="`/requests/${convertResult.id}`" class="text-electric-blue font-bold hover:underline">
+            Buka detail proyek →
+          </RouterLink>
+        </div>
+
+        <form v-else @submit.prevent="submitConvert" class="space-y-3">
+          <div>
+            <label class="text-label-sm text-on-surface-variant block mb-1">Kategori</label>
+            <select v-model="convertForm.category" class="w-full rounded-xl border border-outline-variant bg-surface-container-low px-4 py-3 text-sm">
+              <option value="web">Website / Web App</option>
+              <option value="mobile">Aplikasi Mobile</option>
+              <option value="desktop">Aplikasi Desktop</option>
+              <option value="database">Database</option>
+              <option value="ai">AI / Machine Learning</option>
+              <option value="debug">Debug / Benerin Error</option>
+              <option value="skripsi">Skripsi / Tugas Akhir</option>
+              <option value="tugas_kuliah">Tugas Kuliah Dasar</option>
+              <option value="design">Desain UI/UX</option>
+              <option value="lainnya">Lainnya</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-label-sm text-on-surface-variant block mb-1">Kebutuhan (opsional)</label>
+            <textarea v-model="convertForm.description" rows="3" class="w-full rounded-xl border border-outline-variant bg-surface-container-low px-4 py-3 text-sm" placeholder="Ringkasan kebutuhan dari percakapan DM"></textarea>
+          </div>
+          <div>
+            <label class="text-label-sm text-on-surface-variant block mb-1">Quote awal (Rp, opsional)</label>
+            <input v-model="convertForm.quote" type="number" min="0" step="1" class="w-full rounded-xl border border-outline-variant bg-surface-container-low px-4 py-3 text-sm" placeholder="0">
+          </div>
+          <p v-if="convertError" class="text-sm text-urgency-red">{{ convertError }}</p>
+          <div class="flex gap-3 pt-2">
+            <button type="button" @click="convertTarget = null" class="flex-1 px-4 py-2.5 rounded-xl border border-outline-variant font-bold text-sm">Batal</button>
+            <button type="submit" :disabled="converting" class="flex-1 px-4 py-2.5 rounded-xl bg-electric-blue text-white font-bold text-sm disabled:opacity-60">
+              {{ converting ? 'Membuat...' : 'Buat Proyek' }}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
 
     <!-- Add modal -->
@@ -424,12 +665,25 @@ onMounted(load)
 
         <div v-if="importResult" class="rounded-xl bg-success-green/10 border border-success-green/30 p-4 mb-4 text-sm">
           <p class="font-bold mb-1">Import selesai</p>
+          <p class="text-[11px] text-on-surface-variant mb-1 font-mono">batch {{ String(importResult.batch_id).slice(0, 8) }}…</p>
           <ul class="text-xs space-y-0.5 text-on-surface-variant">
             <li>Baru: {{ importResult.inserted_count }}</li>
             <li>Sudah ada: {{ importResult.duplicate_existing }}</li>
             <li>Dilewati karena jangan-dihubungi: {{ importResult.suppressed_count }}</li>
             <li>Duplikat dalam file: {{ importResult.duplicate_in_file }}</li>
             <li>Invalid: {{ importResult.invalid_count }}</li>
+          </ul>
+        </div>
+
+        <div v-if="batches.length" class="rounded-xl border border-border-subtle p-3 mb-4">
+          <p class="text-[11px] uppercase tracking-wide text-on-surface-variant mb-2">Riwayat import</p>
+          <ul class="text-[11px] text-on-surface-variant space-y-1">
+            <li v-for="b in batches" :key="b.id" class="flex justify-between gap-2">
+              <span class="truncate font-mono">{{ b.file_name || '(tanpa nama)' }}</span>
+              <span class="shrink-0">
+                {{ b.inserted_count ?? '—' }}/{{ b.total_rows }} baru · {{ b.permission_basis }}
+              </span>
+            </li>
           </ul>
         </div>
 

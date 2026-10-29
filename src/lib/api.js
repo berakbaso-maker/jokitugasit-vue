@@ -44,15 +44,51 @@ export async function createRequest(payload) {
   return { order_no: data }
 }
 
+const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024
+const ATTACHMENT_EXTENSIONS = ['pdf', 'zip', 'png', 'jpg', 'jpeg', 'webp', 'txt']
+const MIME_BY_EXTENSION = {
+  pdf: 'application/pdf',
+  zip: 'application/zip',
+  png: 'image/png',
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  webp: 'image/webp',
+  txt: 'text/plain',
+}
+
+/**
+ * Upload ke bucket privat. Mengembalikan PATH, bukan URL publik.
+ * Bucket harus privat (lihat migration-hardening.sql); akses dibuka
+ * lewat signed URL saat engineer menekan "Lihat lampiran".
+ */
 export async function uploadAttachment(file) {
-  const ext = file.name.split('.').pop() || 'bin'
+  if (!file) throw new Error('File tidak ditemukan.')
+  if (file.size > MAX_ATTACHMENT_BYTES) {
+    throw new Error('Ukuran file maksimal 10 MB.')
+  }
+
+  const ext = (file.name.split('.').pop() || '').toLowerCase()
+  if (!ATTACHMENT_EXTENSIONS.includes(ext)) {
+    throw new Error('Tipe file tidak didukung. Gunakan PDF, ZIP, gambar, atau TXT.')
+  }
+
+  // Sebagian browser mengosongkan file.type (mis. ZIP); pakai ekstensi.
+  const contentType = file.type || MIME_BY_EXTENSION[ext]
   const path = `requests/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`
   const { error } = await supabase.storage
     .from(ATTACHMENT_BUCKET)
-    .upload(path, file, { cacheControl: '3600', upsert: false })
+    .upload(path, file, { cacheControl: '3600', upsert: false, contentType })
   if (error) throw error
-  const { data: publicUrl } = supabase.storage.from(ATTACHMENT_BUCKET).getPublicUrl(path)
-  return publicUrl.publicUrl
+  return path
+}
+
+/** URL sementara untuk lampiran privat. */
+export async function getAttachmentSignedUrl(path, expiresIn = 3600) {
+  const { data, error } = await supabase.storage
+    .from(ATTACHMENT_BUCKET)
+    .createSignedUrl(path, expiresIn)
+  if (error) throw error
+  return data.signedUrl
 }
 
 /** Validasi kode referral tanpa membuka data partner. */
@@ -87,6 +123,12 @@ export async function updateRequest(id, patch) {
   return data
 }
 
+/**
+ * @deprecated Tabel `transactions` adalah data lama yang tidak lagi ditulis
+ * aplikasi. Sumber kebenaran pendapatan sekarang `payments` + `commissions`
+ * (lihat listPayments/listCommissions dan /earnings). Dipertahankan hanya
+ * supaya data historis masih bisa dibaca manual.
+ */
 export async function listTransactions() {
   const { data, error } = await supabase
     .from('transactions')
@@ -125,6 +167,15 @@ export const STATUS_LABELS = {
   paid: 'Lunas',
 }
 
+/** Kanal masuknya klien. Dipakai untuk membandingkan sumber akuisisi. */
+export const SOURCE_LABELS = {
+  DIRECT_DM: 'Direct DM',
+  ADMIN_SHARE: 'Dibagikan Admin',
+  REFERRAL: 'Referral Partner',
+  INBOUND: 'Website Inbound',
+  OTHER: 'Lainnya / Tidak Diketahui',
+}
+
 export const DEADLINE_LABELS = {
   hari_ini: 'Hari Ini',
   besok: 'Besok',
@@ -154,28 +205,58 @@ export async function updatePartner(id, patch) {
   return data
 }
 
-export function generateReferralCode(name) {
-  const clean = (name || 'partner').replace(/[^a-zA-Z]/g, '').slice(0, 6).toUpperCase()
-  const num = String(Math.floor(10 + Math.random() * 90))
-  return `REF-${clean}${num}`
+export function generateReferralCode() {
+  // Fallback lokal saja; produksi memakai generate_referral_code() di DB.
+  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+  let code = 'REF-'
+  for (let i = 0; i < 8; i += 1) {
+    code += alphabet[Math.floor(Math.random() * alphabet.length)]
+  }
+  return code
 }
 
 /**
  * Pastikan kode unik. Dipakai sebelum insert partner supaya tabrakan
  * tidak berakhir sebagai error database.
  */
-export async function ensureUniqueReferralCode(name) {
+export async function ensureUniqueReferralCode() {
+  // Kode dibuat di database (8 karakter acak) supaya tidak bisa ditebak.
+  const { data, error } = await supabase.rpc('generate_referral_code')
+  if (!error && data) return data
+
+  // Fallback untuk database yang belum menjalankan migration-hardening.
   for (let i = 0; i < 8; i += 1) {
-    const candidate = generateReferralCode(i === 0 ? name : `${name}${Math.random()}`)
-    const { data, error } = await supabase
+    const candidate = generateReferralCode('')
+    const { data: existing, error: lookupError } = await supabase
       .from('partners')
       .select('id')
       .eq('referral_code', candidate)
       .maybeSingle()
-    if (error) throw error
-    if (!data) return candidate
+    if (lookupError) throw lookupError
+    if (!existing) return candidate
   }
   throw new Error('Gagal membuat kode referral unik. Coba lagi.')
+}
+
+/** Rotasi kode partner (kode lama langsung tidak berlaku). */
+export async function rotatePartnerCode(partnerId) {
+  const { data, error } = await supabase.rpc('rotate_partner_code', {
+    p_partner_id: partnerId,
+  })
+  if (error) throw error
+  return data
+}
+
+/** Pendaftaran partner publik; kode dibuat server-side. */
+export async function registerPartner({ fullName, whatsapp, campus = null, ewalletInfo = null }) {
+  const { data, error } = await supabase.rpc('register_partner', {
+    p_full_name: fullName,
+    p_whatsapp: whatsapp,
+    p_campus: campus,
+    p_ewallet_info: ewalletInfo,
+  })
+  if (error) throw error
+  return Array.isArray(data) ? data[0] : data
 }
 
 // ---------- COMMISSIONS ----------
@@ -191,6 +272,8 @@ export async function listCommissions(filters = {}) {
     .order('created_at', { ascending: false })
   if (filters.status) query = query.eq('status', filters.status)
   if (filters.partnerId) query = query.eq('partner_id', filters.partnerId)
+  if (filters.requestId) query = query.eq('request_id', filters.requestId)
+  if (filters.limit) query = query.limit(filters.limit)
   const { data, error } = await query
   if (error) throw error
   return data
@@ -214,9 +297,13 @@ export async function recomputeCommission(requestId) {
 
 // ---------- PAYMENTS ----------
 
-export async function listPayments(requestId = null) {
-  let query = supabase.from('payments').select('*').order('paid_at', { ascending: false })
+export async function listPayments(requestId = null, { limit = null } = {}) {
+  let query = supabase
+    .from('payments')
+    .select('*, requests(order_no, customer_name, category)')
+    .order('paid_at', { ascending: false, nullsFirst: false })
   if (requestId) query = query.eq('request_id', requestId)
+  if (limit) query = query.limit(limit)
   const { data, error } = await query
   if (error) throw error
   return data
@@ -246,18 +333,46 @@ export async function recordPayment({
   return Array.isArray(data) ? data[0] : data
 }
 
+/**
+ * Batalkan pembayaran yang salah input. Baris tidak dihapus; status
+ * jadi VOID + alasan, lalu komisi dan status proyek dihitung ulang
+ * oleh database.
+ */
+export async function voidPayment(paymentId, reason) {
+  const { data, error } = await supabase.rpc('void_payment', {
+    p_payment_id: paymentId,
+    p_reason: reason,
+  })
+  if (error) throw error
+  return Array.isArray(data) ? data[0] : data
+}
+
 // ---------- ANALYTICS ----------
 
-export async function getAnalyticsOverview(from = null, to = null) {
-  const { data, error } = await supabase.rpc('analytics_overview', { p_from: from, p_to: to })
+export async function getAnalyticsOverview(from = null, to = null, campus = null) {
+  const { data, error } = await supabase.rpc('analytics_overview', {
+    p_from: from,
+    p_to: to,
+    p_campus: campus || null,
+  })
   if (error) throw error
   return data
 }
 
-export async function getAnalyticsFunnel(from = null, to = null) {
-  const { data, error } = await supabase.rpc('analytics_funnel', { p_from: from, p_to: to })
+export async function getAnalyticsFunnel(from = null, to = null, campus = null) {
+  const { data, error } = await supabase.rpc('analytics_funnel', {
+    p_from: from,
+    p_to: to,
+    p_campus: campus || null,
+  })
   if (error) throw error
   return data || []
+}
+
+export async function getAnalyticsCampuses() {
+  const { data, error } = await supabase.rpc('analytics_campuses')
+  if (error) throw error
+  return (data || []).map(row => row.campus).filter(Boolean)
 }
 
 /**
