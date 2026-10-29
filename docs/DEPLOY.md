@@ -21,19 +21,34 @@ vercel login
 vercel link          # project jokitugasit-vue
 ```
 
-Migration otomatis butuh connection string Postgres:
+### Kredensial database (untuk migration otomatis)
+
+Script membaca connection string dari **file terpisah**, bukan dari `~/.zshrc`,
+supaya kredensial tidak tercampur dengan konfigurasi shell dan tidak ikut
+ter-share/ter-commit.
+
+Buat sekali:
 
 ```bash
-export SUPABASE_DB_URL="postgresql://postgres.<ref>:<password>@<host>:5432/postgres?sslmode=require"
+mkdir -p ~/.config/jokitugasit
+cat > ~/.config/jokitugasit/db.env <<'EOF'
+SUPABASE_DB_URL="postgresql://postgres.<ref>:<PASSWORD>@<host>:5432/postgres?sslmode=require"
+EOF
+chmod 600 ~/.config/jokitugasit/db.env
 ```
 
-Ambil dari **Supabase → Project Settings → Database → Connection string (URI)**.
-Jangan pernah commit nilai ini. Script hanya mencetaknya dalam bentuk
-`postgresql://***@host`.
+Ambil nilainya dari **Supabase → Project Settings → Database → Connection
+string (URI)**. Ganti `<PASSWORD>` dengan password database Anda.
 
-Alternatif: `make redeploy ARGS="--db-url postgresql://..."`.
+`~/.zshrc` sudah memuat file ini otomatis (blok `jokitugasit deploy env`), dan
+`scripts/redeploy.sh` juga memuatnya sendiri — karena `make` menjalankan
+`/bin/bash` non-interaktif yang **tidak** membaca `~/.zshrc`. Jadi
+`make redeploy` tetap menemukan kredensial walau dijalankan dari Makefile.
 
----
+Lokasi file bisa diganti lewat `DEPLOY_ENV_FILE=/path/lain.env`.
+
+Kalau ingin tanpa file: `make redeploy ARGS="--db-url postgresql://..."` atau
+`SUPABASE_DB_URL="..." make redeploy`.
 
 ## Yang dijalankan script
 
@@ -93,7 +108,7 @@ make redeploy ARGS="--allow-branch"
 | `--skip-deploy` | lewati Vercel + smoke |
 | `--only-db` | hanya migration |
 | `--only-deploy` | build + deploy |
-| `--db-url <url>` | connection string (atau env) |
+| `--db-url <url>` | connection string (atau env / `~/.config/jokitugasit/db.env`) |
 | `--backup` | `pg_dump -Fc` penuh sebelum migration |
 | `--message <text>` | pesan commit |
 | `--allow-branch` | izinkan branch non-main |
@@ -132,4 +147,7 @@ Website publik, form request, tracking, dan portal partner tetap berjalan.
 | `psql tidak ditemukan` | `brew install postgresql` |
 | `Deploy gagal ... fetch failed` | script retry 3×; kalau tetap gagal cek koneksi/Vercel status |
 | Migration sukses tapi fitur error | pastikan frontend yang live adalah build terbaru; cek `vercel inspect` |
+| `Password DB belum diisi` | edit `~/.config/jokitugasit/db.env`, ganti `<PASSWORD>` |
+| `Tidak bisa terhubung ke database` | cek host/region & password; atau `chmod 600` file env |
+| Setelah ganti `.zshrc` tetap tidak terbaca | jalankan `source ~/.zshrc` atau buka terminal baru (tidak berpengaruh ke `make`) |
 | Ingin lihat perintah tanpa eksekusi | `--check` (preflight) atau `--skip-*` sesuai kebutuhan |

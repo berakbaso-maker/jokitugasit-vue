@@ -43,6 +43,7 @@ Opsi:
   --only-db           Hanya jalankan migration SQL
   --only-deploy       Hanya build + deploy (tanpa test/migration/push)
   --db-url <url>      Connection string Postgres (atau env SUPABASE_DB_URL)
+                      Default dibaca dari ~/.config/jokitugasit/db.env
   --backup            pg_dump penuh (-Fc) sebelum migration (default: schema-only)
   --message <text>    Pesan commit (default: chore(deploy): <timestamp>)
   --allow-branch      Izinkan deploy dari branch selain main
@@ -69,7 +70,23 @@ ALLOW_BRANCH=false
 CHECK_ONLY=false
 SELF_TEST=false
 COMMIT_MSG="chore(deploy): $(date '+%Y-%m-%d %H:%M')"
+# Make menjalankan /bin/bash (non-interaktif), jadi ~/.zshrc tidak dibaca.
+# Muat file kredensial sendiri supaya `make redeploy` selalu menemukannya.
+DEPLOY_ENV_FILE="${DEPLOY_ENV_FILE:-$HOME/.config/jokitugasit/db.env}"
+if [ -z "${SUPABASE_DB_URL:-}" ] && [ -f "$DEPLOY_ENV_FILE" ]; then
+  set -a
+  # shellcheck disable=SC1090
+  . "$DEPLOY_ENV_FILE" 2>/dev/null || true
+  set +a
+fi
+
 DB_URL="${SUPABASE_DB_URL:-${DATABASE_URL:-}}"
+if printf '%s' "$DB_URL" | grep -q '<PASSWORD>'; then
+  DB_URL=""
+  DB_PLACEHOLDER=true
+else
+  DB_PLACEHOLDER=false
+fi
 PROD_BASE="${PROD_URL:-https://jokitugasit.my.id}"
 SMOKE_PATHS="/ /request /track /partner /harga"
 
@@ -148,10 +165,19 @@ ok "Repo: $ROOT"
 ok "Branch: $BRANCH"
 ok "Node: $(node -v) · npm: $(npm -v)"
 if [ -n "$DB_URL" ]; then
-  ok "Database: $(mask_url "$DB_URL")"
+  ok "Database: $(mask_url "$DB_URL")  (dari ${DEPLOY_ENV_FILE/#$HOME/~})"
+  if ! psql "$DB_URL" -tAc 'select 1' >/dev/null 2>&1; then
+    fail "Tidak bisa terhubung ke database. Cek password/host di ${DEPLOY_ENV_FILE/#$HOME/~} (atau --db-url)."
+  fi
+  ok "Koneksi database: OK"
+elif $DB_PLACEHOLDER; then
+  $ONLY_DB && fail "Password belum diisi di ${DEPLOY_ENV_FILE/#$HOME/~} (masih <PASSWORD>)."
+  warn "Password DB belum diisi di ${DEPLOY_ENV_FILE/#$HOME/~} → migration dilewati."
+  warn "Edit file itu, ganti <PASSWORD>, lalu jalankan lagi."
 else
   $ONLY_DB && fail "--only-db butuh --db-url atau SUPABASE_DB_URL."
   warn "SUPABASE_DB_URL tidak di-set → migration akan dilewati."
+  warn "Buat ${DEPLOY_ENV_FILE/#$HOME/~} berisi SUPABASE_DB_URL=... (lihat docs/DEPLOY.md)."
 fi
 
 if $CHECK_ONLY; then
@@ -313,7 +339,8 @@ printf '  Live      : %s\n' "$PROD_BASE"
 if [ "$DB_STATUS" = "TIDAK dijalankan (butuh DB URL)" ]; then
   printf '\n%s⚠ SQL belum dijalankan.%s Fitur CRM baru akan error sampai\n' "$C_YELLOW" "$C_RESET"
   printf '  supabase/DEPLOY-ALL-IN-ONE.sql dijalankan di Supabase SQL Editor.\n'
-  printf '  Untuk otomatis: SUPABASE_DB_URL="postgresql://..." make redeploy\n'
+  printf '  Untuk otomatis: isi %s lalu jalankan make redeploy\n' "${DEPLOY_ENV_FILE/#$HOME/~}"
+  printf '  (file: Supabase > Project Settings > Database > Connection string URI)\n'
 fi
 
 printf '\nRollback cepat:\n'
