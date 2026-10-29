@@ -1,0 +1,1865 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Panduan lengkap sistem jokitugasit.my.id: setup Supabase, akun engineer, semua fitur CRM outreach &amp; referral 10%, aturan uang, SOP, keamanan, troubleshooting.">
+<meta name="author" content="jokitugasit.my.id">
+<title>Panduan Lengkap — jokitugasit.my.id (IG Outreach &amp; Referral Manager)</title>
+<style>
+/* ============================================================
+   Design tokens
+   ============================================================ */
+:root{
+  --bg:#f7f8fb; --surface:#ffffff; --surface-2:#f1f3f9; --surface-3:#e8ebf3;
+  --text:#141a24; --text-2:#4a5568; --text-3:#7b8794;
+  --border:#e2e6ef; --border-2:#cfd6e4;
+  --brand:#2563eb; --brand-2:#1d4ed8; --brand-soft:#e8efff;
+  --ok:#0f9d58; --ok-soft:#e6f6ee;
+  --warn:#b45309; --warn-soft:#fdf3e3;
+  --danger:#cf2b3f; --danger-soft:#fdecef;
+  --info:#0e7c9a; --info-soft:#e6f6fa;
+  --code-bg:#0f172a; --code-text:#e2e8f0;
+  --shadow:0 1px 2px rgba(16,24,40,.05),0 8px 24px rgba(16,24,40,.06);
+  --radius:12px;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+html[data-theme="dark"]{
+  --bg:#0b0f16; --surface:#121826; --surface-2:#1a2233; --surface-3:#232d42;
+  --text:#e6ebf4; --text-2:#a9b4c6; --text-3:#7d8aa0;
+  --border:#26314a; --border-2:#33415e;
+  --brand:#5b8cff; --brand-2:#7aa2ff; --brand-soft:#182444;
+  --ok:#3ddc97; --ok-soft:#0f2b21;
+  --warn:#f0b44c; --warn-soft:#2d2413;
+  --danger:#ff7387; --danger-soft:#331a20;
+  --info:#57c8e8; --info-soft:#0d2831;
+  --code-bg:#060a12; --code-text:#dbe4f3;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; background:var(--bg); color:var(--text); font-family:var(--sans);
+  font-size:15.5px; line-height:1.65; -webkit-font-smoothing:antialiased;
+}
+a{color:var(--brand); text-decoration:none}
+a:hover{text-decoration:underline}
+.skip{position:absolute;left:-9999px}
+.skip:focus{left:12px;top:12px;z-index:999;background:var(--brand);color:#fff;padding:10px 16px;border-radius:8px}
+
+/* ============================================================
+   Layout
+   ============================================================ */
+.wrap{display:flex;min-height:100vh}
+.sidebar{
+  width:300px;flex:0 0 300px;position:sticky;top:0;height:100vh;overflow-y:auto;
+  background:var(--surface);border-right:1px solid var(--border);padding:22px 16px 40px;
+}
+.main{flex:1;min-width:0;padding:0 0 120px}
+.content{max-width:920px;margin:0 auto;padding:0 32px}
+
+/* Sidebar */
+.brand{display:flex;align-items:center;gap:10px;padding:0 4px 14px 8px;border-bottom:1px solid var(--border);margin-bottom:14px}
+.brand .iconbtn{width:30px;height:30px}
+.brand .iconbtn svg{width:15px;height:15px}
+.brand-mark{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--brand),#7c3aed);display:grid;place-items:center;color:#fff;font-weight:800;font-size:15px;flex:0 0 auto}
+.brand-t{font-weight:750;font-size:14.5px;line-height:1.25}
+.brand-s{font-size:11.5px;color:var(--text-3)}
+.searchbox{position:relative;margin:0 0 14px}
+.searchbox input{
+  width:100%;padding:9px 32px 9px 34px;border-radius:9px;border:1px solid var(--border-2);
+  background:var(--surface-2);color:var(--text);font-size:13.5px;font-family:var(--sans);
+}
+.searchbox input:focus{outline:2px solid var(--brand);outline-offset:-1px;background:var(--surface)}
+.searchbox svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--text-3)}
+.searchbox .hits{position:absolute;right:9px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--text-3)}
+nav.toc{font-size:13.5px}
+nav.toc ol{list-style:none;margin:0;padding:0}
+nav.toc li{margin:1px 0}
+nav.toc a{
+  display:block;padding:6px 10px;border-radius:8px;color:var(--text-2);
+  border-left:2px solid transparent;line-height:1.4;
+}
+nav.toc a:hover{background:var(--surface-2);color:var(--text);text-decoration:none}
+nav.toc a.active{background:var(--brand-soft);color:var(--brand-2);border-left-color:var(--brand);font-weight:650}
+nav.toc .num{display:inline-block;width:22px;color:var(--text-3);font-variant-numeric:tabular-nums;font-size:12px}
+nav.toc a.active .num{color:var(--brand)}
+
+/* Topbar (mobile) */
+.topbar{
+  display:none;position:sticky;top:0;z-index:50;background:var(--surface);
+  border-bottom:1px solid var(--border);padding:10px 16px;align-items:center;gap:10px;
+}
+.topbar .t{font-weight:700;font-size:14px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.iconbtn{
+  border:1px solid var(--border-2);background:var(--surface-2);color:var(--text);
+  width:34px;height:34px;border-radius:9px;display:grid;place-items:center;cursor:pointer;flex:0 0 auto;
+}
+.iconbtn:hover{background:var(--surface-3)}
+.iconbtn svg{width:17px;height:17px}
+
+/* ============================================================
+   Typography
+   ============================================================ */
+h1{font-size:32px;line-height:1.2;letter-spacing:-.02em;margin:0 0 10px;font-weight:800}
+h2{
+  font-size:23px;line-height:1.28;letter-spacing:-.01em;margin:0 0 14px;font-weight:750;
+  padding-top:14px;scroll-margin-top:80px;
+}
+h3{font-size:17px;margin:26px 0 8px;font-weight:700;scroll-margin-top:80px}
+h4{font-size:14.5px;margin:20px 0 6px;font-weight:700;color:var(--text)}
+p{margin:0 0 12px}
+ul,ol{margin:0 0 14px;padding-left:22px}
+li{margin:4px 0}
+strong{font-weight:680}
+code{
+  font-family:var(--mono);font-size:.86em;background:var(--surface-3);color:var(--text);
+  padding:2px 5px;border-radius:5px;border:1px solid var(--border);
+  overflow-wrap:anywhere;
+}
+kbd{
+  font-family:var(--mono);font-size:.8em;border:1px solid var(--border-2);border-bottom-width:2px;
+  background:var(--surface-2);padding:1px 5px;border-radius:4px;
+}
+hr{border:0;border-top:1px solid var(--border);margin:34px 0}
+
+/* Hero */
+.hero{
+  background:linear-gradient(150deg,var(--brand) 0%,#6d28d9 55%,#7c3aed 100%);
+  color:#fff;border-radius:16px;padding:34px 34px 30px;margin:34px 0 30px;box-shadow:var(--shadow);
+}
+.hero h1{color:#fff;margin-bottom:8px}
+.hero p{color:rgba(255,255,255,.92);margin:0;max-width:62ch;font-size:15px}
+.hero .pills{display:flex;flex-wrap:wrap;gap:7px;margin-top:18px}
+.hero .pill{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);padding:4px 10px;border-radius:999px;font-size:11.5px;font-weight:650;letter-spacing:.01em}
+.hero .meta{margin-top:18px;font-size:12px;color:rgba(255,255,255,.78)}
+
+/* Section */
+section.part{padding:34px 0;border-top:1px solid var(--border)}
+section.part:first-of-type{border-top:0}
+.sec-label{
+  display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:750;
+  letter-spacing:.09em;text-transform:uppercase;color:var(--brand);margin-bottom:7px;
+}
+.sec-label .dot{width:5px;height:5px;border-radius:50%;background:var(--brand)}
+.lead{font-size:15.5px;color:var(--text-2);margin-bottom:18px}
+
+/* Cards */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin:0 0 16px;box-shadow:var(--shadow)}
+.card h3{margin-top:0}
+.grid{display:grid;gap:14px;margin:0 0 18px}
+.grid.two{grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+.grid.three{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+.grid .card{margin:0}
+.kpi{font-size:26px;font-weight:800;letter-spacing:-.02em;line-height:1.15}
+.kpi-s{font-size:12px;color:var(--text-3);margin-top:2px}
+
+/* Callouts */
+.callout{
+  display:flex;gap:11px;border-radius:10px;padding:13px 15px;margin:0 0 16px;
+  border:1px solid;font-size:14.2px;line-height:1.6;
+}
+.callout svg{width:17px;height:17px;flex:0 0 auto;margin-top:2px}
+.callout p:last-child{margin-bottom:0}
+.callout.info{background:var(--info-soft);border-color:color-mix(in srgb,var(--info) 30%,transparent);color:var(--text)}
+.callout.info svg{color:var(--info)}
+.callout.tip{background:var(--ok-soft);border-color:color-mix(in srgb,var(--ok) 30%,transparent)}
+.callout.tip svg{color:var(--ok)}
+.callout.warn{background:var(--warn-soft);border-color:color-mix(in srgb,var(--warn) 34%,transparent)}
+.callout.warn svg{color:var(--warn)}
+.callout.danger{background:var(--danger-soft);border-color:color-mix(in srgb,var(--danger) 32%,transparent)}
+.callout.danger svg{color:var(--danger)}
+
+/* Code */
+.codewrap{position:relative;margin:0 0 16px}
+.codewrap .lang{
+  position:absolute;right:44px;top:9px;font-family:var(--mono);font-size:10.5px;
+  color:rgba(226,232,240,.55);text-transform:uppercase;letter-spacing:.08em;pointer-events:none;
+}
+.codewrap .copy{
+  position:absolute;right:8px;top:7px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);
+  color:#cbd5e1;border-radius:6px;padding:3px 7px;font-size:10.5px;cursor:pointer;font-family:var(--sans);
+}
+.codewrap .copy:hover{background:rgba(255,255,255,.18);color:#fff}
+.codewrap .copy.done{background:rgba(61,220,151,.22);border-color:rgba(61,220,151,.4);color:#9df3c8}
+pre{
+  margin:0;background:var(--code-bg);color:var(--code-text);border-radius:10px;
+  padding:16px 16px 15px;overflow-x:auto;font-family:var(--mono);font-size:12.8px;line-height:1.62;
+  border:1px solid rgba(255,255,255,.07);
+}
+pre code{background:none;border:0;padding:0;color:inherit;font-size:inherit}
+pre .c{color:#7c8ba1}
+pre .k{color:#7dd3fc}
+pre .s{color:#a5e8a0}
+pre .n{color:#f0b44c}
+
+/* Tables */
+.tablewrap{overflow-x:auto;margin:0 0 18px;border:1px solid var(--border);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:13.6px;min-width:520px}
+th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--border);vertical-align:top}
+th{
+  background:var(--surface-2);font-weight:700;font-size:11.6px;text-transform:uppercase;
+  letter-spacing:.05em;color:var(--text-2);white-space:nowrap;position:sticky;top:0;
+}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover{background:var(--surface-2)}
+td code{font-size:12px}
+
+/* Badges */
+.badge{
+  display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;
+  border:1px solid;white-space:nowrap;line-height:1.5;
+}
+.b-new{background:var(--surface-3);border-color:var(--border-2);color:var(--text-2)}
+.b-ok{background:var(--ok-soft);border-color:color-mix(in srgb,var(--ok) 32%,transparent);color:var(--ok)}
+.b-warn{background:var(--warn-soft);border-color:color-mix(in srgb,var(--warn) 32%,transparent);color:var(--warn)}
+.b-bad{background:var(--danger-soft);border-color:color-mix(in srgb,var(--danger) 32%,transparent);color:var(--danger)}
+.b-info{background:var(--info-soft);border-color:color-mix(in srgb,var(--info) 32%,transparent);color:var(--info)}
+.b-brand{background:var(--brand-soft);border-color:color-mix(in srgb,var(--brand) 32%,transparent);color:var(--brand-2)}
+
+/* Steps */
+.steps{list-style:none;padding:0;margin:0 0 18px;counter-reset:st}
+.steps>li{
+  counter-increment:st;position:relative;padding:0 0 20px 46px;margin:0;
+  border-left:2px solid var(--border);margin-left:15px;
+}
+.steps>li:last-child{border-left-color:transparent;padding-bottom:0}
+.steps>li::before{
+  content:counter(st);position:absolute;left:-15px;top:-2px;width:28px;height:28px;border-radius:50%;
+  background:var(--brand);color:#fff;font-size:12.5px;font-weight:750;display:grid;place-items:center;
+  box-shadow:0 0 0 4px var(--bg);
+}
+.steps>li .st-t{font-weight:700;margin-bottom:5px;font-size:15px}
+.steps>li .st-b{color:var(--text-2);font-size:14.3px}
+.steps>li .st-b>:last-child{margin-bottom:0}
+.steps ul{margin:8px 0 0}
+
+/* Flow diagram */
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 18px}
+.flow .node{
+  background:var(--surface);border:1px solid var(--border-2);border-radius:9px;padding:7px 11px;
+  font-size:12.6px;font-weight:650;box-shadow:var(--shadow);
+}
+.flow .node.hl{background:var(--brand-soft);border-color:var(--brand);color:var(--brand-2)}
+.flow .arr{color:var(--text-3);font-size:15px}
+
+/* Tabs (scenario switcher) */
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 16px}
+.tabs button{
+  border:1px solid var(--border-2);background:var(--surface);color:var(--text-2);
+  padding:7px 13px;border-radius:999px;font-size:13px;font-weight:650;cursor:pointer;font-family:var(--sans);
+}
+.tabs button[aria-selected="true"]{background:var(--brand);border-color:var(--brand);color:#fff}
+.tabpanel[hidden]{display:none}
+
+/* Checklist */
+.check{list-style:none;padding:0;margin:0 0 18px}
+.check li{display:flex;gap:10px;padding:8px 0;border-bottom:1px dashed var(--border);font-size:14.3px}
+.check li:last-child{border-bottom:0}
+.check li::before{
+  content:"";flex:0 0 auto;width:17px;height:17px;border-radius:4px;border:1.5px solid var(--border-2);
+  margin-top:3px;background:var(--surface);
+}
+.check li b{font-weight:680}
+
+/* Two-col definition list */
+.dl{display:grid;grid-template-columns:minmax(140px,auto) 1fr;gap:6px 16px;font-size:14px;margin:0 0 16px}
+.dl dt{font-weight:680;color:var(--text)}
+.dl dd{margin:0;color:var(--text-2)}
+
+/* Footer */
+.foot{margin-top:40px;padding-top:20px;border-top:1px solid var(--border);color:var(--text-3);font-size:12.5px}
+
+mark{background:rgba(240,180,76,.35);color:inherit;padding:0 2px;border-radius:3px}
+html[data-theme="dark"] mark{background:rgba(240,180,76,.28)}
+
+/* Back to top */
+.totop{
+  position:fixed;right:22px;bottom:22px;width:42px;height:42px;border-radius:50%;
+  background:var(--brand);color:#fff;border:0;display:grid;place-items:center;cursor:pointer;
+  box-shadow:0 6px 18px rgba(37,99,235,.35);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;
+  transform:translateY(8px);z-index:60;
+}
+.totop.show{opacity:1;pointer-events:auto;transform:none}
+.totop svg{width:19px;height:19px}
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+@media (max-width:1040px){
+  .sidebar{
+    position:fixed;left:0;top:0;bottom:0;z-index:100;transform:translateX(-102%);
+    transition:transform .22s ease;box-shadow:0 0 40px rgba(0,0,0,.25);
+  }
+  .sidebar.open{transform:none}
+  .topbar{display:flex}
+  .content{padding:0 18px}
+  .hero{padding:26px 20px;border-radius:14px;margin:20px 0}
+  h1{font-size:26px}
+  h2{font-size:20px}
+  .scrim{position:fixed;inset:0;background:rgba(8,12,20,.45);z-index:99;display:none}
+  .scrim.show{display:block}
+  .dl{grid-template-columns:1fr}
+  .dl dt{margin-top:8px}
+}
+
+/* ============================================================
+   Print → PDF
+   ============================================================ */
+@media print{
+  :root{--bg:#fff;--surface:#fff;--text:#000;--text-2:#222;--text-3:#555;--border:#bbb;--border-2:#999;--shadow:none}
+  html[data-theme="dark"]{--bg:#fff;--surface:#fff;--text:#000;--text-2:#222;--text-3:#555;--border:#bbb;--border-2:#999}
+  body{font-size:10.5pt;line-height:1.5}
+  .sidebar,.topbar,.totop,.scrim,.codewrap .copy,.searchbox{display:none!important}
+  .wrap{display:block}
+  .content{max-width:none;padding:0}
+  .hero{background:#1d4ed8!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:20px;margin:0 0 18px}
+  section.part{page-break-inside:auto;padding:18px 0}
+  section.part{break-before:auto}
+  h2,h3,h4{page-break-after:avoid;break-after:avoid}
+  h2{font-size:16pt}
+  h3{font-size:12.5pt}
+  pre{page-break-inside:avoid;break-inside:avoid;font-size:8.6pt;background:#f4f6fa!important;color:#111!important;border:1px solid #ccc}
+  pre code{color:#111!important}
+  .codewrap .lang{color:#666!important}
+  table{font-size:8.8pt;page-break-inside:auto}
+  th{background:#eee!important;color:#000!important;position:static}
+  .card,.callout,.tablewrap{page-break-inside:avoid;break-inside:avoid;box-shadow:none}
+  .tabpanel[hidden]{display:block!important}
+  .tabs{display:none}
+  a{color:#000;text-decoration:underline}
+  a[href^="http"]::after{content:" (" attr(href) ")";font-size:8pt;color:#555}
+  .foot{margin-top:16px}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#konten">Lewati ke konten</a>
+
+<div class="topbar">
+  <button class="iconbtn" id="menuBtn" aria-label="Buka daftar isi" aria-expanded="false">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+  </button>
+  <span class="t">Panduan Lengkap — jokitugasit.my.id</span>
+  <button class="iconbtn" id="themeBtn2" aria-label="Ganti tema">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg>
+  </button>
+</div>
+
+<div class="scrim" id="scrim"></div>
+
+<div class="wrap">
+<aside class="sidebar" id="sidebar">
+  <div class="brand">
+    <div class="brand-mark">JT</div>
+    <div style="flex:1;min-width:0">
+      <div class="brand-t">Panduan Lengkap</div>
+      <div class="brand-s">jokitugasit.my.id</div>
+    </div>
+    <button class="iconbtn" id="themeBtn" aria-label="Ganti tema terang/gelap" title="Ganti tema (T)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg>
+    </button>
+  </div>
+
+  <div class="searchbox">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <input id="search" type="search" placeholder="Cari di panduan…" autocomplete="off" aria-label="Cari di panduan">
+    <span class="hits" id="hits"></span>
+  </div>
+
+  <nav class="toc" aria-label="Daftar isi">
+    <ol id="tocList"></ol>
+  </nav>
+</aside>
+
+<main class="main">
+<div class="content" id="konten">
+
+<div class="hero">
+  <h1>Panduan Lengkap Sistem</h1>
+  <p>Dari nol sampai produksi: setup Supabase, akun engineer, semua fitur CRM outreach &amp; referral 10%, aturan uang, SOP harian, keamanan, sampai troubleshooting.</p>
+  <div class="pills">
+    <span class="pill">Vue 3 + Vite</span>
+    <span class="pill">Supabase (Postgres + Auth + RLS)</span>
+    <span class="pill">Vercel</span>
+    <span class="pill">1 engineer</span>
+  </div>
+  <div class="meta">Dokumen ini dihasilkan dari kode yang benar-benar ada di repo · 15 file SQL · 11 suite database · 39 unit test</div>
+</div>
+
+<!-- ============================================================
+     1
+     ============================================================ -->
+<section class="part" id="s1" data-title="Ringkasan &amp; arsitektur">
+  <div class="sec-label"><span class="dot"></span>Bagian 1</div>
+  <h2 id="h1">Ringkasan &amp; arsitektur</h2>
+
+  <p class="lead">Sistem ini adalah <strong>website jasa</strong> (publik) plus <strong>dashboard internal</strong> untuk mengelola prospek dari Instagram, klien, proyek, pembayaran, dan komisi referral 10%. Semuanya satu aplikasi — bukan dua sistem terpisah.</p>
+
+  <h3>Apa yang bisa dilakukan</h3>
+  <div class="grid three">
+    <div class="card"><div class="kpi">Publik</div><div class="kpi-s">Landing, layanan, harga, form request + upload, tracking order, portal partner</div></div>
+    <div class="card"><div class="kpi">Outreach</div><div class="kpi-s">Akun target, prospek, import CSV, antrean DM, template, log respons</div></div>
+    <div class="card"><div class="kpi">Uang</div><div class="kpi-s">DP, pelunasan, refund, void, komisi 10%, payout, rekap</div></div>
+  </div>
+
+  <h3>Alur besar</h3>
+  <div class="flow">
+    <span class="node">IG angkatan</span><span class="arr">→</span>
+    <span class="node">Prospek</span><span class="arr">→</span>
+    <span class="node">DM manual</span><span class="arr">→</span>
+    <span class="node hl">Klien / Proyek</span><span class="arr">→</span>
+    <span class="node">Pembayaran</span><span class="arr">→</span>
+    <span class="node hl">Komisi 10%</span>
+  </div>
+
+  <h3>Arsitektur teknis</h3>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Lapisan</th><th>Teknologi</th><th>Peran</th></tr></thead>
+    <tbody>
+      <tr><td>Frontend</td><td>Vue 3.5 (SFC, <code>&lt;script setup&gt;</code>), Vite 8, Vue Router 5, Pinia 4, Tailwind 3</td><td>Website publik + dashboard admin dalam satu SPA</td></tr>
+      <tr><td>Backend</td><td>Supabase: PostgreSQL, Auth, Row Level Security, PostgREST, RPC SQL</td><td>Semua baca/tulis data; tidak ada server API sendiri untuk CRUD</td></tr>
+      <tr><td>Fungsi server</td><td>Vercel Functions (<code>api/</code>)</td><td>Hanya untuk hal ber-secret: webhook Instagram, email, Telegram</td></tr>
+      <tr><td>Penyimpanan file</td><td>Supabase Storage bucket <code>attachments</code></td><td>Lampiran request; privat + signed URL</td></tr>
+      <tr><td>Deploy</td><td>Vercel (alias <code>jokitugasit.my.id</code>)</td><td>Build statis + functions</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Prinsip yang tidak boleh dilanggar</h3>
+  <ul>
+    <li><strong>Satu engineer.</strong> Tidak ada tim sales, tidak ada agensi, tidak ada multi-tenant.</li>
+    <li><strong>Tidak ada bot Instagram.</strong> Tidak ada scraping followers, tidak ada cold DM massal, tidak ada penyimpanan cookie/password IG.</li>
+    <li><strong>Uang dihitung database.</strong> Komisi 10% tidak pernah dihitung di browser.</li>
+    <li><strong>RLS adalah otorisasi.</strong> Menyembunyikan menu di Vue bukan pengamanan; policy database yang menentukan.</li>
+    <li><strong>Migration additive.</strong> Tidak ada <code>db reset</code> ke data nyata.</li>
+  </ul>
+
+  <div class="callout info">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>
+    <div><p><strong>Istilah.</strong> "Prospek" = orang yang belum jadi klien. "Lead" dipakai bergantian. "Proyek" dan "request" adalah hal yang sama: satu baris di tabel <code>requests</code>.</p></div>
+  </div>
+</section>
+
+<!-- ============================================================
+     2
+     ============================================================ -->
+<section class="part" id="s2" data-title="Persiapan &amp; instalasi">
+  <div class="sec-label"><span class="dot"></span>Bagian 2</div>
+  <h2 id="h2">Persiapan &amp; instalasi</h2>
+
+  <p class="lead">Dari mesin kosong sampai aplikasi jalan di <code>localhost</code>.</p>
+
+  <h3>2.1 Yang dibutuhkan</h3>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Alat</th><th>Versi</th><th>Untuk apa</th></tr></thead>
+    <tbody>
+      <tr><td>Node.js</td><td><code>^22.18</code> atau <code>&gt;=24.12</code></td><td>Build &amp; dev server (ada di <code>engines</code>)</td></tr>
+      <tr><td>npm</td><td>ikut Node</td><td>Instalasi dependency</td></tr>
+      <tr><td>Git</td><td>terbaru</td><td>Versioning &amp; deploy</td></tr>
+      <tr><td>PostgreSQL lokal</td><td>14+</td><td><strong>Opsional</strong> — untuk <code>npm run test:db</code></td></tr>
+      <tr><td>Supabase CLI</td><td>terbaru</td><td>Opsional (migration manual lewat dashboard juga bisa)</td></tr>
+      <tr><td>Vercel CLI</td><td>terbaru</td><td>Deploy dari terminal</td></tr>
+      <tr><td>Akun</td><td>—</td><td>Supabase (project), Vercel, GitHub</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="codewrap" data-lang="bash"><pre><code><span class="c"># cek versi</span>
+node -v &amp;&amp; npm -v &amp;&amp; git --version
+psql --version        <span class="c"># opsional</span>
+vercel --version      <span class="c"># opsional</span></code></pre></div>
+
+  <h3>2.2 Ambil kode &amp; install</h3>
+  <div class="codewrap" data-lang="bash"><pre><code>git clone https://github.com/berakbaso-maker/jokitugasit-vue.git
+cd jokitugasit-vue
+npm install</code></pre></div>
+
+  <h3>2.3 Buat file environment</h3>
+  <p>Salin contoh lalu isi dua nilai dari <strong>Supabase → Project Settings → API</strong>.</p>
+  <div class="codewrap" data-lang="bash"><pre><code>cp .env.example .env</code></pre></div>
+  <div class="codewrap" data-lang="env"><pre><code><span class="c"># HANYA dua ini yang masuk ke browser (prefix VITE_)</span>
+VITE_SUPABASE_URL=https://&lt;project-ref&gt;.supabase.co
+VITE_SUPABASE_ANON_KEY=&lt;anon-publishable-key&gt;
+
+<span class="c"># Modul CRM: biarkan true. Set false untuk menyembunyikan menu CRM.</span>
+VITE_ENABLE_CRM=true</code></pre></div>
+
+  <div class="callout danger">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l9 16H3z"/><path d="M12 9v4M12 16h.01"/></svg>
+    <div><p><strong>Jangan pernah</strong> memakai prefix <code>VITE_</code> untuk <code>SUPABASE_SERVICE_ROLE_KEY</code>, token Instagram, atau password apa pun. Apa pun berawalan <code>VITE_</code> akan ikut ke bundle browser.</p></div>
+  </div>
+
+  <h3>2.4 Jalankan</h3>
+  <div class="codewrap" data-lang="bash"><pre><code>npm run dev          <span class="c"># http://localhost:5173</span>
+npm run build        <span class="c"># buat dist/</span>
+npm run preview      <span class="c"># cek hasil build lokal</span></code></pre></div>
+
+  <h3>2.5 Perintah yang sering dipakai</h3>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Perintah</th><th>Fungsi</th></tr></thead>
+    <tbody>
+      <tr><td><code>npm run dev</code></td><td>Dev server dengan hot reload</td></tr>
+      <tr><td><code>npm run build</code></td><td>Build produksi ke <code>dist/</code></td></tr>
+      <tr><td><code>npm test</code></td><td>39 unit test (CSV, username, template, uang, flag)</td></tr>
+      <tr><td><code>npm run test:db</code></td><td>Recreate DB lokal <code>jokitugasit_test</code>, jalankan semua migration + 11 suite RLS/aturan bisnis</td></tr>
+      <tr><td><code>npm run test:all</code></td><td>Keduanya</td></tr>
+      <tr><td><code>make redeploy</code></td><td><strong>Satu perintah deploy penuh</strong> (lihat Bagian 6)</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="callout warn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l9 16H3z"/><path d="M12 9v4M12 16h.01"/></svg>
+    <div><p><code>npm run test:db</code> <strong>menghapus dan membuat ulang</strong> database bernama <code>jokitugasit_test</code> di PostgreSQL lokal. Jangan arahkan ke database produksi.</p></div>
+  </div>
+</section>
+
+<!-- ============================================================
+     3
+     ============================================================ -->
+<section class="part" id="s3" data-title="Setup database Supabase">
+  <div class="sec-label"><span class="dot"></span>Bagian 3</div>
+  <h2 id="h3">Setup database Supabase</h2>
+
+  <p class="lead">Ini bagian paling kritis. Urutan migration tidak boleh diacak karena fungsi saling bergantung.</p>
+
+  <h3>3.1 Cara tercepat (satu tempel)</h3>
+  <ol class="steps">
+    <li>
+      <div class="st-t">Backup dulu</div>
+      <div class="st-b">Supabase Dashboard → <strong>Database → Backups</strong>. Pastikan backup harian aktif. Kalau data masih kosong, tetap lanjut.</div>
+    </li>
+    <li>
+      <div class="st-t">Buka SQL Editor</div>
+      <div class="st-b">Dashboard → <strong>SQL Editor → New query</strong>.</div>
+    </li>
+    <li>
+      <div class="st-t">Tempel seluruh <code>supabase/DEPLOY-ALL-IN-ONE.sql</code></div>
+      <div class="st-b">File ini berisi gabungan 10 migration terakhir dan bersifat <strong>idempoten</strong> — aman dijalankan berulang.</div>
+    </li>
+    <li>
+      <div class="st-t">Klik Run, lalu verifikasi</div>
+      <div class="st-b">Jalankan query verifikasi di bawah. Harus muncul <strong>6</strong> dan <strong>4</strong>.</div>
+    </li>
+  </ol>
+
+  <div class="codewrap" data-lang="sql"><pre><code><span class="c">-- 1. Enam fungsi inti harus ada</span>
+select proname from pg_proc
+where proname in ('void_payment','import_prospects_batch','analytics_campuses',
+                  'register_partner','rotate_partner_code','delete_prospect')
+order by 1;
+
+<span class="c">-- 2. Empat kolom baru di requests</span>
+select column_name from information_schema.columns
+where table_schema = 'public' and table_name = 'requests'
+  and column_name in ('campus','stack','source','prospect_id')
+order by 1;</code></pre></div>
+
+  <h3>3.2 Cara manual (dari nol, berurutan)</h3>
+  <p>Kalau <code>DEPLOY-ALL-IN-ONE.sql</code> belum memuat perubahan tertentu, jalankan file berikut <strong>sesuai urutan</strong>:</p>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>#</th><th>File</th><th>Isi</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td><code>schema.sql</code></td><td>Tabel dasar: <code>profiles</code>, <code>requests</code>, <code>transactions</code></td></tr>
+      <tr><td>2</td><td><code>migration-delivery-walkthrough.sql</code></td><td>Kolom walkthrough</td></tr>
+      <tr><td>3</td><td><code>migration-referral-partner.sql</code></td><td>Tabel <code>partners</code>, kolom <code>referral_code</code></td></tr>
+      <tr><td>4</td><td><code>ig-schema.sql</code></td><td>Lead/konten Instagram (opsional, legacy)</td></tr>
+      <tr><td>5</td><td><code>migration-security-hardening.sql</code></td><td><strong>Wajib.</strong> Menutup kebocoran RLS, membuat <code>is_engineer()</code></td></tr>
+      <tr><td>6</td><td><code>migration-outreach-schema.sql</code></td><td><code>target_accounts</code>, <code>prospects</code>, <code>dm_templates</code>, <code>outreach_logs</code></td></tr>
+      <tr><td>7</td><td><code>migration-money-schema.sql</code></td><td><code>payments</code>, <code>commissions</code>, analytics, portal partner</td></tr>
+      <tr><td>8</td><td><code>migration-payment-flow.sql</code></td><td>Status proyek dari pembayaran, <code>void_payment</code></td></tr>
+      <tr><td>9</td><td><code>migration-analytics-source.sql</code></td><td>Window analytics, <code>requests.source</code></td></tr>
+      <tr><td>10</td><td><code>migration-import-batches.sql</code></td><td><code>import_batches</code>, statistik, konversi prospek</td></tr>
+      <tr><td>11</td><td><code>migration-referral-integrity.sql</code></td><td>Guard self-referral</td></tr>
+      <tr><td>12</td><td><code>migration-data-rights.sql</code></td><td>Hapus prospek, suppression list</td></tr>
+      <tr><td>13</td><td><code>migration-project-details.sql</code></td><td>Kolom campus/stack, analytics per kampus</td></tr>
+      <tr><td>14</td><td><code>migration-hardening.sql</code></td><td>Kode referral acak, bucket privat, chunk import</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="callout warn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l9 16H3z"/><path d="M12 9v4M12 16h.01"/></svg>
+    <div><p><strong>SQL dulu, frontend kemudian.</strong> Frontend baru mengirim kolom <code>source</code>, <code>campus</code>, <code>stack</code>, dan memanggil RPC baru. Kalau frontend naik lebih dulu, menyimpan quote/notes akan gagal.</p></div>
+  </div>
+
+  <div class="callout info">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>
+    <div><p><code>migration-engineer-role.sql</code> hanya berisi trigger pembuatan profil dan contoh query untuk menjadikan akun sebagai engineer. Jalankan kapan saja saat butuh (biasanya sekali di awal).</p></div>
+  </div>
+
+  <h3>3.3 Setelan dashboard yang wajib dicek</h3>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Setelan</th><th>Nilai</th><th>Kenapa</th></tr></thead>
+    <tbody>
+      <tr><td>Authentication → Email → <em>Allow new users to sign up</em></td><td><strong>Matikan</strong></td><td>Tidak ada alur signup customer; membiarkannya menambah permukaan serangan</td></tr>
+      <tr><td>Database → Backups</td><td>Aktif (harian)</td><td>Jaring pengaman sebelum migration</td></tr>
+      <tr><td>Storage → bucket <code>attachments</code></td><td><strong>Private</strong>, limit 10 MB</td><td>Lampiran klien tidak boleh bisa dibuka siapa pun yang punya URL</td></tr>
+      <tr><td>Storage policy</td><td>insert: <code>anon</code>; select: <code>authenticated</code> + <code>is_engineer()</code></td><td>Klien boleh unggah, hanya engineer yang boleh membaca</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="codewrap" data-lang="sql"><pre><code><span class="c">-- Kalau policy storage belum terpasang (jalankan sekali)</span>
+create policy "attachments_anon_upload" on storage.objects
+  for insert to anon
+  with check (bucket_id = 'attachments');
+
+create policy "attachments_engineer_read" on storage.objects
+  for select to authenticated
+  using (bucket_id = 'attachments' and public.is_engineer());</code></pre></div>
+
+  <h3>3.4 Rollback database</h3>
+  <p>Semua migration bersifat <strong>additive</strong> (tambah tabel/kolom/fungsi). Untuk mengembalikan satu fungsi, jalankan ulang definisi lamanya dari file migration sebelumnya. Tidak ada perintah yang menghapus data.</p>
+  <div class="codewrap" data-lang="sql"><pre><code><span class="c">-- Contoh: kembalikan analytics_overview ke versi tanpa filter kampus</span>
+<span class="c">-- jalankan ulang definisi dari migration-analytics-source.sql</span>
+
+<span class="c">-- Nama fungsi yang tersedia (tanpa p_from/p_to/p_campus):</span>
+select proname, pg_get_function_arguments(oid)
+from pg_proc
+where proname in ('analytics_overview','analytics_funnel');</code></pre></div>
+</section>
+
+<!-- ============================================================
+     4
+     ============================================================ -->
+<section class="part" id="s4" data-title="Akun engineer &amp; login">
+  <div class="sec-label"><span class="dot"></span>Bagian 4</div>
+  <h2 id="h4">Akun engineer &amp; login</h2>
+
+  <p class="lead">Tidak ada halaman daftar admin. Akun dibuat manual, lalu role-nya dinaikkan menjadi <code>engineer</code>.</p>
+
+  <ol class="steps">
+    <li>
+      <div class="st-t">Buat user di Supabase</div>
+      <div class="st-b">Dashboard → <strong>Authentication → Users → Add user</strong>. Isi email + password, centang <em>auto confirm</em>.</div>
+    </li>
+    <li>
+      <div class="st-t">Pastikan baris <code>profiles</code> ada</div>
+      <div class="st-b">Trigger <code>handle_new_user()</code> membuat baris profil otomatis. Kalau tidak, buat manual:</div>
+    </li>
+  </ol>
+
+  <div class="codewrap" data-lang="sql"><pre><code>insert into public.profiles (id, full_name, email, role)
+values ('&lt;user-uuid&gt;', 'Nama Engineer', 'email@contoh.com', 'engineer')
+on conflict (id) do update set role = 'engineer';
+
+<span class="c">-- Cek</span>
+select id, email, role from public.profiles;</code></pre></div>
+
+  <ol class="steps" start="3" style="counter-reset:st 2">
+    <li>
+      <div class="st-t">Login di aplikasi</div>
+      <div class="st-b">Buka <code>/login</code>. Kalau role bukan <code>engineer</code>, login <strong>ditolak</strong> dan sesi langsung dihapus — ini disengaja.</div>
+    </li>
+  </ol>
+
+  <div class="callout warn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l9 16H3z"/><path d="M12 9v4M12 16h.01"/></svg>
+    <div><p>Role disimpan di <code>profiles.role</code> dan dibaca fungsi <code>is_engineer()</code>. <strong>Jangan</strong> mengandalkan penyembunyian menu di Vue — policy RLS yang menolak akses data.</p></div>
+  </div>
+
+  <h3>4.1 Matriks akses</h3>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Peran</th><th>Baca prospek</th><th>Tambah prospek</th><th>Bayar komisi</th><th>Ubah role</th></tr></thead>
+    <tbody>
+      <tr><td><code>anon</code> (pengunjung)</td><td><span class="badge b-bad">Tolak</span></td><td><span class="badge b-bad">Tolak</span></td><td><span class="badge b-bad">Tolak</span></td><td><span class="badge b-bad">Tolak</span></td></tr>
+      <tr><td><code>authenticated</code> non-engineer</td><td><span class="badge b-bad">Tolak</span></td><td><span class="badge b-bad">Tolak</span></td><td><span class="badge b-bad">Tolak</span></td><td><span class="badge b-bad">Tolak</span></td></tr>
+      <tr><td>Engineer</td><td><span class="badge b-ok">Boleh</span></td><td><span class="badge b-ok">Boleh</span></td><td><span class="badge b-bad">Hanya via RPC</span></td><td><span class="badge b-warn">Manual di DB</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="lead" style="font-size:13.5px">Dibuktikan otomatis oleh <code>supabase/tests/10_security.sql</code> pada setiap <code>npm run test:db</code>.</p>
+</section>
+
+<!-- ============================================================
+     5
+     ============================================================ -->
+<section class="part" id="s5" data-title="Menjalankan lokal">
+  <div class="sec-label"><span class="dot"></span>Bagian 5</div>
+  <h2 id="h5">Menjalankan lokal &amp; menguji</h2>
+
+  <h3>5.1 Alur kerja harian untuk development</h3>
+  <div class="codewrap" data-lang="bash"><pre><code>npm run dev            <span class="c"># terminal 1</span>
+npm test -- --watch    <span class="c"># terminal 2 (opsional)</span></code></pre></div>
+
+  <h3>5.2 Test database lokal</h3>
+  <p>Butuh PostgreSQL lokal aktif. Script membuat database <code>jokitugasit_test</code> dari nol, menjalankan semua migration, lalu 11 suite test.</p>
+  <div class="codewrap" data-lang="bash"><pre><code>pg_isready              <span class="c"># pastikan server hidup</span>
+npm run test:db</code></pre></div>
+
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Suite</th><th>Yang diuji</th></tr></thead>
+    <tbody>
+      <tr><td><code>10_security.sql</code></td><td>anon/non-engineer tidak bisa baca tabel sensitif; RPC engineer menolak non-engineer</td></tr>
+      <tr><td><code>20_outreach.sql</code></td><td>normalisasi username, dedupe import, DNC lengket, log outreach</td></tr>
+      <tr><td><code>30_money.sql</code></td><td>DP belum eligible, diskon, idempotency, refund, pembulatan, bukti payout</td></tr>
+      <tr><td><code>40_partner_portal.sql</code></td><td>portal partner hanya mengembalikan data miliknya</td></tr>
+      <tr><td><code>50_payment_flow.sql</code></td><td>status proyek dari pembayaran, void, data legacy tidak mundur</td></tr>
+      <tr><td><code>60_analytics_source.sql</code></td><td>filter periode, breakdown sumber, sumber divalidasi</td></tr>
+      <tr><td><code>70_import_batch.sql</code></td><td>audit batch, statistik, konversi prospek &amp; penolakannya</td></tr>
+      <tr><td><code>80_referral_integrity.sql</code></td><td>self-referral ditolak, referral sah tetap dapat komisi</td></tr>
+      <tr><td><code>90_data_rights.sql</code></td><td>hapus prospek, suppression, DNC tidak hilang</td></tr>
+      <tr><td><code>95_project_details.sql</code></td><td>campus/stack, analytics per kampus</td></tr>
+      <tr><td><code>99_hardening.sql</code></td><td>kode referral acak, rotasi, registrasi publik, chunk import</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>5.3 Kalau test gagal</h3>
+  <div class="callout tip">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+    <div><p>Pesan error diawali <code>FAIL:</code> dan menyebut ekspektasinya. Karena database dibuat ulang setiap run, kegagalan hampir selalu berarti perubahan migration mematahkan aturan bisnis — bukan sisa data lama.</p></div>
+  </div>
+</section>
+
+<!-- ============================================================
+     6
+     ============================================================ -->
+<section class="part" id="s6" data-title="Deploy produksi">
+  <div class="sec-label"><span class="dot"></span>Bagian 6</div>
+  <h2 id="h6">Deploy produksi</h2>
+
+  <p class="lead">Satu perintah menjalankan seluruh siklus: test → build → migration → push → deploy → smoke test.</p>
+
+  <div class="codewrap" data-lang="bash"><pre><code>make redeploy</code></pre></div>
+
+  <h3>6.1 Sekali saja: siapkan kredensial database</h3>
+  <p>Migration otomatis butuh connection string. Simpan di file terpisah (bukan di <code>.env</code> repo):</p>
+  <div class="codewrap" data-lang="bash"><pre><code>mkdir -p ~/.config/jokitugasit
+cat &gt; ~/.config/jokitugasit/db.env &lt;&lt;'EOF'
+SUPABASE_DB_URL="postgresql://postgres.&lt;ref&gt;:&lt;PASSWORD&gt;@&lt;host&gt;:5432/postgres?sslmode=require"
+EOF
+chmod 600 ~/.config/jokitugasit/db.env</code></pre></div>
+  <p>Ambil URI dari <strong>Supabase → Project Settings → Database → Connection string (URI)</strong>. Ganti <code>&lt;PASSWORD&gt;</code>.</p>
+
+  <div class="callout info">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>
+    <div><p><code>make</code> memakai <code>/bin/bash</code> non-interaktif yang <strong>tidak</strong> membaca <code>~/.zshrc</code>. Karena itu <code>scripts/redeploy.sh</code> memuat file <code>db.env</code> sendiri. Lokasi bisa diganti dengan <code>DEPLOY_ENV_FILE</code>.</p></div>
+  </div>
+
+  <h3>6.2 Tujuh langkah yang dijalankan</h3>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>#</th><th>Langkah</th><th>Gagal →</th></tr></thead>
+    <tbody>
+      <tr><td>0</td><td>Preflight: branch <code>main</code>, node/npm/git/vercel/psql, cek koneksi DB</td><td>berhenti</td></tr>
+      <tr><td>1</td><td><code>npm test</code></td><td>berhenti</td></tr>
+      <tr><td>2</td><td><code>npm run test:db</code> (kalau Postgres lokal hidup)</td><td>berhenti</td></tr>
+      <tr><td>3</td><td><code>npm run build</code></td><td>berhenti</td></tr>
+      <tr><td>4</td><td>Backup schema → apply <code>DEPLOY-ALL-IN-ONE.sql</code> → verifikasi 6 fungsi + 4 kolom</td><td>berhenti</td></tr>
+      <tr><td>5</td><td>Commit + <code>git push origin main</code> (retry 3×)</td><td>berhenti</td></tr>
+      <tr><td>6</td><td><code>vercel --prod</code> (retry 3×)</td><td>berhenti</td></tr>
+      <tr><td>7</td><td>Smoke test 5 route publik</td><td>berhenti</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>6.3 Opsi</h3>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Flag</th><th>Efek</th></tr></thead>
+    <tbody>
+      <tr><td><code>--check</code></td><td>Preflight saja, tidak mengubah apa pun</td></tr>
+      <tr><td><code>--self-test</code></td><td>Uji skrip + bundle SQL (tanpa deploy)</td></tr>
+      <tr><td><code>--skip-tests</code></td><td>Lewati unit + DB test</td></tr>
+      <tr><td><code>--skip-db</code></td><td>Lewati migration (SQL sudah dijalankan manual)</td></tr>
+      <tr><td><code>--skip-push</code></td><td>Lewati commit/push</td></tr>
+      <tr><td><code>--skip-deploy</code></td><td>Lewati Vercel + smoke</td></tr>
+      <tr><td><code>--only-db</code></td><td>Hanya migration</td></tr>
+      <tr><td><code>--only-deploy</code></td><td>Build + deploy saja (hotfix frontend)</td></tr>
+      <tr><td><code>--db-url &lt;url&gt;</code></td><td>Connection string langsung</td></tr>
+      <tr><td><code>--backup</code></td><td><code>pg_dump -Fc</code> penuh sebelum migration</td></tr>
+      <tr><td><code>--message "..."</code></td><td>Pesan commit kustom</td></tr>
+      <tr><td><code>--allow-branch</code></td><td>Izinkan branch selain <code>main</code></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>6.4 Contoh nyata</h3>
+  <div class="codewrap" data-lang="bash"><pre><code><span class="c"># deploy penuh (paling sering)</span>
+make redeploy
+
+<span class="c"># SQL sudah dijalankan manual, hanya frontend</span>
+make redeploy ARGS="--skip-db"
+
+<span class="c"># cek prasyarat tanpa mengubah apa pun</span>
+make redeploy ARGS="--check"
+
+<span class="c"># hanya memperbaiki database</span>
+make redeploy ARGS="--only-db --db-url postgresql://..."
+
+<span class="c"># backup penuh dulu, lalu deploy</span>
+SUPABASE_DB_URL="postgresql://..." make redeploy ARGS="--backup"</code></pre></div>
+
+  <h3>6.5 Rollback</h3>
+  <div class="codewrap" data-lang="bash"><pre><code>vercel rollback                              <span class="c"># kembali ke deployment sebelumnya</span>
+git revert &lt;sha&gt; --no-edit &amp;&amp; git push origin main
+
+<span class="c"># mematikan modul CRM tanpa rollback kode</span>
+vercel env add VITE_ENABLE_CRM production    <span class="c"># isi: false</span>
+make redeploy ARGS="--only-deploy"</code></pre></div>
+</section>
+
+<!-- ============================================================
+     7
+     ============================================================ -->
+<section class="part" id="s7" data-title="Halaman publik">
+  <div class="sec-label"><span class="dot"></span>Bagian 7</div>
+  <h2 id="h7">Halaman publik (sisi klien)</h2>
+
+  <p class="lead">Semua halaman ini bisa diakses tanpa login.</p>
+
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>URL</th><th>Isi</th><th>Catatan</th></tr></thead>
+    <tbody>
+      <tr><td><code>/</code></td><td>Landing: layanan, harga, CTA</td><td>SEO meta + canonical dinamis</td></tr>
+      <tr><td><code>/layanan</code>, <code>/cara-kerja</code>, <code>/tentang</code>, <code>/tanya-jawab</code></td><td>Halaman informasi</td><td>—</td></tr>
+      <tr><td><code>/harga</code></td><td>4 paket + kalkulator estimasi</td><td>Harga uji pasar, bukan final</td></tr>
+      <tr><td><code>/testimoni</code>, <code>/blog</code>, <code>/blog/:slug</code></td><td>Konten &amp; artikel</td><td>Artikel dari <code>src/data/posts.js</code></td></tr>
+      <tr><td><code>/joki-*</code> (9 halaman)</td><td>Landing per kategori layanan</td><td>Untuk SEO</td></tr>
+      <tr><td><code>/request</code></td><td><strong>Form kirim project</strong> + upload lampiran + kode referral</td><td>Sumber utama lead inbound</td></tr>
+      <tr><td><code>/success/:orderNo</code></td><td>Konfirmasi setelah submit</td><td>Menampilkan nomor tiket</td></tr>
+      <tr><td><code>/track</code>, <code>/track/:orderNo</code></td><td>Lacak status order</td><td>Lewat RPC <code>track_request</code>, tidak membuka tabel</td></tr>
+      <tr><td><code>/partner</code></td><td>Daftar jadi partner + cek komisi</td><td>Kode dibuat server-side</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>7.1 Alur form request</h3>
+  <ol class="steps">
+    <li><div class="st-t">Klien isi form</div><div class="st-b">Nama, WhatsApp, kategori, deadline, deskripsi, link (opsional), lampiran (opsional), kode referral (opsional).</div></li>
+    <li><div class="st-t">Lampiran diunggah</div><div class="st-b">Maks 10 MB, tipe PDF/ZIP/PNG/JPG/WEBP/TXT. Disimpan sebagai <em>path</em> di bucket privat.</div></li>
+    <li><div class="st-t">Server membuat nomor order</div><div class="st-b">RPC <code>create_public_request</code>. Nomor 6 digit acak (tidak mudah ditebak). Status dipaksa <code>new</code>, harga &amp; catatan internal dikosongkan — klien tidak bisa memalsukan.</div></li>
+    <li><div class="st-t">Kode referral divalidasi</div><div class="st-b">Hanya kode partner aktif yang disimpan. Kalau nomor WhatsApp klien sama dengan nomor partner → kode <strong>dibuang</strong> (self-referral).</div></li>
+    <li><div class="st-t">Klien dapat nomor tiket</div><div class="st-b">Diarahkan ke <code>/success/:orderNo</code>, lalu bisa cek di <code>/track</code>.</div></li>
+  </ol>
+
+  <h3>7.2 Portal partner</h3>
+  <p>Partner memasukkan kode referral untuk melihat: nama, kode, kampus, jumlah referral, jumlah deal, total dibayar, total tertunda, dan daftar komisi (order, kategori, status, nominal, tanggal).</p>
+  <div class="callout info">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>
+    <div><p>Portal memakai RPC <code>partner_portal(kode)</code> yang hanya mengembalikan baris milik partner tersebut. WhatsApp, e-wallet, dan data partner lain tidak pernah ikut keluar.</p></div>
+  </div>
+</section>
+
+<!-- ============================================================
+     8
+     ============================================================ -->
+<section class="part" id="s8" data-title="Tur dashboard admin">
+  <div class="sec-label"><span class="dot"></span>Bagian 8</div>
+  <h2 id="h8">Tur dashboard admin (fitur per fitur)</h2>
+
+  <p class="lead">Semua halaman di bawah butuh login engineer. Sidebar menampilkan menu; kalau <code>VITE_ENABLE_CRM=false</code>, menu CRM disembunyikan dan route-nya dialihkan ke dashboard.</p>
+
+  <h3>8.1 Dasbor — <code>/dashboard</code></h3>
+  <div class="card">
+    <p><strong>Kegunaan:</strong> melihat kondisi bisnis dalam 10 detik.</p>
+    <div class="dl">
+      <dt>Kartu atas</dt><dd>Request baru, perlu review, dikerjakan, deadline hari ini</dd>
+      <dt>Filter</dt><dd>Periode (Semua / 30 Hari / Bulan Ini) + Kampus</dd>
+      <dt>Funnel Outreach</dt><dd>Dihubungi → Dibalas → Berminat → Deal, dengan bar proporsional</dd>
+      <dt>Rasio</dt><dd>Response, Berminat, Closing (dihitung dari angka database; "—" kalau pembagi nol)</dd>
+      <dt>Uang</dt><dd>Omzet terkonfirmasi, komisi sudah dibayar, komisi siap dibayar, pendapatan sebelum biaya lain</dd>
+      <dt>Sumber Klien</dt><dd>Direct DM / Dibagikan Admin / Referral / Website Inbound / Lainnya — jumlah proyek, lunas, omzet</dd>
+    </div>
+  </div>
+  <div class="callout warn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l9 16H3z"/><path d="M12 9v4M12 16h.01"/></svg>
+    <div><p>"Sebelum biaya lain" = omzet − komisi. <strong>Bukan laba bersih</strong>; biaya operasional dan pajak belum dikurangi.</p></div>
+  </div>
+
+  <h3>8.2 Permintaan — <code>/requests</code></h3>
+  <p>Daftar semua request dengan status dan deadline. Klik satu baris untuk membuka detail.</p>
+
+  <h3>8.3 Detail request — <code>/requests/:id</code></h3>
+  <p>Halaman kerja utama. Terdiri dari dua kolom:</p>
+  <h4>Kolom kiri</h4>
+  <ul>
+    <li><strong>Customer info</strong> — nama, WhatsApp, tombol chat WA.</li>
+    <li><strong>Problem description</strong> — kategori, deadline, deskripsi klien, lampiran (dibuka via signed URL), link.</li>
+  </ul>
+  <h4>Kolom kanan — Actions</h4>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Field</th><th>Fungsi</th></tr></thead>
+    <tbody>
+      <tr><td>Your Quote (Rp)</td><td>Nilai quotation</td></tr>
+      <tr><td>Diskon (Rp)</td><td>Pengurang; total tagihan = quote − diskon</td></tr>
+      <tr><td>Internal Notes</td><td>Catatan pribadi (tidak pernah dikirim ke klien)</td></tr>
+      <tr><td>Video Walkthrough URL</td><td>Link Loom/Drive untuk serah terima</td></tr>
+      <tr><td>Catatan Logika &amp; Cheatsheet</td><td>Penjelasan kode untuk klien saat demo</td></tr>
+      <tr><td>Kampus</td><td>Dimensi untuk filter dashboard</td></tr>
+      <tr><td>Stack / Teknologi</td><td>mis. "Vue 3 + Supabase"</td></tr>
+      <tr><td>Sumber Klien</td><td>Direct DM / Dibagikan Admin / Referral / Website Inbound / Lainnya</td></tr>
+      <tr><td>Update Status</td><td>Konsultasi / Dikerjakan / Review / Selesai / Lunas</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>Tombol: <strong>Simpan Perubahan</strong>, <strong>Salin SOW &amp; Invoice DP 50%</strong> (teks siap tempel ke WhatsApp), <strong>Chat WhatsApp</strong>, <strong>Mark as Working</strong>, <strong>Done</strong>, <strong>Catat Pelunasan</strong>.</p>
+
+  <h4>Panel Pembayaran &amp; Komisi</h4>
+  <div class="dl">
+    <dt>Ringkasan</dt><dd>Total, Terbayar (bersih setelah refund), Sisa</dd>
+    <dt>Komisi referral</dt><dd>Status + nominal, dibaca dari database</dd>
+    <dt>Form catat</dt><dd>Jenis (DP / Pelunasan / Refund), nominal, metode, URL bukti, catatan</dd>
+    <dt>Tombol cepat</dt><dd>"Isi DP 50%", "Isi Sisa"</dd>
+    <dt>Riwayat</dt><dd>Setiap baris: jenis, nominal, tanggal, status, bukti, tombol <strong>Batalkan</strong></dd>
+  </div>
+  <div class="callout danger">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l9 16H3z"/><path d="M12 9v4M12 16h.01"/></svg>
+    <div><p>Status <strong>Lunas tidak bisa dipilih manual</strong>. Tombol "Mark as Paid" sudah diganti "Catat Pelunasan" — status berubah otomatis setelah pembayaran bersih ≥ total.</p></div>
+  </div>
+
+  <h3>8.4 Akun Target — <code>/ops/targets</code></h3>
+  <p>Mendata akun angkatan/jurusan sebagai <em>sumber</em> prospek.</p>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Field</th><th>Keterangan</th></tr></thead>
+    <tbody>
+      <tr><td>Username IG</td><td>Dinormalisasi: trim, buang <code>@</code>, lowercase</td></tr>
+      <tr><td>Kampus / Jurusan / Angkatan</td><td>Dimensi filter &amp; analytics</td></tr>
+      <tr><td>Jenis akun</td><td>Angkatan / Jurusan / Organisasi / Lainnya</td></tr>
+      <tr><td>Kontak admin</td><td>Hanya jika diberikan secara sah</td></tr>
+      <tr><td>Catatan pendekatan</td><td>Bebas</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>Aksi per baris: <strong>Tandai Dihubungi</strong>, <strong>Izin Diberikan</strong>, <strong>Menolak</strong>, <strong>Edit</strong>, <strong>Hapus</strong>.</p>
+  <div class="callout info">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>
+    <div><p>Menghapus akun target <strong>tidak menghapus prospek</strong>. Hanya tautan sumbernya dikosongkan (<code>source_account_id = null</code>).</p></div>
+  </div>
+
+  <h3>8.5 Prospek — <code>/ops/prospects</code></h3>
+  <p>Tabel prospek dengan pagination server-side 25 baris/halaman, filter status + kampus + pencarian.</p>
+  <h4>Menambah prospek</h4>
+  <ul>
+    <li><strong>Tambah Manual</strong> — satu username, opsional nama/kampus/angkatan/akun sumber. Basis izin otomatis <code>MANUAL_ENTRY</code>.</li>
+    <li><strong>Impor CSV</strong> — lihat 8.6.</li>
+  </ul>
+  <h4>Aksi per baris</h4>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Aksi</th><th>Yang terjadi</th></tr></thead>
+    <tbody>
+      <tr><td>Jadikan Klien</td><td>Membuat proyek baru + prospek jadi <code>CONVERTED</code> (lihat 8.7)</td></tr>
+      <tr><td>Lepas DNC</td><td>Hanya muncul untuk prospek DNC. Wajib alasan, tercatat di audit log</td></tr>
+      <tr><td>Hapus</td><td>Wajib alasan. Pilihan: masukkan ke suppression list atau tidak</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>8.6 Impor CSV</h3>
+  <div class="codewrap" data-lang="csv"><pre><code>ig_username,display_name,campus,cohort_year
+@Andi.23,Andi Pratama,Binus,2023
+siti_ok,Siti,Telkom,2022
+budi_s,Budi,,2024</code></pre></div>
+  <div class="dl">
+    <dt>Kolom wajib</dt><dd><code>ig_username</code> (header opsional; tanpa header urutan kolom tetap sama)</dd>
+    <dt>Normalisasi</dt><dd>spasi dibuang, <code>@</code> dihapus, jadi huruf kecil</dd>
+    <dt>Validasi</dt><dd>format <code>[a-z0-9._]{1,30}</code>; angkatan 1990–2036</dd>
+    <dt>Duplikat</dt><dd>dalam file dihitung terpisah; yang sudah ada di database tidak digandakan</dd>
+    <dt>DNC</dt><dd>prospek yang sudah minta jangan dihubungi <strong>tidak berubah</strong> walau diimpor ulang</dd>
+    <dt>Suppression</dt><dd>username yang pernah dihapus atas permintaan pemilik data dilewati</dd>
+    <dt>Basis izin</dt><dd><code>MANUAL_ENTRY</code>, <code>ADMIN_SHARED_LIST</code>, <code>INBOUND_OPT_IN</code> — wajib dipilih</dd>
+    <dt>File</dt><dd>tidak disimpan; hanya ringkasan batch yang dicatat</dd>
+    <dt>Besar file</dt><dd>dikirim per 200 baris dengan <code>batch_id</code> sama, terakumulasi ke satu baris riwayat</dd>
+  </div>
+  <p>Setelah commit, muncul ringkasan: <em>baru / sudah ada / dilewati karena DNC / duplikat dalam file / invalid</em>, plus potongan <code>batch_id</code>. Riwayat 5 import terakhir tampil di modal.</p>
+  <div class="callout warn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l9 16H3z"/><path d="M12 9v4M12 16h.01"/></svg>
+    <div><p>Hanya impor daftar yang Anda berhak pakai: input manual, formulir opt-in, atau daftar yang diserahkan admin dengan izin. <strong>Tidak ada</strong> scraping followers.</p></div>
+  </div>
+
+  <h3>8.7 Konversi prospek → klien</h3>
+  <ol class="steps">
+    <li><div class="st-t">Klik "Jadikan Klien"</div><div class="st-b">Modal terbuka: kategori, ringkasan kebutuhan, quote awal (opsional).</div></li>
+    <li><div class="st-t">Buat Proyek</div><div class="st-b">RPC <code>create_request_from_prospect</code> membuat <code>requests</code> dengan <code>source = DIRECT_DM</code>, <code>campus</code> dari prospek, <code>prospect_id</code> terisi, status <code>consultation</code>.</div></li>
+    <li><div class="st-t">Prospek ditandai CONVERTED</div><div class="st-b">Tombol berubah "Sudah klien". Konversi kedua ditolak (unique index).</div></li>
+    <li><div class="st-t">Lanjut ke detail proyek</div><div class="st-b">Klik "Buka detail proyek →" untuk mengisi quote final, DP, dll.</div></li>
+  </ol>
+  <div class="callout danger">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l9 16H3z"/><path d="M12 9v4M12 16h.01"/></svg>
+    <div><p>Prospek berstatus <strong>DNC tidak bisa dikonversi</strong>. RPC menolak dengan <code>DNC_LOCKED</code>.</p></div>
+  </div>
+
+  <h3>8.8 Antrean DM — <code>/ops/outreach</code></h3>
+  <p>Dua tab: <strong>Antrean</strong> (prospek layak dihubungi) dan <strong>Semua</strong> (semua prospek, dengan pagination "Muat lebih banyak").</p>
+  <div class="dl">
+    <dt>Kartu statistik</dt><dd>Di antrean, sudah dihubungi, berminat, jadi klien, jangan dihubungi — dari RPC <code>prospect_stats()</code></dd>
+    <dt>Panel kerja</dt><dd>Pilih template → preview terisi data nyata → <strong>Copy</strong> → <strong>Buka Profil</strong> → kirim manual dari aplikasi Instagram</dd>
+    <dt>Placeholder</dt><dd><code>{name}</code>, <code>{campus}</code>, <code>{cohort}</code>, <code>{website_url}</code> (alias Indonesia juga diterima)</dd>
+    <dt>Data kosong</dt><dd>diganti penanda jelas seperti <code>[Kampus]</code> dan dilaporkan, tidak dikarang</dd>
+    <dt>Catat hasil</dt><dd>Mark Contacted, Replied, Interested (service/referral), Not Interested, Do Not Contact</dd>
+  </div>
+  <div class="callout danger">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l9 16H3z"/><path d="M12 9v4M12 16h.01"/></svg>
+    <div><p><strong>Tidak ada tombol kirim massal.</strong> Tidak ada otomatisasi login Instagram. Semua pesan dikirim dan ditinjau manual — ini batasan platform sekaligus keputusan desain.</p></div>
+  </div>
+
+  <h3>8.9 Template DM — <code>/ops/templates</code></h3>
+  <p>Lima template awal sudah ter-seed:</p>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Nama</th><th>Kategori</th><th>Dipakai untuk</th></tr></thead>
+    <tbody>
+      <tr><td>Perkenalan ke admin angkatan</td><td>ADMIN</td><td>Pendekatan pertama ke admin</td></tr>
+      <tr><td>Direct client + referral</td><td>DUAL_OFFER</td><td>Mahasiswa: butuh jasa / mau mereferensikan</td></tr>
+      <tr><td>Penjelasan skema referral</td><td>REFERRAL</td><td>Setelah menyatakan minat referral</td></tr>
+      <tr><td>Balasan setelah minta website</td><td>WEBSITE_REPLY</td><td>Mengirim link setelah diminta</td></tr>
+      <tr><td>Penolakan / opt-out</td><td>OPT_OUT</td><td>Menutup percakapan dengan sopan</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>Template bisa diedit dan dibuat baru. Placeholder asing tidak dihapus — ditandai agar Anda sadar sebelum menyalin.</p>
+
+  <h3>8.10 Partner — <code>/engineer/partners</code></h3>
+  <p>Dua tab: <strong>Partner List</strong> dan <strong>Komisi Tracker</strong>.</p>
+  <h4>Partner List</h4>
+  <div class="dl">
+    <dt>Tambah</dt><dd>Nama, WhatsApp (dinormalisasi ke <code>62…</code>), kampus, e-wallet</dd>
+    <dt>Kode</dt><dd>Dibuat database: <code>REF-</code> + 8 karakter acak (±1,1 triliun kombinasi)</dd>
+    <dt>Edit</dt><dd>Semua field kecuali kode</dd>
+    <dt>Ganti kode</dt><dd>Rotasi; kode lama <strong>langsung tidak berlaku</strong>, proyek lama tidak terpengaruh</dd>
+    <dt>Aktif/Nonaktif</dt><dd>Kode nonaktif tidak menghasilkan komisi baru</dd>
+  </div>
+  <h4>Komisi Tracker</h4>
+  <div class="dl">
+    <dt>Filter</dt><dd>Partner + periode (Semua / 30 hari / Bulan ini)</dd>
+    <dt>Status</dt><dd><span class="badge b-warn">Menunggu Lunas</span> <span class="badge b-bad">Siap Dibayar</span> <span class="badge b-ok">Sudah Dibayar</span> <span class="badge b-new">Batal</span> <span class="badge b-warn">Perlu Review</span></dd>
+    <dt>Tandai Lunas</dt><dd>Modal konfirmasi: nominal, tujuan e-wallet, URL bukti, catatan</dd>
+    <dt>Ekspor CSV</dt><dd>Order, customer, partner, kode, kategori, nilai proyek, eligible, rate, komisi, status, tanggal, bukti</dd>
+  </div>
+  <div class="callout warn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l9 16H3z"/><path d="M12 9v4M12 16h.01"/></svg>
+    <div><p>Status <code>PAID</code> tidak bisa dikembalikan dari UI. Pastikan transfer benar-benar sudah dilakukan.</p></div>
+  </div>
+
+  <h3>8.11 Pendapatan — <code>/earnings</code></h3>
+  <p>Empat kartu: omzet terkonfirmasi, komisi siap dibayar, komisi sudah dibayar, sebelum biaya lain. Di bawahnya: arus pembayaran (diterima, refund, nilai bersih), tabel pembayaran terbaru, dan daftar komisi. Semua dari <code>payments</code> + <code>commissions</code> + <code>analytics_overview</code>.</p>
+
+  <h3>8.12 Instagram (legacy) — <code>/ig-leads</code></h3>
+  <p>Modul lama untuk lead dari komentar/DM Instagram (webhook). Bukan bagian alur outreach manual. Bisa diabaikan kalau tidak dipakai.</p>
+
+  <h3>8.13 Pengaturan — <code>/settings</code></h3>
+  <p>Menampilkan profil engineer (nama, email, WhatsApp) dan aksi cepat. Data berasal dari <code>profiles</code>.</p>
+</section>
+
+<!-- ============================================================
+     9
+     ============================================================ -->
+<section class="part" id="s9" data-title="Empat skenario end-to-end">
+  <div class="sec-label"><span class="dot"></span>Bagian 9</div>
+  <h2 id="h9">Empat skenario end-to-end</h2>
+
+  <p class="lead">Data dummy dipakai konsisten: admin <strong>@hmif.kampusx.2023</strong> (Kampus X, angkatan 2023), prospek <strong>@andi.dev</strong>, partner <strong>Sinta</strong> (<code>REF-SINTA23</code>), klien <strong>Budi</strong>.</p>
+
+  <div class="tabs" role="tablist">
+    <button role="tab" aria-selected="true" data-tab="sc1">1 · Admin memberi izin</button>
+    <button role="tab" aria-selected="false" data-tab="sc2">2 · Klien langsung</button>
+    <button role="tab" aria-selected="false" data-tab="sc3">3 · Referral 10%</button>
+    <button role="tab" aria-selected="false" data-tab="sc4">4 · Menolak &amp; re-import</button>
+  </div>
+
+  <div class="tabpanel" data-panel="sc1">
+    <h3>Skenario 1 — Admin angkatan memberi izin</h3>
+    <ol class="steps">
+      <li><div class="st-t">Catat akun target</div><div class="st-b"><code>/ops/targets</code> → Tambah Akun → <code>hmif.kampusx.2023</code>, Kampus X, Informatika, 2023, jenis Angkatan.</div></li>
+      <li><div class="st-t">Kirim DM perkenalan</div><div class="st-b"><code>/ops/outreach</code> → pilih template <em>Perkenalan ke admin angkatan</em> → Copy → Buka Profil → kirim manual → <strong>Mark Contacted</strong>.</div></li>
+      <li><div class="st-t">Admin membalas &amp; mengizinkan</div><div class="st-b">Kembali ke <code>/ops/targets</code> → <strong>Izin Diberikan</strong>. Waktu izin tercatat.</div></li>
+      <li><div class="st-t">Impor daftar dari admin</div><div class="st-b"><code>/ops/prospects</code> → Impor CSV → pilih file → akun sumber <code>@hmif.kampusx.2023</code> → basis izin <strong>Daftar diberikan admin</strong> → pratinjau → Simpan.</div></li>
+      <li><div class="st-t">Catat hasil</div><div class="st-b">Riwayat import muncul, batch tercatat, dan statistik antrean bertambah.</div></li>
+    </ol>
+    <div class="callout tip">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+      <div><p>Basis izin <code>ADMIN_SHARED_LIST</code> adalah bukti Anda punya dasar menghubungi mereka. Jangan pakai untuk daftar yang sumbernya tidak jelas.</p></div>
+    </div>
+  </div>
+
+  <div class="tabpanel" data-panel="sc2" hidden>
+    <h3>Skenario 2 — Andi jadi klien langsung</h3>
+    <ol class="steps">
+      <li><div class="st-t">Hubungi dari antrean</div><div class="st-b">Template <em>Direct client + referral</em> → Copy → Buka Profil → kirim → <strong>Mark Contacted</strong>.</div></li>
+      <li><div class="st-t">Andi membalas</div><div class="st-b">Catat <strong>Replied</strong>, lalu <strong>Interested in Service</strong>.</div></li>
+      <li><div class="st-t">Jadikan klien</div><div class="st-b"><code>/ops/prospects</code> → Jadikan Klien → kategori Website/Web App → quote awal Rp800.000 → Buat Proyek.</div></li>
+      <li><div class="st-t">Quote final &amp; diskon</div><div class="st-b">Di detail proyek: Quote 800.000, Diskon 0 → Simpan. Total tagihan 800.000.</div></li>
+      <li><div class="st-t">Catat DP 50%</div><div class="st-b">Panel Pembayaran → <strong>Isi DP 50%</strong> → 400.000 → Catat. Status proyek tetap <em>Dikerjakan</em>, komisi belum eligible.</div></li>
+      <li><div class="st-t">Pelunasan</div><div class="st-b"><strong>Catat Pelunasan</strong> → 400.000 → Catat. Status otomatis <em>Lunas</em>. Kalau ada kode referral, komisi jadi <em>Siap dibayar</em>.</div></li>
+    </ol>
+    <div class="callout info">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>
+      <div><p>Klik ganda pada tombol simpan tidak menggandakan pembayaran — setiap percobaan memakai <code>idempotency_key</code> yang sama sampai berhasil.</p></div>
+    </div>
+  </div>
+
+  <div class="tabpanel" data-panel="sc3" hidden>
+    <h3>Skenario 3 — Sinta membawa klien lewat referral</h3>
+    <ol class="steps">
+      <li><div class="st-t">Jadikan partner</div><div class="st-b"><code>/engineer/partners</code> → Tambah Partner → Sinta, 08xxx → kode otomatis <code>REF-SINTA23</code>.</div></li>
+      <li><div class="st-t">Sinta membagikan</div><div class="st-b">Sinta mengirim info jasa + kodenya ke Budi. Tidak perlu membuat konten atau mengerjakan proyek.</div></li>
+      <li><div class="st-t">Budi mengisi form</div><div class="st-b"><code>/request</code> dengan kode <code>REF-SINTA23</code>. Sistem menyimpan <code>source = REFERRAL</code>.</div></li>
+      <li><div class="st-t">Kerjakan &amp; tagih</div><div class="st-b">Quote Rp1.000.000 → DP 500.000 → Pelunasan 500.000 → status Lunas.</div></li>
+      <li><div class="st-t">Komisi muncul</div><div class="st-b">Komisi <strong>Rp100.000</strong> (10% dari 1.000.000), status <em>Siap dibayar</em>.</div></li>
+      <li><div class="st-t">Bayar &amp; catat bukti</div><div class="st-b">Tandai Lunas → isi URL bukti + catatan → Konfirmasi. Status jadi <em>Sudah dibayar</em>, tautan bukti muncul.</div></li>
+      <li><div class="st-t">Sinta cek sendiri</div><div class="st-b">Buka <code>/partner</code> → masukkan kode → melihat komisinya sendiri, tanpa data partner lain.</div></li>
+    </ol>
+  </div>
+
+  <div class="tabpanel" data-panel="sc4" hidden>
+    <h3>Skenario 4 — Menolak, re-import, dan hapus data</h3>
+    <ol class="steps">
+      <li><div class="st-t">Budi menolak</div><div class="st-b">Di antrean DM → <strong>Do Not Contact</strong> (dengan konfirmasi). Alasan bisa diisi di catatan.</div></li>
+      <li><div class="st-t">Efeknya</div><div class="st-b">Prospek hilang dari antrean; <code>log_outreach</code> menolak mencatat pesan baru ke prospek ini.</div></li>
+      <li><div class="st-t">CSV yang sama diimpor ulang</div><div class="st-b">Baris Budi dihitung <em>dilewati karena jangan-dihubungi</em>; status DNC tidak berubah.</div></li>
+      <li><div class="st-t">Budi minta datanya dihapus</div><div class="st-b">Tombol <strong>Hapus</strong> → isi alasan → pilih <em>OK</em> untuk masuk suppression list.</div></li>
+      <li><div class="st-t">Hasilnya</div><div class="st-b">Data prospek + log terhapus, proyek lama tetap ada dengan <code>prospect_id = null</code>, dan username tidak akan muncul lagi saat impor.</div></li>
+    </ol>
+    <div class="callout tip">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+      <div><p>Untuk <strong>salah input username</strong>, pilih <em>Batal</em> saat ditanya suppression — supaya username yang benar bisa diimpor lagi.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     10
+     ============================================================ -->
+<section class="part" id="s10" data-title="Aturan uang &amp; status">
+  <div class="sec-label"><span class="dot"></span>Bagian 10</div>
+  <h2 id="h10">Aturan uang &amp; status</h2>
+
+  <p class="lead">Bagian ini tidak boleh diubah tanpa menambah test. Semua nominal integer rupiah; tidak ada float.</p>
+
+  <h3>10.1 Rumus</h3>
+  <div class="codewrap" data-lang="text"><pre><code>total_tagihan      = quote_amount − discount_amount        (minimum 0)
+net_dibayar        = (DP + pelunasan) − refund             (hanya status CONFIRMED)
+eligible_komisi    = total_tagihan − refund                (hanya jika net_dibayar ≥ total_tagihan)
+komisi             = eligible_komisi × rate_bps / 10000    (integer, dipotong/truncate)
+rate_bps           = 1000  → 10%</code></pre></div>
+
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Kasus</th><th>Quote</th><th>Diskon</th><th>Dibayar</th><th>Komisi</th><th>Status komisi</th></tr></thead>
+    <tbody>
+      <tr><td>Baru DP 50%</td><td>1.000.000</td><td>50.000</td><td>475.000</td><td>0</td><td><span class="badge b-warn">PENDING</span></td></tr>
+      <tr><td>Lunas</td><td>1.000.000</td><td>50.000</td><td>950.000</td><td>95.000</td><td><span class="badge b-bad">ELIGIBLE</span></td></tr>
+      <tr><td>Lunas + refund 100.000</td><td>500.000</td><td>0</td><td>400.000</td><td>40.000</td><td><span class="badge b-bad">ELIGIBLE</span></td></tr>
+      <tr><td>Refund penuh</td><td>300.000</td><td>0</td><td>0</td><td>0</td><td><span class="badge b-new">VOID</span></td></tr>
+      <tr><td>Refund setelah dibayar</td><td>1.000.000</td><td>0</td><td>750.000</td><td>tetap 100.000</td><td><span class="badge b-warn">ADJUSTMENT</span></td></tr>
+      <tr><td>Nominal ganjil</td><td>333.333</td><td>0</td><td>333.333</td><td>33.333</td><td><span class="badge b-bad">ELIGIBLE</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>10.2 Status proyek</h3>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Status</th><th>Arti</th><th>Berubah karena</th></tr></thead>
+    <tbody>
+      <tr><td><code>new</code></td><td>Baru masuk</td><td>Form publik</td></tr>
+      <tr><td><code>consultation</code></td><td>Sedang konsultasi</td><td>Manual / konversi prospek</td></tr>
+      <tr><td><code>working</code></td><td>Dikerjakan</td><td>Manual, atau turun dari <code>paid</code> setelah refund</td></tr>
+      <tr><td><code>review</code></td><td>Menunggu review klien</td><td>Manual</td></tr>
+      <tr><td><code>done</code></td><td>Selesai</td><td>Manual</td></tr>
+      <tr><td><code>paid</code></td><td>Lunas</td><td><strong>Otomatis</strong> saat net ≥ total</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>10.3 Status prospek</h3>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Status</th><th>Label</th><th>Masuk antrean?</th></tr></thead>
+    <tbody>
+      <tr><td><code>NEW</code></td><td>Baru</td><td><span class="badge b-ok">Ya</span></td></tr>
+      <tr><td><code>READY_TO_REVIEW</code></td><td>Siap Ditinjau</td><td><span class="badge b-ok">Ya</span></td></tr>
+      <tr><td><code>CONTACTED</code></td><td>Sudah Dihubungi</td><td><span class="badge b-ok">Ya</span></td></tr>
+      <tr><td><code>REPLIED</code></td><td>Membalas</td><td><span class="badge b-ok">Ya</span></td></tr>
+      <tr><td><code>INTERESTED_SERVICE</code></td><td>Minat Jasa</td><td><span class="badge b-bad">Tidak</span></td></tr>
+      <tr><td><code>INTERESTED_REFERRAL</code></td><td>Minat Referral</td><td><span class="badge b-bad">Tidak</span></td></tr>
+      <tr><td><code>NOT_INTERESTED</code></td><td>Tidak Minat</td><td><span class="badge b-bad">Tidak</span></td></tr>
+      <tr><td><code>DO_NOT_CONTACT</code></td><td>Jangan Dihubungi</td><td><span class="badge b-bad">Tidak, permanen</span></td></tr>
+      <tr><td><code>CONVERTED</code></td><td>Jadi Klien</td><td><span class="badge b-bad">Tidak</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>10.4 Anti-fraud</h3>
+  <ul>
+    <li><strong>Satu proyek satu partner.</strong> Unique index pada <code>commissions.request_id</code>.</li>
+    <li><strong>Self-referral ditolak.</strong> Nomor WhatsApp dinormalisasi (<code>0831…</code> = <code>62831…</code>); kalau sama dengan partner, kode dibuang dan komisi tidak pernah dibuat.</li>
+    <li><strong>Idempotensi.</strong> <code>record_payment</code> memakai <code>idempotency_key</code> unik.</li>
+    <li><strong>Tidak ada double payout.</strong> <code>mark_commission_paid</code> hanya menerima status <code>ELIGIBLE</code>.</li>
+    <li><strong>Refund tidak menghapus histori.</strong> Nominal yang sudah dibayar tidak ditulis ulang; status jadi <code>ADJUSTMENT</code> untuk review manual.</li>
+  </ul>
+
+  <div class="callout danger">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l9 16H3z"/><path d="M12 9v4M12 16h.01"/></svg>
+    <div><p><strong>Komisi tidak pernah dibayar dari DP.</strong> Hanya setelah pelunasan terverifikasi. Ini aturan bisnis yang ditegakkan database, bukan sekadar kebiasaan.</p></div>
+  </div>
+</section>
+
+<!-- ============================================================
+     11
+     ============================================================ -->
+<section class="part" id="s11" data-title="SOP operasional">
+  <div class="sec-label"><span class="dot"></span>Bagian 11</div>
+  <h2 id="h11">SOP operasional</h2>
+
+  <p class="lead">Rutinitas singkat supaya sistem tetap akurat tanpa menambah beban.</p>
+
+  <div class="grid two">
+    <div class="card">
+      <h3 style="margin-top:0">Harian — 10–20 menit</h3>
+      <ul>
+        <li>Buka <code>/dashboard</code>: cek request baru &amp; deadline hari ini.</li>
+        <li><code>/ops/outreach</code>: tindak lanjuti yang membalas, catat hasil.</li>
+        <li>Catat pembayaran yang benar-benar masuk (jangan menunda).</li>
+        <li>Prospek yang minta berhenti → <strong>Do Not Contact</strong> segera.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">Mingguan — 20–30 menit</h3>
+      <ul>
+        <li><code>/engineer/partners</code>: bayar komisi <code>ELIGIBLE</code>, unggah bukti.</li>
+        <li>Cek <code>ADJUSTMENT</code> dan selesaikan manual.</li>
+        <li>Ekspor CSV komisi untuk arsip.</li>
+        <li>Tinjau prospek <code>CONTACTED</code> yang belum membalas — jangan follow-up berulang.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">Bulanan — 45 menit</h3>
+      <ul>
+        <li>Dashboard: bandingkan kanal (Direct DM / Admin / Referral / Inbound).</li>
+        <li>Hitung response, interest, closing rate aktual.</li>
+        <li>Putuskan: lanjutkan kanal terbaik, hentikan yang tidak jalan.</li>
+        <li>Evaluasi kapasitas jam delivery sebelum menaikkan target.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">Permintaan hapus data</h3>
+      <ol style="margin-bottom:0">
+        <li><code>/ops/prospects</code> → cari username.</li>
+        <li><strong>Hapus</strong> → isi alasan.</li>
+        <li>Pilih <em>OK</em> (suppression) — wajib untuk permintaan privasi.</li>
+        <li>Catat tanggal permintaan di luar sistem bila perlu.</li>
+      </ol>
+    </div>
+  </div>
+
+  <h3>11.1 Retensi data</h3>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Data</th><th>Saran retensi</th><th>Catatan</th></tr></thead>
+    <tbody>
+      <tr><td>Prospek tanpa interaksi</td><td>12 bulan → hapus</td><td>Tanpa suppression (bukan permintaan privasi)</td></tr>
+      <tr><td>Prospek DNC / suppression</td><td>≥24 bulan</td><td>Agar larangan kontak tetap berlaku</td></tr>
+      <tr><td>Pembayaran &amp; komisi</td><td>Sesuai kebutuhan pembukuan</td><td>Jangan dihapus sembarangan</td></tr>
+      <tr><td>Lampiran request</td><td>Setelah proyek selesai + garansi</td><td>Hapus objek di Storage, bukan hanya baris</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="lead" style="font-size:13.5px">Retensi ini <strong>kebijakan manual</strong>, belum otomatis. Tinjau terhadap UU PDP 27/2022; ini bukan nasihat hukum.</p>
+</section>
+
+<!-- ============================================================
+     12
+     ============================================================ -->
+<section class="part" id="s12" data-title="Keamanan &amp; privasi">
+  <div class="sec-label"><span class="dot"></span>Bagian 12</div>
+  <h2 id="h12">Keamanan &amp; privasi</h2>
+
+  <h3>12.1 Yang sudah ditegakkan</h3>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Kontrol</th><th>Implementasi</th></tr></thead>
+    <tbody>
+      <tr><td>Akses CRM</td><td>RLS + <code>is_engineer()</code>; anon &amp; non-engineer ditolak di level database</td></tr>
+      <tr><td>Data publik</td><td><code>requests</code> &amp; <code>partners</code> tidak bisa dibaca anon; diganti RPC berkolom terbatas</td></tr>
+      <tr><td>Kunci rahasia</td><td>Service role hanya di Vercel Functions; tidak ada di bundle</td></tr>
+      <tr><td>Lampiran</td><td>Bucket privat, signed URL 1 jam, maks 10 MB, tipe dibatasi</td></tr>
+      <tr><td>CSV ekspor</td><td>Sel <code>= + - @</code> dinetralkan (formula injection)</td></tr>
+      <tr><td>Nominal</td><td><code>bigint</code> rupiah; komisi dihitung database</td></tr>
+      <tr><td>Idempotensi</td><td>Pembayaran &amp; payout aman terhadap retry</td></tr>
+      <tr><td>Audit</td><td>Void pembayaran, lepas DNC, hapus prospek — semua wajib alasan</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>12.2 Yang perlu Anda jaga</h3>
+  <ul>
+    <li>Password database &amp; service role jangan masuk repo, screenshot, atau chat.</li>
+    <li>Matikan signup publik di Supabase Auth.</li>
+    <li>Backup harian aktif; uji restore sesekali.</li>
+    <li>Rotasi kode partner kalau kode lama bocor (tombol <strong>Ganti kode</strong>).</li>
+    <li>Audit user engineer: <code>select id, email, role from profiles where role = 'engineer';</code></li>
+  </ul>
+
+  <div class="callout warn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l9 16H3z"/><path d="M12 9v4M12 16h.01"/></svg>
+    <div><p><strong>Risiko residual:</strong> rate limit per-IP untuk portal partner belum ada. Kode 8 karakter acak membuat brute force tidak praktis, tetapi untuk traffic tinggi sebaiknya pasang rate limit di edge (Vercel/Cloudflare).</p></div>
+  </div>
+
+  <h3>12.3 Data minimal yang disimpan</h3>
+  <div class="dl">
+    <dt>Prospek</dt><dd>username, nama opsional, kampus, angkatan, status, basis izin, catatan</dd>
+    <dt>Suppression</dt><dd>username + alasan + waktu (tanpa nama/kampus/nomor)</dd>
+    <dt>Partner</dt><dd>nama, WhatsApp, kampus, info e-wallet, kode</dd>
+    <dt>Tidak disimpan</dt><dd>password Instagram, cookie sesi, kode sumber klien, token API klien</dd>
+  </div>
+</section>
+
+<!-- ============================================================
+     13
+     ============================================================ -->
+<section class="part" id="s13" data-title="Kepatuhan Instagram">
+  <div class="sec-label"><span class="dot"></span>Bagian 13</div>
+  <h2 id="h13">Kepatuhan Instagram</h2>
+
+  <p class="lead">Kebijakan Meta berubah. Verifikasi ulang ke dokumentasi resmi sebelum menambah otomatisasi apa pun.</p>
+
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Aktivitas</th><th>Status</th><th>Catatan</th></tr></thead>
+    <tbody>
+      <tr><td>Ambil daftar followers/following akun pihak ketiga</td><td><span class="badge b-bad">Tidak didukung</span></td><td>API resmi hanya memberi jumlah, bukan daftar; scraping melanggar ketentuan</td></tr>
+      <tr><td>Kirim DM manual setelah ditinjau</td><td><span class="badge b-ok">Boleh</span></td><td>Copy pesan + buka profil; manusia yang mengirim</td></tr>
+      <tr><td>DM massal otomatis / login browser / cookie</td><td><span class="badge b-bad">Dilarang</span></td><td>Tidak diimplementasikan</td></tr>
+      <tr><td>Messaging API untuk balasan</td><td><span class="badge b-warn">Kondisional</span></td><td>Hanya percakapan dimulai pengguna / private reply komentar; perlu review Meta</td></tr>
+      <tr><td>Impor CSV dari admin</td><td><span class="badge b-warn">Kondisional</span></td><td>Wajib mencatat basis izin; file mentah tidak disimpan</td></tr>
+      <tr><td>Portal partner via kode</td><td><span class="badge b-warn">Kondisional</span></td><td>Hanya data partner sendiri</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>13.1 Batas yang dipegang sistem</h3>
+  <ul>
+    <li>Tidak ada kredensial Instagram di database atau browser.</li>
+    <li>Tidak ada tombol "kirim ke semua".</li>
+    <li>Tidak ada penyamaran bot, rotasi proxy, atau bypass rate limit.</li>
+    <li>Tidak ada klaim "aman dari shadowban" — tidak ada ambang DM yang menjamin aman.</li>
+  </ul>
+
+  <div class="callout info">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>
+    <div><p><strong>Integritas akademik.</strong> Situs memakai branding "joki". Pastikan copy DM dan penawaran tidak menjanjikan nilai, kelulusan, atau menyamarkan siapa pembuat karya. Bedakan konsultasi/pendampingan dari pengembangan software untuk proyek independen.</p></div>
+  </div>
+</section>
+
+<!-- ============================================================
+     14
+     ============================================================ -->
+<section class="part" id="s14" data-title="Troubleshooting">
+  <div class="sec-label"><span class="dot"></span>Bagian 14</div>
+  <h2 id="h14">Troubleshooting</h2>
+
+  <p class="lead">Gejala → penyebab → solusi. Sebagian besar berasal dari SQL yang belum dijalankan atau deployment yang tidak sinkron.</p>
+
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Gejala</th><th>Penyebab</th><th>Solusi</th></tr></thead>
+    <tbody>
+      <tr><td>Halaman prospek/earnings kosong + pesan "schema belum dipasang"</td><td>Migration belum dijalankan</td><td>Jalankan <code>DEPLOY-ALL-IN-ONE.sql</code>, lalu verifikasi 6 fungsi/4 kolom</td></tr>
+      <tr><td>Simpan quote/notes gagal (<code>column ... does not exist</code>)</td><td>Kolom <code>campus/stack/source</code> belum ada</td><td>Jalankan <code>migration-project-details.sql</code> + <code>migration-analytics-source.sql</code></td></tr>
+      <tr><td><code>void_payment is not a function</code></td><td>Migration <code>payment-flow</code> belum jalan</td><td>Jalankan <code>migration-payment-flow.sql</code></td></tr>
+      <tr><td><code>analytics_campuses</code> tidak ditemukan</td><td>Migration project-details belum jalan</td><td>Jalankan <code>migration-project-details.sql</code></td></tr>
+      <tr><td>Login ditolak "bukan akun engineer"</td><td><code>profiles.role</code> bukan <code>engineer</code></td><td><code>update profiles set role='engineer' where email='...'</code></td></tr>
+      <tr><td>Import CSV: semua baris invalid</td><td>Header/urutan kolom salah, atau username ada spasi/karakter terlarang</td><td>Pastikan kolom pertama <code>ig_username</code>; cek pratinjau error per baris</td></tr>
+      <tr><td>Import: "dilewati" banyak</td><td>Username sudah DNC atau ada di suppression</td><td>Normal — itu proteksi. Cek tab Semua prospek</td></tr>
+      <tr><td>Komisi tetap "Menunggu Lunas" walau klien bilang sudah bayar</td><td>Pembayaran belum dicatat, atau kurang dari total</td><td>Catat pelunasan; pastikan net ≥ total. Cek riwayat pembayaran</td></tr>
+      <tr><td>Komisi tidak muncul sama sekali</td><td>Tidak ada <code>referral_code</code>, partner nonaktif, atau self-referral</td><td>Cek kolom referral di detail proyek; aktifkan partner; pastikan nomor berbeda</td></tr>
+      <tr><td>Status "Lunas" tidak bisa dipilih</td><td>Disengaja</td><td>Catat pelunasan; status berubah otomatis</td></tr>
+      <tr><td>Upload lampiran gagal</td><td>&gt;10 MB, tipe tidak didukung, atau bucket belum privat/policy hilang</td><td>Perkecil file; cek bucket &amp; policy Storage</td></tr>
+      <tr><td>Lampiran lama tidak bisa dibuka</td><td>Bucket sudah privat, URL publik lama mati</td><td>Buka dari detail request (signed URL). Data lama otomatis diekstrak path-nya</td></tr>
+      <tr><td>DNC tidak bisa dilepas</td><td>Disengaja — butuh alasan</td><td>Tombol <strong>Lepas DNC</strong> + isi alasan (tercatat di audit)</td></tr>
+      <tr><td>Prospek tidak bisa dikonversi</td><td>Sudah punya proyek, atau DNC</td><td>Satu prospek satu proyek; DNC harus dilepas dulu (dengan alasan)</td></tr>
+      <tr><td><code>make redeploy</code>: "Branch saat ini ..."</td><td>Bukan di <code>main</code></td><td><code>git checkout main</code> atau <code>--allow-branch</code></td></tr>
+      <tr><td><code>make redeploy</code>: "Password DB belum diisi"</td><td><code>db.env</code> masih placeholder</td><td>Edit <code>~/.config/jokitugasit/db.env</code>, ganti <code>&lt;PASSWORD&gt;</code></td></tr>
+      <tr><td>Push/deploy gagal "fetch failed"</td><td>Jaringan/Vercel</td><td>Script retry 3×; ulangi <code>make redeploy</code></td></tr>
+      <tr><td>Frontend baru tapi fitur error</td><td>Urutan terbalik (frontend sebelum SQL)</td><td>Jalankan SQL, lalu redeploy</td></tr>
+      <tr><td>Menu CRM hilang</td><td><code>VITE_ENABLE_CRM=false</code></td><td>Set <code>true</code> lalu <code>make redeploy ARGS="--only-deploy"</code></td></tr>
+      <tr><td><code>npm run test:db</code> gagal connect</td><td>PostgreSQL lokal mati</td><td><code>pg_isready</code>; nyalakan server; atau lewati (bukan wajib)</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>14.1 Diagnostik cepat</h3>
+  <div class="codewrap" data-lang="sql"><pre><code><span class="c">-- Apa yang sudah terpasang?</span>
+select table_name from information_schema.tables
+where table_schema='public' order by 1;
+
+select proname from pg_proc
+where pronamespace='public'::regnamespace order by 1;
+
+<span class="c">-- Siapa engineer?</span>
+select id, email, role from public.profiles where role='engineer';
+
+<span class="c">-- Pembayaran &amp; komisi sebuah proyek</span>
+select r.order_no, r.status, r.quote_amount, r.discount_amount,
+       coalesce(sum(p.amount) filter (where p.kind&lt;&gt;'REFUND'),0) as dibayar,
+       c.status as komisi_status, c.amount as komisi
+from public.requests r
+left join public.payments p on p.request_id=r.id and p.status='CONFIRMED'
+left join public.commissions c on c.request_id=r.id
+where r.order_no='&lt;NOMOR&gt;'
+group by r.id, r.order_no, r.status, r.quote_amount, r.discount_amount, c.status, c.amount;</code></pre></div>
+</section>
+
+<!-- ============================================================
+     15
+     ============================================================ -->
+<section class="part" id="s15" data-title="Referensi">
+  <div class="sec-label"><span class="dot"></span>Bagian 15</div>
+  <h2 id="h15">Referensi</h2>
+
+  <h3>15.1 Route</h3>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Route</th><th>Akses</th><th>Keterangan</th></tr></thead>
+    <tbody>
+      <tr><td><code>/login</code></td><td>publik</td><td>Masuk engineer</td></tr>
+      <tr><td><code>/dashboard</code></td><td>engineer</td><td>KPI, funnel, sumber, uang</td></tr>
+      <tr><td><code>/requests</code>, <code>/requests/:id</code></td><td>engineer</td><td>Daftar &amp; detail proyek</td></tr>
+      <tr><td><code>/ops/targets</code></td><td>engineer + CRM</td><td>Akun target</td></tr>
+      <tr><td><code>/ops/prospects</code></td><td>engineer + CRM</td><td>Prospek, import, konversi</td></tr>
+      <tr><td><code>/ops/outreach</code></td><td>engineer + CRM</td><td>Antrean DM</td></tr>
+      <tr><td><code>/ops/templates</code></td><td>engineer + CRM</td><td>Template DM</td></tr>
+      <tr><td><code>/engineer/partners</code></td><td>engineer + CRM</td><td>Partner &amp; komisi</td></tr>
+      <tr><td><code>/earnings</code></td><td>engineer</td><td>Pendapatan</td></tr>
+      <tr><td><code>/ig-leads</code></td><td>engineer + CRM</td><td>Instagram legacy</td></tr>
+      <tr><td><code>/settings</code></td><td>engineer</td><td>Profil</td></tr>
+      <tr><td><code>/request</code>, <code>/track</code>, <code>/partner</code></td><td>publik</td><td>Form, tracking, portal partner</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>15.2 RPC (fungsi database yang dipanggil frontend)</h3>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>RPC</th><th>Untuk</th><th>Akses</th></tr></thead>
+    <tbody>
+      <tr><td><code>create_public_request</code></td><td>Form publik → nomor order</td><td>anon</td></tr>
+      <tr><td><code>track_request</code></td><td>Lacak order tanpa membuka tabel</td><td>anon</td></tr>
+      <tr><td><code>validate_referral_code</code></td><td>Validasi kode tanpa data partner</td><td>anon</td></tr>
+      <tr><td><code>partner_portal</code></td><td>Data partner sendiri</td><td>anon</td></tr>
+      <tr><td><code>register_partner</code></td><td>Pendaftaran partner + kode</td><td>anon</td></tr>
+      <tr><td><code>import_prospects_batch</code></td><td>Import + audit batch</td><td>engineer</td></tr>
+      <tr><td><code>prospect_stats</code></td><td>Statistik antrean</td><td>engineer</td></tr>
+      <tr><td><code>log_outreach</code></td><td>Catat hasil kontak</td><td>engineer</td></tr>
+      <tr><td><code>clear_do_not_contact</code></td><td>Lepas DNC + alasan</td><td>engineer</td></tr>
+      <tr><td><code>delete_prospect</code></td><td>Hapus + suppression</td><td>engineer</td></tr>
+      <tr><td><code>create_request_from_prospect</code></td><td>Konversi prospek → proyek</td><td>engineer</td></tr>
+      <tr><td><code>record_payment</code></td><td>DP/pelunasan/refund (idempoten)</td><td>engineer</td></tr>
+      <tr><td><code>void_payment</code></td><td>Batalkan pembayaran + alasan</td><td>engineer</td></tr>
+      <tr><td><code>recompute_commission</code></td><td>Hitung ulang komisi</td><td>engineer</td></tr>
+      <tr><td><code>mark_commission_paid</code></td><td>Payout + bukti</td><td>engineer</td></tr>
+      <tr><td><code>generate_referral_code</code></td><td>Kode acak baru</td><td>engineer</td></tr>
+      <tr><td><code>rotate_partner_code</code></td><td>Ganti kode partner</td><td>engineer</td></tr>
+      <tr><td><code>analytics_overview</code></td><td>KPI + breakdown</td><td>engineer</td></tr>
+      <tr><td><code>analytics_funnel</code></td><td>Funnel outreach</td><td>engineer</td></tr>
+      <tr><td><code>analytics_campuses</code></td><td>Daftar kampus</td><td>engineer</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>15.3 Tabel utama</h3>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Tabel</th><th>Isi</th></tr></thead>
+    <tbody>
+      <tr><td><code>profiles</code></td><td>Profil user + role (<code>customer</code>/<code>engineer</code>)</td></tr>
+      <tr><td><code>requests</code></td><td>Proyek/order: klien, quote, diskon, kampus, stack, sumber, status</td></tr>
+      <tr><td><code>payments</code></td><td>DP/pelunasan/refund, idempotency, void audit</td></tr>
+      <tr><td><code>partners</code></td><td>Partner referral + kode</td></tr>
+      <tr><td><code>commissions</code></td><td>Komisi per proyek, status, bukti payout</td></tr>
+      <tr><td><code>target_accounts</code></td><td>Akun IG angkatan/jurusan</td></tr>
+      <tr><td><code>prospects</code></td><td>Prospek unik (username unik), DNC, basis izin</td></tr>
+      <tr><td><code>prospect_suppressions</code></td><td>Username yang tidak boleh diimpor lagi</td></tr>
+      <tr><td><code>import_batches</code></td><td>Audit import (tanpa file mentah)</td></tr>
+      <tr><td><code>dm_templates</code></td><td>Template pesan</td></tr>
+      <tr><td><code>outreach_logs</code></td><td>Riwayat kontak &amp; hasil</td></tr>
+      <tr><td><code>transactions</code></td><td>Legacy — tidak lagi dipakai UI</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>15.4 Environment variable</h3>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Variabel</th><th>Masuk browser?</th><th>Guna</th></tr></thead>
+    <tbody>
+      <tr><td><code>VITE_SUPABASE_URL</code></td><td>Ya</td><td>URL project Supabase</td></tr>
+      <tr><td><code>VITE_SUPABASE_ANON_KEY</code></td><td>Ya</td><td>Key publik (aman, dilindungi RLS)</td></tr>
+      <tr><td><code>VITE_ENABLE_CRM</code></td><td>Ya</td><td>Feature flag modul CRM</td></tr>
+      <tr><td><code>SUPABASE_URL</code>, <code>SUPABASE_SERVICE_ROLE_KEY</code></td><td><strong>Tidak</strong></td><td>Functions server</td></tr>
+      <tr><td><code>IG_*</code></td><td><strong>Tidak</strong></td><td>Webhook/Graph API</td></tr>
+      <tr><td><code>TELEGRAM_*</code>, <code>RESEND_*</code>, <code>APP_URL</code></td><td><strong>Tidak</strong></td><td>Notifikasi &amp; email</td></tr>
+      <tr><td><code>SUPABASE_DB_URL</code> (lokal)</td><td><strong>Tidak</strong></td><td>Migration otomatis <code>make redeploy</code></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>15.5 Perintah <code>make</code></h3>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Perintah</th><th>Fungsi</th></tr></thead>
+    <tbody>
+      <tr><td><code>make redeploy</code></td><td>Test → build → SQL → push → deploy → smoke</td></tr>
+      <tr><td><code>make ship</code></td><td>Alias <code>redeploy</code></td></tr>
+      <tr><td><code>make deploy</code></td><td>Pipeline interaktif lama (<code>scripts/deploy.sh</code>)</td></tr>
+      <tr><td><code>make build</code></td><td>Clean + build produksi</td></tr>
+      <tr><td><code>make dev</code></td><td>Dev server</td></tr>
+      <tr><td><code>make preview</code></td><td>Preview hasil build</td></tr>
+      <tr><td><code>make health</code></td><td>Cek HTTP domain live</td></tr>
+      <tr><td><code>make supabase-check</code></td><td>Cek file migration &amp; <code>.env</code></td></tr>
+      <tr><td><code>make vercel-deploy</code></td><td>Push ke <code>origin/main</code></td></tr>
+      <tr><td><code>make test-telegram</code></td><td>Uji notifikasi Telegram</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>15.6 Template DM</h3>
+  <div class="card">
+    <p><strong>F1 — ke admin angkatan</strong></p>
+    <p style="font-size:14px;color:var(--text-2)">Halo kak, izin perkenalan. Saya software engineer yang membuka jasa konsultasi coding, debugging, integrasi API/database, serta pengembangan software. Saya ingin memperkenalkan layanan ini kepada teman-teman mahasiswa IT di angkatan kakak. Saya juga menyediakan komisi referral 10% untuk rekomendasi yang berhasil menjadi klien. Apakah berkenan jika saya kirim website dan informasi singkatnya untuk dipertimbangkan atau dibagikan? Terima kasih, kak.</p>
+    <hr>
+    <p><strong>F2 — mahasiswa (klien langsung + referral)</strong></p>
+    <p style="font-size:14px;color:var(--text-2)">Halo kak, salam kenal! Saya software engineer dan sedang membuka jasa bantuan teknis coding, debugging, API/database, dan pengembangan aplikasi. Kalau kakak sedang butuh bantuan teknis atau punya teman yang membutuhkan, boleh menghubungi saya. Saya juga menyediakan komisi referral 10% untuk rekomendasi yang berhasil menjadi klien. Jika berkenan, boleh saya bagikan website dan portofolionya?</p>
+    <hr>
+    <p><strong>F5 — penolakan / opt-out</strong></p>
+    <p style="font-size:14px;color:var(--text-2)">Baik kak, terima kasih sudah membalas. Saya tidak akan menghubungi lagi terkait penawaran ini. Semoga aktivitasnya lancar ya.</p>
+  </div>
+  <p class="lead" style="font-size:13.5px">Template lengkap (F1–F5) sudah ter-seed di <code>dm_templates</code> dan bisa diedit di <code>/ops/templates</code>.</p>
+</section>
+
+<!-- ============================================================
+     16
+     ============================================================ -->
+<section class="part" id="s16" data-title="Checklist go-live">
+  <div class="sec-label"><span class="dot"></span>Bagian 16</div>
+  <h2 id="h16">Checklist go-live &amp; offboarding</h2>
+
+  <h3>16.1 Sebelum live</h3>
+  <ul class="check">
+    <li><b>Backup database</b> sudah dibuat</li>
+    <li><b>SQL</b> <code>DEPLOY-ALL-IN-ONE.sql</code> dijalankan</li>
+    <li><b>Verifikasi</b> 6 fungsi + 4 kolom mengembalikan angka benar</li>
+    <li><b>Signup publik</b> dimatikan di Supabase Auth</li>
+    <li><b>Akun engineer</b> ada dan <code>role = engineer</code></li>
+    <li><b>Bucket attachments</b> private + policy terpasang</li>
+    <li><b>Test</b> <code>npm test</code> dan <code>npm run test:db</code> hijau</li>
+    <li><b>Build</b> sukses</li>
+    <li><b>Env Vercel</b> berisi dua variabel <code>VITE_*</code> yang benar</li>
+    <li><b>Deploy</b> sukses, alias mengarah ke build baru</li>
+  </ul>
+
+  <h3>16.2 Uji 6 jalur setelah live</h3>
+  <ul class="check">
+    <li>Landing <code>/</code> tampil normal</li>
+    <li><code>/request</code> bisa kirim (dengan dan tanpa lampiran)</li>
+    <li><code>/track</code> menemukan order yang baru dibuat</li>
+    <li><code>/partner</code> bisa daftar → dapat kode <code>REF-XXXXXXXX</code></li>
+    <li>Login engineer → dashboard, filter periode &amp; kampus berubah</li>
+    <li>Satu siklus: prospek → Jadikan Klien → DP → pelunasan → komisi → tandai lunas</li>
+  </ul>
+
+  <h3>16.3 Offboarding / mematikan modul</h3>
+  <div class="codewrap" data-lang="bash"><pre><code><span class="c"># sembunyikan CRM tanpa rollback kode</span>
+vercel env add VITE_ENABLE_CRM production      <span class="c"># isi: false</span>
+make redeploy ARGS="--only-deploy"</code></pre></div>
+  <p>Yang tetap berjalan: website publik, form request, tracking, portal partner, dashboard, earnings. Yang hilang dari navigasi: target accounts, prospek, antrean DM, template, partner, IG leads.</p>
+
+  <h3>16.4 Ekspor data sebelum berhenti</h3>
+  <div class="codewrap" data-lang="sql"><pre><code><span class="c">-- Jalankan di SQL Editor, unduh hasilnya sebagai CSV</span>
+select * from public.requests order by created_at;
+select * from public.payments order by paid_at;
+select * from public.commissions order by created_at;
+select * from public.partners order by created_at;
+select * from public.prospects order by first_seen_at;
+select * from public.outreach_logs order by sent_at;</code></pre></div>
+
+  <div class="callout tip">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+    <div><p>Data prospek dan komisi juga bisa diekspor dari UI: tombol <strong>Ekspor</strong> di <code>/ops/prospects</code> dan <strong>Ekspor CSV</strong> di <code>/engineer/partners</code>.</p></div>
+  </div>
+
+  <div class="foot">
+    <p><strong>Panduan Lengkap — jokitugasit.my.id</strong></p>
+    <p>Dokumen ini diturunkan dari kode di repository <code>jokitugasit-vue</code>. Untuk detail teknis schema/RLS, lihat <code>docs/OUTREACH-CRM.md</code>; untuk produk &amp; model omzet, lihat <code>docs/PRD-OUTREACH.md</code>; untuk deploy, lihat <code>docs/DEPLOY.md</code>.</p>
+    <p>Tips: tekan <kbd>T</kbd> untuk ganti tema, <kbd>/</kbd> untuk mencari, dan <kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>P</kbd> untuk menyimpan sebagai PDF.</p>
+  </div>
+</section>
+
+</div><!-- /content -->
+</main>
+</div><!-- /wrap -->
+
+<button class="totop" id="totop" aria-label="Kembali ke atas">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- theme ---------- */
+  var root = document.documentElement;
+  var KEY = "jt-guide-theme";
+  function applyTheme(t) {
+    root.setAttribute("data-theme", t);
+    try { localStorage.setItem(KEY, t); } catch (e) {}
+  }
+  var saved = null;
+  try { saved = localStorage.getItem(KEY); } catch (e) {}
+  applyTheme(saved || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"));
+
+  function toggleTheme() {
+    applyTheme(root.getAttribute("data-theme") === "dark" ? "light" : "dark");
+  }
+  ["themeBtn", "themeBtn2"].forEach(function (id) {
+    var b = document.getElementById(id);
+    if (b) b.addEventListener("click", toggleTheme);
+  });
+
+  /* ---------- build TOC from sections ---------- */
+  var sections = Array.prototype.slice.call(document.querySelectorAll("section.part"));
+  var tocList = document.getElementById("tocList");
+
+  sections.forEach(function (sec, i) {
+    var h2 = sec.querySelector("h2");
+    if (!h2) return;
+    var li = document.createElement("li");
+    var a = document.createElement("a");
+    a.href = "#" + sec.id;
+    a.innerHTML = '<span class="num">' + (i + 1) + ".</span>" + sec.getAttribute("data-title");
+    a.dataset.target = sec.id;
+    li.appendChild(a);
+    tocList.appendChild(li);
+  });
+
+  var tocLinks = Array.prototype.slice.call(tocList.querySelectorAll("a"));
+
+  /* ---------- scrollspy ---------- */
+  var current = "";
+  function setActive(id) {
+    if (id === current) return;
+    current = id;
+    tocLinks.forEach(function (a) {
+      a.classList.toggle("active", a.dataset.target === id);
+    });
+  }
+  if ("IntersectionObserver" in window) {
+    var visible = {};
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        visible[en.target.id] = en.isIntersecting ? en.intersectionRatio : 0;
+      });
+      var best = "", bestRatio = 0;
+      Object.keys(visible).forEach(function (k) {
+        if (visible[k] > bestRatio) { bestRatio = visible[k]; best = k; }
+      });
+      if (best) setActive(best);
+    }, { rootMargin: "-15% 0px -60% 0px", threshold: [0, 0.15, 0.4, 0.75, 1] });
+    sections.forEach(function (s) { io.observe(s); });
+  }
+
+  /* ---------- mobile sidebar ---------- */
+  var sidebar = document.getElementById("sidebar");
+  var scrim = document.getElementById("scrim");
+  var menuBtn = document.getElementById("menuBtn");
+
+  function closeMenu() {
+    sidebar.classList.remove("open");
+    scrim.classList.remove("show");
+    menuBtn.setAttribute("aria-expanded", "false");
+  }
+  menuBtn.addEventListener("click", function () {
+    var open = sidebar.classList.toggle("open");
+    scrim.classList.toggle("show", open);
+    menuBtn.setAttribute("aria-expanded", String(open));
+  });
+  scrim.addEventListener("click", closeMenu);
+  tocList.addEventListener("click", function (e) {
+    if (e.target.closest("a") && window.innerWidth <= 1040) closeMenu();
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") closeMenu();
+  });
+
+  /* ---------- copy buttons ---------- */
+  document.querySelectorAll(".codewrap").forEach(function (wrap) {
+    var lang = wrap.getAttribute("data-lang");
+    if (lang) {
+      var tag = document.createElement("span");
+      tag.className = "lang";
+      tag.textContent = lang;
+      wrap.appendChild(tag);
+    }
+    var btn = document.createElement("button");
+    btn.className = "copy";
+    btn.type = "button";
+    btn.textContent = "copy";
+    btn.setAttribute("aria-label", "Salin kode");
+    btn.addEventListener("click", function () {
+      var code = wrap.querySelector("pre");
+      var text = code ? code.innerText : "";
+      var done = function () {
+        btn.textContent = "copied";
+        btn.classList.add("done");
+        setTimeout(function () {
+          btn.textContent = "copy";
+          btn.classList.remove("done");
+        }, 1600);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, function () {
+          fallbackCopy(text); done();
+        });
+      } else {
+        fallbackCopy(text); done();
+      }
+    });
+    wrap.appendChild(btn);
+  });
+
+  function fallbackCopy(text) {
+    var ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand("copy"); } catch (e) {}
+    document.body.removeChild(ta);
+  }
+
+  /* ---------- tabs ---------- */
+  var tabButtons = Array.prototype.slice.call(document.querySelectorAll(".tabs button"));
+  tabButtons.forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      tabButtons.forEach(function (b) { b.setAttribute("aria-selected", "false"); });
+      btn.setAttribute("aria-selected", "true");
+      document.querySelectorAll(".tabpanel").forEach(function (p) {
+        p.hidden = p.getAttribute("data-panel") !== btn.getAttribute("data-tab");
+      });
+    });
+  });
+
+  /* ---------- search ---------- */
+  var input = document.getElementById("search");
+  var hits = document.getElementById("hits");
+  var index = sections.map(function (sec) {
+    return {
+      sec: sec,
+      text: (sec.getAttribute("data-title") + " " + sec.textContent).toLowerCase()
+    };
+  });
+
+  function clearMarks(rootEl) {
+    rootEl.querySelectorAll("mark").forEach(function (m) {
+      var parent = m.parentNode;
+      while (m.firstChild) parent.insertBefore(m.firstChild, m);
+      parent.removeChild(m);
+      parent.normalize();
+    });
+  }
+
+  function highlight(sec, term) {
+    if (!term) return;
+    var walker = document.createTreeWalker(sec, NodeFilter.SHOW_TEXT, {
+      acceptNode: function (node) {
+        if (!node.nodeValue || !node.nodeValue.toLowerCase().includes(term)) return NodeFilter.FILTER_REJECT;
+        var p = node.parentNode;
+        if (!p) return NodeFilter.FILTER_REJECT;
+        var tag = p.nodeName;
+        if (tag === "SCRIPT" || tag === "STYLE" || tag === "MARK") return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    var nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.slice(0, 40).forEach(function (node) {
+      var text = node.nodeValue;
+      var idx = text.toLowerCase().indexOf(term);
+      if (idx === -1) return;
+      var range = document.createRange();
+      range.setStart(node, idx);
+      range.setEnd(node, idx + term.length);
+      var mark = document.createElement("mark");
+      try {
+        range.surroundContents(mark);
+      } catch (e) { /* skip node yang kompleks */ }
+    });
+  }
+
+  var searchTimer = null;
+  input.addEventListener("input", function () {
+    clearTimeout(searchTimer);
+    var term = input.value.trim().toLowerCase();
+    searchTimer = setTimeout(function () {
+      sections.forEach(clearMarks);
+      if (!term) {
+        sections.forEach(function (s) { s.style.display = ""; });
+        tocLinks.forEach(function (a) { a.parentNode.style.display = ""; });
+        hits.textContent = "";
+        return;
+      }
+      var matched = 0;
+      index.forEach(function (item) {
+        var ok = item.text.includes(term);
+        item.sec.style.display = ok ? "" : "none";
+        var link = tocLinks.find(function (a) { return a.dataset.target === item.sec.id; });
+        if (link) link.parentNode.style.display = ok ? "" : "none";
+        if (ok) { matched++; highlight(item.sec, term); }
+      });
+      hits.textContent = matched ? matched + "/" + sections.length : "0";
+    }, 130);
+  });
+
+  input.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") {
+      input.value = "";
+      input.dispatchEvent(new Event("input"));
+      input.blur();
+    }
+  });
+
+  /* ---------- back to top ---------- */
+  var totop = document.getElementById("totop");
+  window.addEventListener("scroll", function () {
+    totop.classList.toggle("show", window.scrollY > 600);
+  }, { passive: true });
+  totop.addEventListener("click", function () {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  /* ---------- keyboard shortcuts ---------- */
+  document.addEventListener("keydown", function (e) {
+    var tag = (document.activeElement && document.activeElement.tagName) || "";
+    var typing = tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT";
+
+    if (e.key === "/" && !typing) {
+      e.preventDefault();
+      input.focus();
+      input.select();
+      return;
+    }
+    if ((e.key === "t" || e.key === "T") && !typing && !e.metaKey && !e.ctrlKey && !e.altKey) {
+      toggleTheme();
+    }
+  });
+})();
+</script>
+</body>
+</html>

@@ -4,8 +4,10 @@ Modul internal untuk mendata akun angkatan, prospek, antrean DM, klien, proyek,
 pembayaran, dan komisi referral 10%. Bagian dari aplikasi `jokitugasit-vue`.
 
 Dokumen produk, alur kerja, model omzet, dan compliance matrix ada di
-[`PRD-OUTREACH.md`](./PRD-OUTREACH.md). Dokumen ini fokus pada teknis:
-schema, RLS, migration, dan aturan uang.
+[`PRD-OUTREACH.md`](./PRD-OUTREACH.md). Panduan pemakaian dari nol sampai
+produksi (HTML, bisa dibuka offline) ada di
+[`panduan-lengkap.html`](./panduan-lengkap.html) — jalankan `make guide`.
+Dokumen ini fokus pada teknis: schema, RLS, migration, dan aturan uang.
 
 **Bukan bot.** Tidak ada kredensial Instagram, tidak ada pengiriman DM otomatis,
 tidak ada scraping followers/following. Semua pesan dikirim manual oleh kamu dari

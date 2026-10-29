@@ -3,7 +3,7 @@
 # Quick CLI automation for deployment, fresh builds, Supabase, and Vercel.
 # ==============================================================================
 
-.PHONY: help deploy fresh build clean dev preview health supabase-check vercel-deploy test-telegram redeploy ship
+.PHONY: help deploy fresh build clean dev preview health supabase-check vercel-deploy test-telegram redeploy ship guide
 
 # Set default shell and PATH to include Homebrew node & tools
 SHELL := /bin/bash
@@ -41,6 +41,7 @@ help:
 	@echo -e "  ${C_BLUE}make vercel-deploy${C_RESET}  Deploy cepat (git push origin main)"
 	@echo -e "  ${C_GREEN}make redeploy${C_RESET}       ${C_BOLD}🔥 SATU PERINTAH: test → build → SQL → push → deploy → smoke${C_RESET}"
 	@echo -e "  ${C_GRAY}                 Opsi: make redeploy ARGS=\"--skip-db\" (lihat --help)${C_RESET}"
+	@echo -e "  ${C_CYAN}make guide${C_RESET}          Buka panduan lengkap (HTML) di browser"
 	@echo ""
 
 ## deploy: Jalankan full interactive fresh deployment pipeline
@@ -111,6 +112,16 @@ redeploy:
 
 ## ship: Alias untuk redeploy
 ship: redeploy
+
+## guide: Buka panduan lengkap (HTML) di browser
+guide:
+	@if [ -f docs/panduan-lengkap.html ]; then \
+		(command -v open >/dev/null 2>&1 && open docs/panduan-lengkap.html) || \
+		(command -v xdg-open >/dev/null 2>&1 && xdg-open docs/panduan-lengkap.html) || \
+		echo "Buka manual: docs/panduan-lengkap.html"; \
+	else \
+		echo "docs/panduan-lengkap.html tidak ditemukan"; exit 1; \
+	fi
 
 ## test-telegram: Kirim notifikasi tes ke Telegram engineer
 test-telegram:
