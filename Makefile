@@ -3,7 +3,7 @@
 # Quick CLI automation for deployment, fresh builds, Supabase, and Vercel.
 # ==============================================================================
 
-.PHONY: help deploy fresh build clean dev preview health supabase-check vercel-deploy test-telegram redeploy ship guide
+.PHONY: help deploy fresh build clean dev preview health supabase-check vercel-deploy test-telegram redeploy ship guide gate
 
 # Set default shell and PATH to include Homebrew node & tools
 SHELL := /bin/bash
@@ -42,6 +42,7 @@ help:
 	@echo -e "  ${C_GREEN}make redeploy${C_RESET}       ${C_BOLD}🔥 SATU PERINTAH: test → build → SQL → push → deploy → smoke${C_RESET}"
 	@echo -e "  ${C_GRAY}                 Opsi: make redeploy ARGS=\"--skip-db\" (lihat --help)${C_RESET}"
 	@echo -e "  ${C_CYAN}make guide${C_RESET}          Buka panduan lengkap (HTML) di browser"
+	@echo -e "  ${C_GREEN}make gate${C_RESET}           ${C_BOLD}⛔ Wajib lulus sebelum commit/deploy (test, secret, bundle)${C_RESET}"
 	@echo ""
 
 ## deploy: Jalankan full interactive fresh deployment pipeline
@@ -112,6 +113,12 @@ redeploy:
 
 ## ship: Alias untuk redeploy
 ship: redeploy
+
+## gate: Penjaga wajib — secret scan, unit, DB, build, integritas bundle
+##   Contoh: make gate            (lengkap)
+##           make gate ARGS="--static"
+gate:
+	@bash ./scripts/gate.sh $(ARGS)
 
 ## guide: Buka panduan lengkap (HTML) di browser
 guide:

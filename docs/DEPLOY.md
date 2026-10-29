@@ -50,6 +50,20 @@ Lokasi file bisa diganti lewat `DEPLOY_ENV_FILE=/path/lain.env`.
 Kalau ingin tanpa file: `make redeploy ARGS="--db-url postgresql://..."` atau
 `SUPABASE_DB_URL="..." make redeploy`.
 
+## Gate wajib sebelum commit/deploy
+
+```bash
+make gate              # statis + unit + DB + build
+make gate ARGS="--static"   # cepat: secret scan, diff, bundle, docs
+```
+
+Gate menolak (exit non-zero) jika ada secret, `.env` ter-stage, migration
+tidak tercakup bundle/test, fungsi kunci hilang, atau test/build gagal.
+`make redeploy` otomatis menjalankan gate statis sebagai langkah 0b.
+
+Aturan lengkapnya ada di `AGENTS.md` dan skill
+`.opencode/skills/production-gate/SKILL.md`.
+
 ## Yang dijalankan script
 
 | # | Langkah | Gagal → |

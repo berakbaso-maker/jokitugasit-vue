@@ -508,6 +508,7 @@ npm run preview      <span class="c"># cek hasil build lokal</span></code></pre>
       <tr><td><code>npm test</code></td><td>39 unit test (CSV, username, template, uang, flag)</td></tr>
       <tr><td><code>npm run test:db</code></td><td>Recreate DB lokal <code>jokitugasit_test</code>, jalankan semua migration + 11 suite RLS/aturan bisnis</td></tr>
       <tr><td><code>npm run test:all</code></td><td>Keduanya</td></tr>
+      <tr><td><code>make gate</code></td><td>Penjaga wajib sebelum commit/deploy (secret, test, bundle)</td></tr>
       <tr><td><code>make redeploy</code></td><td><strong>Satu perintah deploy penuh</strong> (lihat Bagian 6)</td></tr>
     </tbody>
   </table>
@@ -1515,7 +1516,8 @@ group by r.id, r.order_no, r.status, r.quote_amount, r.discount_amount, c.status
   <table>
     <thead><tr><th>Perintah</th><th>Fungsi</th></tr></thead>
     <tbody>
-      <tr><td><code>make redeploy</code></td><td>Test → build → SQL → push → deploy → smoke</td></tr>
+      <tr><td><code>make gate</code></td><td>Gate wajib: secret scan, migration coverage, unit, DB, build</td></tr>
+      <tr><td><code>make redeploy</code></td><td>Gate statis → test → build → SQL → push → deploy → smoke</td></tr>
       <tr><td><code>make ship</code></td><td>Alias <code>redeploy</code></td></tr>
       <tr><td><code>make deploy</code></td><td>Pipeline interaktif lama (<code>scripts/deploy.sh</code>)</td></tr>
       <tr><td><code>make build</code></td><td>Clean + build produksi</td></tr>

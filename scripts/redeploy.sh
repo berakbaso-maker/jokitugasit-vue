@@ -185,6 +185,11 @@ if $CHECK_ONLY; then
   exit 0
 fi
 
+# ---------- 0b. gate statis ----------
+step "0b/7 Gate statis (wajib)"
+bash ./scripts/gate.sh --static
+ok "Gate statis lulus"
+
 # ---------- 1. tests ----------
 if ! $SKIP_TESTS; then
   step "1/7 Unit test"
