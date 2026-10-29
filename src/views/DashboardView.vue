@@ -2,11 +2,17 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import SideNav from '../components/SideNav.vue'
-import { listRequests, formatRupiah, DEADLINE_LABELS, STATUS_LABELS, CATEGORY_LABELS, waLink } from '../lib/api'
+import {
+  listRequests, formatRupiah, DEADLINE_LABELS, STATUS_LABELS, CATEGORY_LABELS, waLink,
+  getAnalyticsOverview, getAnalyticsFunnel,
+} from '../lib/api'
 
 const router = useRouter()
 const requests = ref([])
 const loading = ref(true)
+const analytics = ref(null)
+const funnel = ref([])
+const analyticsError = ref('')
 
 const stats = computed(() => {
   const all = requests.value
@@ -18,6 +24,23 @@ const stats = computed(() => {
   }
 })
 
+/** Rasio dihitung dari angka database; null kalau pembaginya nol. */
+const rates = computed(() => {
+  const a = analytics.value
+  if (!a) return { response: null, interest: null, close: null }
+  const sent = Number(a.contacts_sent || 0)
+  const responses = Number(a.responses || 0)
+  const interested = Number(a.interested || 0)
+  const completed = Number(a.projects_completed || 0)
+  return {
+    response: sent > 0 ? (responses / sent) * 100 : null,
+    interest: responses > 0 ? (interested / responses) * 100 : null,
+    close: interested > 0 ? (completed / interested) * 100 : null,
+  }
+})
+
+const pct = (value) => (value == null ? '—' : `${value.toFixed(1)}%`)
+
 const deadlineColor = (d) => (d === 'hari_ini' ? 'text-urgency-red' : 'text-on-surface')
 
 async function load() {
@@ -28,6 +51,20 @@ async function load() {
     console.error(err)
   } finally {
     loading.value = false
+  }
+
+  try {
+    const [overview, funnelRows] = await Promise.all([
+      getAnalyticsOverview(),
+      getAnalyticsFunnel(),
+    ])
+    analytics.value = overview
+    funnel.value = funnelRows || []
+  } catch (err) {
+    // Analytics butuh migration-money-schema.sql + outreach; jangan
+    // sampai memblokir dashboard kalau belum dipasang.
+    analyticsError.value = err.message || ''
+    console.error(err)
   }
 }
 
@@ -97,6 +134,88 @@ const statusClass = (s) => {
         </div>
         <div class="text-display-hero-mobile font-headline-md font-extrabold text-on-error-container leading-none">{{ stats.deadlineToday }}</div>
       </div>
+    </div>
+
+    <!-- Funnel & Uang -->
+    <div v-if="analytics" class="grid lg:grid-cols-2 gap-4 mb-8">
+      <div class="bg-surface-white p-5 rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)]">
+        <h3 class="text-body-lg font-bold mb-1">Funnel Outreach</h3>
+        <p class="text-label-sm text-secondary mb-4">Dari catatan kontak yang benar-benar tersimpan.</p>
+        <div class="space-y-3">
+          <div v-for="step in funnel" :key="step.stage">
+            <div class="flex justify-between text-sm mb-1">
+              <span class="font-medium text-on-surface">{{ step.stage }}</span>
+              <span class="font-bold">{{ step.count }}</span>
+            </div>
+            <div class="h-2 rounded-full bg-surface-container overflow-hidden">
+              <div
+                class="h-full rounded-full bg-electric-blue"
+                :style="{ width: `${funnel[0]?.count ? Math.min(100, (step.count / funnel[0].count) * 100) : 0}%` }"
+              ></div>
+            </div>
+          </div>
+        </div>
+        <dl class="grid grid-cols-3 gap-3 mt-5 pt-4 border-t border-border-subtle text-center">
+          <div>
+            <dt class="text-[11px] text-secondary">Response</dt>
+            <dd class="font-bold">{{ pct(rates.response) }}</dd>
+          </div>
+          <div>
+            <dt class="text-[11px] text-secondary">Berminat</dt>
+            <dd class="font-bold">{{ pct(rates.interest) }}</dd>
+          </div>
+          <div>
+            <dt class="text-[11px] text-secondary">Closing</dt>
+            <dd class="font-bold">{{ pct(rates.close) }}</dd>
+          </div>
+        </dl>
+        <p class="text-[11px] text-secondary mt-3">
+          Response = balasan / pesan terkirim. Closing = proyek selesai / berminat.
+        </p>
+      </div>
+
+      <div class="bg-surface-white p-5 rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)]">
+        <h3 class="text-body-lg font-bold mb-1">Uang</h3>
+        <p class="text-label-sm text-secondary mb-4">Pembayaran terkonfirmasi dan komisi dari tabel.</p>
+        <dl class="space-y-3 text-sm">
+          <div class="flex justify-between">
+            <dt class="text-secondary">Omzet terkonfirmasi</dt>
+            <dd class="font-bold">{{ formatRupiah(analytics.gross_confirmed) }}</dd>
+          </div>
+          <div class="flex justify-between">
+            <dt class="text-secondary">Komisi sudah dibayar</dt>
+            <dd class="font-bold text-urgency-red">− {{ formatRupiah(analytics.commission_paid) }}</dd>
+          </div>
+          <div class="flex justify-between">
+            <dt class="text-secondary">Komisi siap dibayar</dt>
+            <dd class="font-bold text-amber-600">{{ formatRupiah(analytics.commission_unpaid) }}</dd>
+          </div>
+          <div class="flex justify-between border-t border-border-subtle pt-3">
+            <dt class="font-bold">Sebelum biaya lain</dt>
+            <dd class="font-bold text-electric-blue">
+              {{ formatRupiah(Number(analytics.gross_confirmed || 0) - Number(analytics.commission_paid || 0)) }}
+            </dd>
+          </div>
+        </dl>
+        <p class="text-[11px] text-secondary mt-3">
+          Ini belum dikurangi biaya operasional atau pajak, jadi bukan laba bersih.
+        </p>
+        <div class="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-border-subtle text-center">
+          <div>
+            <p class="text-[11px] text-secondary">Partner membawa deal</p>
+            <p class="font-bold">{{ analytics.partners_with_deal }} / {{ analytics.active_partners }}</p>
+          </div>
+          <div>
+            <p class="text-[11px] text-secondary">Prospek di antrean</p>
+            <p class="font-bold">{{ analytics.prospects_queue }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div v-else-if="analyticsError" class="mb-8 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+      Statistik belum tersedia. Jalankan <code class="font-mono">migration-outreach-schema.sql</code> dan
+      <code class="font-mono">migration-money-schema.sql</code> di Supabase.
     </div>
 
     <!-- Active Queue -->

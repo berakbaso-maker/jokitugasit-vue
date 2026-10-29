@@ -8,20 +8,40 @@ export function formatRupiah(value) {
   return 'Rp ' + Number(value).toLocaleString('id-ID')
 }
 
+// ---------- PUBLIC (anon) ----------
+
+/**
+ * Lacak order lewat RPC. Tabel `requests` tidak lagi bisa dibaca anon
+ * supaya nama, WhatsApp, catatan internal, dan harga tidak bocor.
+ */
 export async function getPublicOrder(orderNo) {
-  const { data, error } = await supabase
-    .from('requests')
-    .select('*')
-    .eq('order_no', orderNo)
-    .maybeSingle()
+  const { data, error } = await supabase.rpc('track_request', {
+    p_order_no: String(orderNo || '').trim().toUpperCase(),
+  })
   if (error) throw error
-  return data
+  return Array.isArray(data) ? data[0] || null : data || null
 }
 
+/**
+ * Kirim request lewat RPC. Server yang membuat nomor order dan memaksa
+ * status/harga supaya tidak bisa dipalsukan dari browser.
+ * Mengembalikan order_no.
+ */
 export async function createRequest(payload) {
-  const { data, error } = await supabase.from('requests').insert(payload).select().single()
+  const { data, error } = await supabase.rpc('create_public_request', {
+    p_customer_name: payload.customer_name,
+    p_whatsapp: payload.whatsapp,
+    p_description: payload.description,
+    p_category: payload.category || 'web',
+    p_deadline: payload.deadline || 'besok',
+    p_deadline_date: payload.deadline_date || null,
+    p_link: payload.link || null,
+    p_file_url: payload.file_url || null,
+    p_email: payload.email || null,
+    p_referral_code: payload.referral_code || null,
+  })
   if (error) throw error
-  return data
+  return { order_no: data }
 }
 
 export async function uploadAttachment(file) {
@@ -34,6 +54,18 @@ export async function uploadAttachment(file) {
   const { data: publicUrl } = supabase.storage.from(ATTACHMENT_BUCKET).getPublicUrl(path)
   return publicUrl.publicUrl
 }
+
+/** Validasi kode referral tanpa membuka data partner. */
+export async function validateReferralCode(code) {
+  const clean = String(code || '').trim().toUpperCase()
+  if (clean.length < 3) return null
+  const { data, error } = await supabase.rpc('validate_referral_code', { p_code: clean })
+  if (error) throw error
+  const row = Array.isArray(data) ? data[0] : data
+  return row?.valid ? { referral_code: clean, display_name: row.display_name } : null
+}
+
+// ---------- ENGINEER: requests ----------
 
 export async function listRequests(filters = {}) {
   let query = supabase.from('requests').select('*').order('created_at', { ascending: false })
@@ -122,79 +154,120 @@ export async function updatePartner(id, patch) {
   return data
 }
 
-export async function getPartnerByCode(code) {
-  if (!code || code.trim().length < 3) return null
-  const { data, error } = await supabase
-    .from('partners')
-    .select('id,full_name,referral_code,status')
-    .eq('referral_code', code.trim().toUpperCase())
-    .eq('status', 'active')
-    .maybeSingle()
-  if (error) return null
-  return data
-}
-
 export function generateReferralCode(name) {
   const clean = (name || 'partner').replace(/[^a-zA-Z]/g, '').slice(0, 6).toUpperCase()
   const num = String(Math.floor(10 + Math.random() * 90))
   return `REF-${clean}${num}`
 }
 
-// ---------- COMMISSION TRACKING ----------
-
-export async function listReferralRequests() {
-  const { data, error } = await supabase
-    .from('requests')
-    .select('*')
-    .not('referral_code', 'is', null)
-    .order('created_at', { ascending: false })
-  if (error) throw error
-  return data
-}
-
-export async function markCommissionPaid(requestId) {
-  const { data, error } = await supabase
-    .from('requests')
-    .update({ commission_paid: true })
-    .eq('id', requestId)
-    .select()
-    .single()
-  if (error) throw error
-  return data
-}
-
-export async function getPartnerOverview(code) {
-  if (!code) return null
-  const cleanCode = code.trim().toUpperCase()
-  const { data: partner, error: pErr } = await supabase
-    .from('partners')
-    .select('*')
-    .eq('referral_code', cleanCode)
-    .maybeSingle()
-  if (pErr || !partner) return null
-
-  const { data: requests } = await supabase
-    .from('requests')
-    .select('order_no, category, status, quote_amount, commission_paid, created_at')
-    .eq('referral_code', cleanCode)
-    .order('created_at', { ascending: false })
-
-  const reqList = requests || []
-  const totalEarned = reqList
-    .filter(r => r.commission_paid && r.quote_amount)
-    .reduce((sum, r) => sum + (r.quote_amount * 0.1), 0)
-  const pendingEarned = reqList
-    .filter(r => !r.commission_paid && ['done', 'paid', 'review'].includes(r.status) && r.quote_amount)
-    .reduce((sum, r) => sum + (r.quote_amount * 0.1), 0)
-
-  return {
-    partner,
-    requests: reqList,
-    stats: {
-      totalReferrals: reqList.length,
-      dealCount: reqList.filter(r => ['working', 'review', 'done', 'paid'].includes(r.status)).length,
-      totalEarned,
-      pendingEarned,
-    },
+/**
+ * Pastikan kode unik. Dipakai sebelum insert partner supaya tabrakan
+ * tidak berakhir sebagai error database.
+ */
+export async function ensureUniqueReferralCode(name) {
+  for (let i = 0; i < 8; i += 1) {
+    const candidate = generateReferralCode(i === 0 ? name : `${name}${Math.random()}`)
+    const { data, error } = await supabase
+      .from('partners')
+      .select('id')
+      .eq('referral_code', candidate)
+      .maybeSingle()
+    if (error) throw error
+    if (!data) return candidate
   }
+  throw new Error('Gagal membuat kode referral unik. Coba lagi.')
+}
+
+// ---------- COMMISSIONS ----------
+
+/**
+ * Komisi dihitung di database (integer rupiah, hanya setelah lunas).
+ * UI tidak pernah mengalikan sendiri.
+ */
+export async function listCommissions(filters = {}) {
+  let query = supabase
+    .from('commissions')
+    .select('*, partners(full_name, whatsapp, referral_code), requests(order_no, customer_name, category, status, quote_amount, discount_amount)')
+    .order('created_at', { ascending: false })
+  if (filters.status) query = query.eq('status', filters.status)
+  if (filters.partnerId) query = query.eq('partner_id', filters.partnerId)
+  const { data, error } = await query
+  if (error) throw error
+  return data
+}
+
+export async function markCommissionPaid(commissionId, { proofUrl = null, note = null } = {}) {
+  const { data, error } = await supabase.rpc('mark_commission_paid', {
+    p_commission_id: commissionId,
+    p_proof_url: proofUrl,
+    p_note: note,
+  })
+  if (error) throw error
+  return Array.isArray(data) ? data[0] : data
+}
+
+export async function recomputeCommission(requestId) {
+  const { data, error } = await supabase.rpc('recompute_commission', { p_request_id: requestId })
+  if (error) throw error
+  return Array.isArray(data) ? data[0] : data
+}
+
+// ---------- PAYMENTS ----------
+
+export async function listPayments(requestId = null) {
+  let query = supabase.from('payments').select('*').order('paid_at', { ascending: false })
+  if (requestId) query = query.eq('request_id', requestId)
+  const { data, error } = await query
+  if (error) throw error
+  return data
+}
+
+/**
+ * @param {object} payload
+ * @param {string} payload.requestId
+ * @param {'DP'|'SETTLEMENT'|'REFUND'} payload.kind
+ * @param {number} payload.amount  integer rupiah, tanpa titik/desimal
+ * @param {string} [payload.idempotencyKey] kirim kunci yang sama saat retry
+ */
+export async function recordPayment({
+  requestId, kind, amount, idempotencyKey = null, method = null, proofUrl = null, paidAt = null, note = null,
+}) {
+  const { data, error } = await supabase.rpc('record_payment', {
+    p_request_id: requestId,
+    p_kind: kind,
+    p_amount: Math.round(Number(amount)),
+    p_idempotency_key: idempotencyKey,
+    p_method: method,
+    p_proof_url: proofUrl,
+    p_paid_at: paidAt || new Date().toISOString(),
+    p_note: note,
+  })
+  if (error) throw error
+  return Array.isArray(data) ? data[0] : data
+}
+
+// ---------- ANALYTICS ----------
+
+export async function getAnalyticsOverview(from = null, to = null) {
+  const { data, error } = await supabase.rpc('analytics_overview', { p_from: from, p_to: to })
+  if (error) throw error
+  return data
+}
+
+export async function getAnalyticsFunnel(from = null, to = null) {
+  const { data, error } = await supabase.rpc('analytics_funnel', { p_from: from, p_to: to })
+  if (error) throw error
+  return data || []
+}
+
+/**
+ * Portal partner: hanya komisi milik partner ybs, dihitung di server
+ * lewat RPC supaya kode partner tidak bisa dipakai mengintip data lain.
+ */
+export async function getPartnerOverview(code) {
+  const { data, error } = await supabase.rpc('partner_portal', {
+    p_code: String(code || '').trim().toUpperCase(),
+  })
+  if (error) throw error
+  return data
 }

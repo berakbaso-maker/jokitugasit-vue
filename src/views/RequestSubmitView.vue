@@ -4,7 +4,7 @@ import { useRouter, RouterLink } from 'vue-router'
 import TopAppBar from '../components/TopAppBar.vue'
 import BottomNavBar from '../components/BottomNavBar.vue'
 import FooterBar from '../components/FooterBar.vue'
-import { createRequest, uploadAttachment, getPartnerByCode, CATEGORY_LABELS, DEADLINE_LABELS } from '../lib/api'
+import { createRequest, uploadAttachment, validateReferralCode, CATEGORY_LABELS, DEADLINE_LABELS } from '../lib/api'
 
 const router = useRouter()
 
@@ -59,12 +59,18 @@ watch(() => form.value.referral_code, (val) => {
   }
   referralStatus.value = 'checking'
   referralDebounce = setTimeout(async () => {
-    const partner = await getPartnerByCode(code)
-    if (partner) {
-      referralStatus.value = 'valid'
-      referralPartnerName.value = partner.full_name
-    } else {
-      referralStatus.value = 'invalid'
+    try {
+      const partner = await validateReferralCode(code)
+      if (partner) {
+        referralStatus.value = 'valid'
+        referralPartnerName.value = partner.display_name
+      } else {
+        referralStatus.value = 'invalid'
+        referralPartnerName.value = ''
+      }
+    } catch (err) {
+      console.error(err)
+      referralStatus.value = ''
       referralPartnerName.value = ''
     }
   }, 600)
@@ -89,10 +95,6 @@ function onFileChange(e) {
   const selected = e.target.files?.[0]
   file.value = selected || null
   fileLabel.value = selected ? selected.name : 'ZIP, PNG, JPG maksimal 10MB'
-}
-
-function generateOrderNo() {
-  return 'JT' + String(Math.floor(1000 + Math.random() * 9000))
 }
 
 async function handleSubmit() {
@@ -121,10 +123,9 @@ async function handleSubmit() {
       fileUrl = await uploadAttachment(file.value)
     }
 
-    const orderNo = generateOrderNo()
     const cleanWa = '62' + form.value.whatsapp.replace(/^0+/, '')
-    const payload = {
-      order_no: orderNo,
+    // Nomor order, status, dan harga dibuat server-side (RPC).
+    const created = await createRequest({
       customer_name: form.value.customer_name.trim(),
       email: form.value.email.trim() || null,
       whatsapp: cleanWa,
@@ -135,9 +136,7 @@ async function handleSubmit() {
       link: form.value.link.trim() || null,
       file_url: fileUrl,
       referral_code: referralStatus.value === 'valid' ? form.value.referral_code.trim().toUpperCase() : null,
-      status: 'new',
-    }
-    const created = await createRequest(payload)
+    })
 
     // Kirim notifikasi instan ke Telegram Engineer via Vercel Serverless Function (non-blocking)
     try {

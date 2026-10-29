@@ -5,16 +5,22 @@ import BottomNavBar from '../components/BottomNavBar.vue'
 import FooterBar from '../components/FooterBar.vue'
 import {
   createPartner,
-  getPartnerByCode,
-  generateReferralCode,
+  ensureUniqueReferralCode,
   getPartnerOverview,
   formatRupiah,
   CATEGORY_LABELS,
-  STATUS_LABELS,
   waLink,
 } from '../lib/api'
 
 const WA_ENGINEER = '6285166337257'
+
+const COMMISSION_STATUS_LABELS = {
+  PENDING: 'Menunggu Pelunasan',
+  ELIGIBLE: 'Siap Dicairkan',
+  PAID: 'Sudah Dibayar',
+  VOID: 'Dibatalkan',
+  ADJUSTMENT: 'Perlu Penyesuaian',
+}
 
 // Tab: 'register' | 'check'
 const activeActionTab = ref('register')
@@ -106,11 +112,8 @@ async function handleSubmit() {
 
   submitting.value = true
   try {
-    // Generate kode unik, pastikan tidak duplikat
-    let code = generateReferralCode(form.value.full_name)
-    // Cek duplikat (simple check)
-    const existing = await getPartnerByCode(code)
-    if (existing) code = generateReferralCode(form.value.full_name + Math.random())
+    // Kode unik dibuat dengan cek tabrakan, bukan sekadar menebak sekali.
+    const code = await ensureUniqueReferralCode(form.value.full_name)
 
     const waNum = wa.startsWith('0') ? '62' + wa.slice(1) : wa.startsWith('62') ? wa : '62' + wa
     await createPartner({
@@ -345,19 +348,19 @@ function copyCode() {
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 text-center">
                   <div class="bg-surface-white/80 backdrop-blur-xs p-3 rounded-xl border border-border-subtle">
                     <div class="text-xs text-secondary mb-1">Teman Pakai</div>
-                    <div class="text-xl font-extrabold text-on-surface">{{ partnerData.stats.totalReferrals }}</div>
+                    <div class="text-xl font-extrabold text-on-surface">{{ partnerData.stats.referral_count }}</div>
                   </div>
                   <div class="bg-surface-white/80 backdrop-blur-xs p-3 rounded-xl border border-border-subtle">
                     <div class="text-xs text-secondary mb-1">Project Deal</div>
-                    <div class="text-xl font-extrabold text-electric-blue">{{ partnerData.stats.dealCount }}</div>
+                    <div class="text-xl font-extrabold text-electric-blue">{{ partnerData.stats.deal_count }}</div>
                   </div>
                   <div class="bg-surface-white/80 backdrop-blur-xs p-3 rounded-xl border border-border-subtle">
                     <div class="text-xs text-secondary mb-1">Komisi Cair</div>
-                    <div class="text-xl font-extrabold text-success-green">{{ formatRupiah(partnerData.stats.totalEarned) }}</div>
+                    <div class="text-xl font-extrabold text-success-green">{{ formatRupiah(partnerData.stats.total_paid) }}</div>
                   </div>
                   <div class="bg-surface-white/80 backdrop-blur-xs p-3 rounded-xl border border-border-subtle">
                     <div class="text-xs text-secondary mb-1">Menunggu Cair</div>
-                    <div class="text-xl font-extrabold text-urgency-red">{{ formatRupiah(partnerData.stats.pendingEarned) }}</div>
+                    <div class="text-xl font-extrabold text-urgency-red">{{ formatRupiah(partnerData.stats.total_pending) }}</div>
                   </div>
                 </div>
               </div>
@@ -368,40 +371,52 @@ function copyCode() {
                   <span class="material-symbols-outlined text-[18px] text-electric-blue">history</span>
                   Riwayat Project Teman Kamu
                 </h4>
-                <div v-if="partnerData.requests.length === 0" class="text-center py-8 bg-surface-container-low rounded-xl text-xs text-secondary">
+                <div v-if="partnerData.commissions.length === 0" class="text-center py-8 bg-surface-container-low rounded-xl text-xs text-secondary">
                   Belum ada teman yang menggunakan kodemu. Bagikan kodemu ke grup angkatan sekarang!
                 </div>
                 <div v-else class="space-y-2">
                   <div
-                    v-for="req in partnerData.requests"
-                    :key="req.order_no"
+                    v-for="c in partnerData.commissions"
+                    :key="c.order_no"
                     class="bg-surface-container-lowest p-3.5 rounded-xl border border-border-subtle flex items-center justify-between text-xs"
                   >
                     <div>
-                      <div class="font-bold text-on-surface">Order #{{ req.order_no }} ({{ CATEGORY_LABELS[req.category] || req.category }})</div>
-                      <div class="text-secondary mt-0.5">Status: <span class="font-semibold text-on-surface">{{ STATUS_LABELS[req.status] || req.status }}</span></div>
+                      <div class="font-bold text-on-surface">Order #{{ c.order_no }} ({{ CATEGORY_LABELS[c.category] || c.category }})</div>
+                      <div class="text-secondary mt-0.5">Status komisi: <span class="font-semibold text-on-surface">{{ COMMISSION_STATUS_LABELS[c.status] || c.status }}</span></div>
                     </div>
                     <div class="text-right">
-                      <div v-if="req.quote_amount" class="font-extrabold text-electric-blue">
-                        Komisi: {{ formatRupiah(req.quote_amount * 0.1) }}
+                      <div class="font-extrabold text-electric-blue">
+                        Komisi: {{ formatRupiah(c.amount) }}
                       </div>
                       <span
-                        v-if="req.commission_paid"
+                        v-if="c.status === 'PAID'"
                         class="inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-success-green/10 text-success-green"
                       >
                         ✓ Sudah Ditransfer
                       </span>
                       <span
-                        v-else-if="['done', 'paid', 'review'].includes(req.status)"
+                        v-else-if="c.status === 'ELIGIBLE'"
                         class="inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-yellow-500/10 text-yellow-600"
                       >
                         Menunggu Transfer (1x24 Jam)
                       </span>
                       <span
+                        v-else-if="c.status === 'ADJUSTMENT'"
+                        class="inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700"
+                      >
+                        Sedang Ditinjau
+                      </span>
+                      <span
+                        v-else-if="c.status === 'VOID'"
+                        class="inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-medium text-secondary"
+                      >
+                        Dibatalkan
+                      </span>
+                      <span
                         v-else
                         class="inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-medium text-secondary"
                       >
-                        Dalam Proses
+                        Menunggu Pelunasan
                       </span>
                     </div>
                   </div>

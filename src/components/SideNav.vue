@@ -9,6 +9,10 @@ const auth = useAuthStore()
 const navItems = [
   { label: 'Dasbor', icon: 'dashboard', to: '/dashboard' },
   { label: 'Permintaan', icon: 'list_alt', to: '/requests' },
+  { label: 'Antrean DM', icon: 'send', to: '/ops/outreach' },
+  { label: 'Prospek', icon: 'group', to: '/ops/prospects' },
+  { label: 'Akun Target', icon: 'school', to: '/ops/targets' },
+  { label: 'Template', icon: 'chat', to: '/ops/templates' },
   { label: 'Partner', icon: 'group_add', to: '/engineer/partners' },
   { label: 'Instagram', icon: 'photo_camera', to: '/ig-leads' },
   { label: 'Pendapatan', icon: 'payments', to: '/earnings' },

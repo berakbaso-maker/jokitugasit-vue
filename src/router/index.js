@@ -135,6 +135,18 @@ const router = createRouter({
       path: '/ig-leads', name: 'instagram', component: () => import('../views/InstagramView.vue'), meta: { requiresEngineer: true },
     },
     {
+      path: '/ops/outreach', name: 'outreach-queue', component: () => import('../views/OutreachQueueView.vue'), meta: { requiresEngineer: true },
+    },
+    {
+      path: '/ops/prospects', name: 'prospects', component: () => import('../views/ProspectsView.vue'), meta: { requiresEngineer: true },
+    },
+    {
+      path: '/ops/targets', name: 'target-accounts', component: () => import('../views/TargetAccountsView.vue'), meta: { requiresEngineer: true },
+    },
+    {
+      path: '/ops/templates', name: 'dm-templates', component: () => import('../views/TemplatesView.vue'), meta: { requiresEngineer: true },
+    },
+    {
       path: '/settings', name: 'settings', component: () => import('../views/SettingsView.vue'), meta: { requiresEngineer: true },
     },
     {

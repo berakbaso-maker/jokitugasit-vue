@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:db": "./supabase/tests/run.sh",
+    "test:all": "npm run test && npm run test:db"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.4",
@@ -20,7 +23,8 @@
     "postcss": "^8.5.32",
     "tailwindcss": "^3.4.19",
     "vite": "^8.1.5",
-    "vite-plugin-vue-devtools": "^8.1.5"
+    "vite-plugin-vue-devtools": "^8.1.5",
+    "vitest": "^3.2.7"
   },
   "engines": {
     "node": "^22.18.0 || >=24.12.0"

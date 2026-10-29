@@ -2,14 +2,15 @@
 import { ref, computed, onMounted } from 'vue'
 import SideNav from '../components/SideNav.vue'
 import {
-  listPartners, updatePartner, generateReferralCode, createPartner,
-  listReferralRequests, markCommissionPaid, formatRupiah, CATEGORY_LABELS
+  listPartners, updatePartner, ensureUniqueReferralCode, createPartner,
+  listCommissions, markCommissionPaid, formatRupiah, CATEGORY_LABELS
 } from '../lib/api'
 
 const partners = ref([])
-const referralRequests = ref([])
+const commissions = ref([])
 const loading = ref(true)
 const activeTab = ref('partners') // 'partners' | 'commissions'
+const actionError = ref('')
 
 // Add partner modal
 const showAddModal = ref(false)
@@ -20,28 +21,54 @@ const adding = ref(false)
 // Commission filter
 const filterPartnerCode = ref('')
 
+const COMMISSION_STATUS = {
+  PENDING: { label: 'Menunggu Lunas', class: 'bg-surface-container text-on-surface-variant' },
+  ELIGIBLE: { label: 'Siap Dibayar', class: 'bg-urgency-red/10 text-urgency-red' },
+  PAID: { label: 'Sudah Dibayar', class: 'bg-success-green/10 text-success-green' },
+  VOID: { label: 'Batal', class: 'bg-surface-container text-on-surface-variant' },
+  ADJUSTMENT: { label: 'Perlu Review', class: 'bg-amber-100 text-amber-700' },
+}
+
+const statusMeta = (s) => COMMISSION_STATUS[s] || COMMISSION_STATUS.PENDING
+
+// Semua nominal berasal dari database (integer rupiah), tidak dihitung di sini.
 const filteredCommissions = computed(() => {
-  if (!filterPartnerCode.value) return referralRequests.value
-  return referralRequests.value.filter(r => r.referral_code === filterPartnerCode.value)
+  if (!filterPartnerCode.value) return commissions.value
+  return commissions.value.filter(c => c.partners?.referral_code === filterPartnerCode.value)
 })
 
 const totalOutstanding = computed(() =>
-  referralRequests.value
-    .filter(r => !r.commission_paid && r.quote_amount)
-    .reduce((sum, r) => sum + (r.quote_amount * 0.1), 0)
+  commissions.value
+    .filter(c => c.status === 'ELIGIBLE')
+    .reduce((sum, c) => sum + Number(c.amount || 0), 0)
+)
+
+const totalPaid = computed(() =>
+  commissions.value
+    .filter(c => c.status === 'PAID')
+    .reduce((sum, c) => sum + Number(c.amount || 0), 0)
 )
 
 const uniquePartnerCodes = computed(() => {
-  const codes = [...new Set(referralRequests.value.map(r => r.referral_code).filter(Boolean))]
+  const codes = [...new Set(commissions.value.map(c => c.partners?.referral_code).filter(Boolean))]
   return codes
 })
+
+const commissionForPartner = (partnerId) =>
+  commissions.value
+    .filter(c => c.partner_id === partnerId && ['ELIGIBLE', 'PAID'].includes(c.status))
+    .reduce((sum, c) => sum + Number(c.amount || 0), 0)
+
+const referralCountForPartner = (partnerId) =>
+  commissions.value.filter(c => c.partner_id === partnerId).length
 
 async function load() {
   loading.value = true
   try {
-    ;[partners.value, referralRequests.value] = await Promise.all([listPartners(), listReferralRequests()])
+    ;[partners.value, commissions.value] = await Promise.all([listPartners(), listCommissions()])
   } catch (err) {
     console.error(err)
+    actionError.value = err.message || 'Gagal memuat data partner.'
   } finally {
     loading.value = false
   }
@@ -65,7 +92,7 @@ async function handleAddPartner() {
   try {
     const wa = addForm.value.whatsapp.replace(/[^0-9]/g, '')
     const waNum = wa.startsWith('0') ? '62' + wa.slice(1) : wa.startsWith('62') ? wa : '62' + wa
-    const code = generateReferralCode(addForm.value.full_name)
+    const code = await ensureUniqueReferralCode(addForm.value.full_name)
     const newPartner = await createPartner({
       full_name: addForm.value.full_name.trim(),
       whatsapp: waNum,
@@ -83,10 +110,15 @@ async function handleAddPartner() {
   }
 }
 
-async function payCommission(req) {
-  if (req.commission_paid) return
-  await markCommissionPaid(req.id)
-  req.commission_paid = true
+async function payCommission(commission) {
+  if (commission.status === 'PAID') return
+  actionError.value = ''
+  try {
+    const updated = await markCommissionPaid(commission.id)
+    Object.assign(commission, updated)
+  } catch (err) {
+    actionError.value = err.message || 'Gagal menandai komisi lunas.'
+  }
 }
 
 function partnerName(code) {
@@ -119,6 +151,12 @@ function waLink(wa) {
       </button>
     </div>
 
+    <!-- Error -->
+    <div v-if="actionError" class="mb-5 flex items-start gap-2 rounded-xl border border-urgency-red/30 bg-error-container p-4 text-on-error-container">
+      <span class="material-symbols-outlined text-[18px]">error</span>
+      <span class="text-sm">{{ actionError }}</span>
+    </div>
+
     <!-- Stats Row -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
       <div class="bg-surface-white rounded-xl p-5 border border-border-subtle">
@@ -130,11 +168,11 @@ function waLink(wa) {
         <p class="text-2xl font-bold text-success-green">{{ partners.filter(p => p.status === 'active').length }}</p>
       </div>
       <div class="bg-surface-white rounded-xl p-5 border border-border-subtle">
-        <p class="text-label-sm font-label-sm text-on-surface-variant mb-1">Order via Referral</p>
-        <p class="text-2xl font-bold text-on-surface">{{ referralRequests.length }}</p>
+        <p class="text-label-sm font-label-sm text-on-surface-variant mb-1">Komisi Sudah Dibayar</p>
+        <p class="text-2xl font-bold text-on-surface">{{ formatRupiah(totalPaid) }}</p>
       </div>
       <div class="bg-electric-blue/5 border border-electric-blue/20 rounded-xl p-5">
-        <p class="text-label-sm font-label-sm text-electric-blue mb-1">Komisi Outstanding</p>
+        <p class="text-label-sm font-label-sm text-electric-blue mb-1">Komisi Siap Dibayar</p>
         <p class="text-2xl font-bold text-electric-blue">{{ formatRupiah(totalOutstanding) }}</p>
       </div>
     </div>
@@ -183,11 +221,11 @@ function waLink(wa) {
             </div>
             <div class="text-center">
               <p class="text-xs text-on-surface-variant">Referrals</p>
-              <p class="font-bold text-on-surface">{{ referralRequests.filter(r => r.referral_code === p.referral_code).length }}</p>
+              <p class="font-bold text-on-surface">{{ referralCountForPartner(p.id) }}</p>
             </div>
             <div class="text-center">
               <p class="text-xs text-on-surface-variant">Komisi</p>
-              <p class="font-bold text-electric-blue text-sm">{{ formatRupiah(referralRequests.filter(r => r.referral_code === p.referral_code && r.quote_amount).reduce((s, r) => s + r.quote_amount * 0.1, 0)) }}</p>
+              <p class="font-bold text-electric-blue text-sm">{{ formatRupiah(commissionForPartner(p.id)) }}</p>
             </div>
             <button @click="toggleStatus(p)"
               :class="p.status === 'active' ? 'bg-success-green/10 text-success-green' : 'bg-surface-container text-on-surface-variant'"
@@ -211,46 +249,53 @@ function waLink(wa) {
 
       <div v-if="filteredCommissions.length === 0" class="text-center py-16 text-on-surface-variant">
         <span class="material-symbols-outlined text-[48px] mb-3 block">receipt_long</span>
-        <p class="font-bold">Belum ada order via referral.</p>
+        <p class="font-bold">Belum ada komisi tercatat.</p>
+        <p class="text-sm mt-1">Komisi muncul otomatis setelah proyek dengan kode referral lunas.</p>
       </div>
 
       <div v-else class="space-y-3">
-        <div v-for="req in filteredCommissions" :key="req.id"
+        <div v-for="c in filteredCommissions" :key="c.id"
           class="bg-surface-white rounded-xl border p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-          :class="req.commission_paid ? 'border-success-green/20' : 'border-border-subtle'">
+          :class="c.status === 'PAID' ? 'border-success-green/20' : 'border-border-subtle'">
           <div>
-            <div class="flex items-center gap-2 mb-1">
-              <p class="font-bold text-on-surface">{{ req.order_no }} — {{ req.customer_name }}</p>
-              <span :class="req.commission_paid ? 'bg-success-green/10 text-success-green' : 'bg-urgency-red/10 text-urgency-red'"
+            <div class="flex items-center gap-2 mb-1 flex-wrap">
+              <p class="font-bold text-on-surface">{{ c.requests?.order_no }} — {{ c.requests?.customer_name }}</p>
+              <span :class="statusMeta(c.status).class"
                 class="text-[11px] font-bold px-2 py-0.5 rounded-full">
-                {{ req.commission_paid ? 'Komisi Lunas' : 'Komisi Pending' }}
+                {{ statusMeta(c.status).label }}
               </span>
             </div>
             <p class="text-sm text-on-surface-variant">
-              Partner: <span class="font-bold text-on-surface">{{ partnerName(req.referral_code) }}</span>
-              ({{ req.referral_code }})
+              Partner: <span class="font-bold text-on-surface">{{ c.partners?.full_name || '—' }}</span>
+              ({{ c.partners?.referral_code }})
             </p>
             <p class="text-sm text-on-surface-variant">
-              Kategori: {{ CATEGORY_LABELS[req.category] || req.category }} ·
-              Quote: <span class="font-bold text-on-surface">{{ formatRupiah(req.quote_amount) }}</span>
+              Kategori: {{ CATEGORY_LABELS[c.requests?.category] || c.requests?.category }} ·
+              Nilai proyek: <span class="font-bold text-on-surface">{{ formatRupiah(c.requests?.quote_amount) }}</span>
             </p>
           </div>
           <div class="flex flex-col items-end gap-2">
             <div class="text-right">
-              <p class="text-xs text-on-surface-variant">Komisi 10%</p>
-              <p class="text-lg font-bold text-electric-blue">{{ formatRupiah((req.quote_amount || 0) * 0.1) }}</p>
+              <p class="text-xs text-on-surface-variant">Komisi 10% (dari database)</p>
+              <p class="text-lg font-bold text-electric-blue">{{ formatRupiah(c.amount) }}</p>
+              <p v-if="c.status === 'PENDING'" class="text-[11px] text-on-surface-variant">Baru dihitung setelah pelunasan</p>
             </div>
             <div class="flex gap-2">
-              <a v-if="partnerWa(req.referral_code)" :href="waLink(partnerWa(req.referral_code))" target="_blank"
+              <a v-if="c.partners?.whatsapp" :href="waLink(c.partners.whatsapp)" target="_blank"
                 class="inline-flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-lg bg-success-green/10 text-success-green hover:bg-success-green/20 transition-colors">
                 <span class="material-symbols-outlined text-[14px]">chat</span>
                 WA Partner
               </a>
-              <button v-if="!req.commission_paid" @click="payCommission(req)"
+              <button v-if="c.status === 'ELIGIBLE'" @click="payCommission(c)"
                 class="inline-flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-lg bg-electric-blue text-white hover:bg-primary transition-colors">
                 <span class="material-symbols-outlined text-[14px]">payments</span>
                 Tandai Lunas
               </button>
+              <a v-if="c.status === 'ADJUSTMENT'" :href="waLink(c.partners?.whatsapp || '')" target="_blank"
+                class="inline-flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-lg bg-amber-100 text-amber-700">
+                <span class="material-symbols-outlined text-[14px]">support_agent</span>
+                Review Manual
+              </a>
             </div>
           </div>
         </div>

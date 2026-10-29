@@ -11,7 +11,7 @@ import {
   updateInstagramLead,
 } from '../lib/instagram'
 
-const tab = ref('outbound')
+const tab = ref('leads')
 const leads = ref([])
 const posts = ref([])
 const insights = ref([])
@@ -20,107 +20,6 @@ const saving = ref(false)
 const error = ref('')
 const statusFilter = ref('all')
 const form = ref({ caption: '', media_url: '', media_type: 'IMAGE', scheduled_at: '' })
-
-// Outbound CRM State (Master Blueprint Strategi Bisnis)
-const outboundTarget = ref({ name: '', campus: '', major: 'Informatika' })
-const activeTemplateId = ref('template_4')
-const copyDmSuccess = ref(false)
-const dailyDmCount = ref(Number(localStorage.getItem('joki_daily_dm_count_' + new Date().toISOString().slice(0, 10)) || 0))
-
-function incrementDm() {
-  if (dailyDmCount.value < 20) {
-    dailyDmCount.value++
-    localStorage.setItem('joki_daily_dm_count_' + new Date().toISOString().slice(0, 10), String(dailyDmCount.value))
-  }
-}
-
-function resetDailyDm() {
-  dailyDmCount.value = 0
-  localStorage.setItem('joki_daily_dm_count_' + new Date().toISOString().slice(0, 10), '0')
-}
-
-const outboundTemplates = [
-  {
-    id: 'template_4',
-    name: 'Template 4: Dual Offer (Paling Recommended)',
-    targetType: 'Mahasiswa semester 4–6 (Dua opsi: Bantuan teknis atau Komisi 10%)',
-    content: (name, campus) => `Halo ${name || '[Nama]'}, salam kenal ya!
-
-Izin sapa sesama penggiat IT di ${campus || '[Nama Kampus]'}. Aku software engineer yang udah beberapa tahun kerja di industri software.
-
-Saat ini aku buka dua hal buat temen-temen mahasiswa IT:
-1. Layanan Code Rescue & Pendampingan: bantuan benerin error kode, perbaikan fitur web/mobile, database, sampai persiapan demo tugas akhir.
-2. Program Student Partner (Komisi 10%): kalau ada temenmu yang butuh bantuan teknis dan kamu referensikan ke aku, kamu dapet komisi 10% dari nilai transaksinya.
-
-Jadi kamu bisa pakai bantuannya langsung kalau lagi mentok ngoding, atau dapet uang saku tambahan dengan jadi partner referral.
-
-Kalau relevan, boleh aku share link website & portofolioku buat disimpan dulu?`,
-  },
-  {
-    id: 'template_2',
-    name: 'Template 2: Direct Client (Skripsi / Deadline Mepet)',
-    targetType: 'Mahasiswa tingkat akhir / semester padat dengan urgensi tinggi',
-    content: (name, campus) => `Halo ${name || '[Nama]'}, izin sapa ya!
-
-Aku liat profil kamu mahasiswa IT di ${campus || '[Nama Kampus]'}. Kenalin, aku software engineer profesional di industri.
-
-Di luar jam kerja, aku sering bantu mahasiswa IT yang lagi mentok ngerjain project—khususnya yang butuh bantuan benerin error, optimasi query database, integrasi API, atau asistensi kode skripsi/tugas akhir biar siap pas demo dosen.
-
-Kalau kamu atau kelompokmu lagi ada project ngoding yang stuck dan butuh bantuan teknis cepat, boleh banget ngobrol dulu.
-
-Kalau tertarik lihat portofolio dan ulasan project sebelumnya, boleh aku kirimin link websitenya?`,
-  },
-  {
-    id: 'template_3',
-    name: 'Template 3: Referral Partner (Komti / Mahasiswa Supel)',
-    targetType: 'Mahasiswa aktif organisasi atau komti yang punya jaringan luas',
-    content: (name, campus) => `Halo ${name || '[Nama]'}, salam kenal ya!
-
-Liat profil kamu kayaknya cukup aktif di kampus ${campus || '[Nama Kampus]'}.
-
-Kenalin, aku software engineer. Aku lagi buka program partner referral khusus mahasiswa IT.
-
-Konsepnya simpel: kalau kamu punya temen seangkatan atau adek tingkat yang lagi pusing mentok ngerjain project ngoding/skripsi dan kamu rekomendasikan ke aku, kamu bakal dapet komisi 10% bersih dari nilai transaksi setelah project deal. Semua pengerjaan teknis aku yang handle 100%.
-
-Lumayan banget buat nambah uang saku tanpa kamu harus ikut pusing ngoding.
-
-Kira-kira tertarik denger skema partnernya lebih detail?`,
-  },
-  {
-    id: 'template_1',
-    name: 'Template 1: Soft Selling (Pendekatan Santai & Natural)',
-    targetType: 'Mahasiswa umum, membuka obrolan tanpa terkesan jualan',
-    content: (name, campus) => `Halo ${name || '[Nama]'}, salam kenal ya!
-
-Aku liat kamu anak IT di ${campus || '[Nama Kampus]'}. Kebetulan aku software engineer, lagi connect sama temen-temen mahasiswa IT.
-
-Biasanya anak IT suka pusing pas deadline praktikum atau pas kode kena bug aneh dari ChatGPT. Kalau suatu saat kamu lagi mentok ngoding atau butuh sparring partner buat debug kode project kuliah, feel free buat reach out ya.
-
-Semoga lancar terus kuliahnya! 👍`,
-  },
-  {
-    id: 'template_5',
-    name: 'Template 5: Follow-Up Ramah (Setelah 3-4 Hari)',
-    targetType: 'Prospek yang belum membalas pesan sebelumnya',
-    content: (name) => `Halo ${name || '[Nama]'}, cuma mau re-connect sebentar.
-
-Lagi persiapan UTS/UAS atau lagi sibuk project praktikum minggu ini?
-
-Santai aja ya, nggak ada kewajiban apa-apa. Kalau nanti pas mendekati deadline ada kode yang error atau mau diskusi santai soal industri software, pintu selalu terbuka. Semangat kuliahnya! 🙌`,
-  },
-]
-
-const currentGeneratedDm = computed(() => {
-  const t = outboundTemplates.find(tpl => tpl.id === activeTemplateId.value) || outboundTemplates[0]
-  return t.content(outboundTarget.value.name.trim(), outboundTarget.value.campus.trim())
-})
-
-function copyCurrentDm() {
-  navigator.clipboard.writeText(currentGeneratedDm.value)
-  copyDmSuccess.value = true
-  incrementDm()
-  setTimeout(() => (copyDmSuccess.value = false), 2500)
-}
 
 const visibleLeads = computed(() => statusFilter.value === 'all'
   ? leads.value
@@ -207,124 +106,37 @@ onMounted(load)
     </div>
 
     <div class="flex gap-2 overflow-x-auto mb-5">
-      <button v-for="item in [{id:'outbound',label:'🚀 Outbound DM Generator'},{id:'leads',label:'Lead Instagram'},{id:'posts',label:'Antrean Konten'},{id:'compose',label:'Buat Konten'},{id:'insights',label:'Insight'}]" :key="item.id" class="whitespace-nowrap rounded-full px-4 py-2 font-bold transition" :class="tab === item.id ? 'bg-electric-blue text-white' : 'bg-surface-white text-on-surface border border-border-subtle'" @click="tab = item.id">{{ item.label }}</button>
+      <button v-for="item in [{id:'outbound',label:'🚀 Outreach'},{id:'leads',label:'Lead Instagram'},{id:'posts',label:'Antrean Konten'},{id:'compose',label:'Buat Konten'},{id:'insights',label:'Insight'}]" :key="item.id" class="whitespace-nowrap rounded-full px-4 py-2 font-bold transition" :class="tab === item.id ? 'bg-electric-blue text-white' : 'bg-surface-white text-on-surface border border-border-subtle'" @click="tab = item.id">{{ item.label }}</button>
     </div>
 
     <div v-if="loading" class="rounded-xl bg-surface-white p-12 text-center"><span class="material-symbols-outlined animate-spin text-electric-blue text-4xl">progress_activity</span></div>
 
-    <!-- OUTBOUND DM GENERATOR (MASTER BLUEPRINT) -->
-    <section v-else-if="tab === 'outbound'" class="space-y-6">
-      <!-- Quota Tracker & Rule Banner -->
-      <div class="bg-surface-white rounded-2xl border border-border-subtle p-5 md:p-6 shadow-sm">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border-subtle">
-          <div>
-            <span class="text-xs font-bold text-electric-blue uppercase tracking-wider">Aturan Anti-Spam Blueprint</span>
-            <h2 class="text-lg font-bold text-on-surface">Target Harian: 15–20 DM Terkirim</h2>
-            <p class="text-xs text-secondary mt-0.5">Batasi 15-20 DM per hari agar akun Instagram personal aman dari shadowban/action block.</p>
-          </div>
-          <div class="flex items-center gap-3">
-            <div class="text-right">
-              <div class="text-xs text-secondary">Progres Hari Ini:</div>
-              <div class="text-xl font-extrabold text-electric-blue">{{ dailyDmCount }} / 20 DM</div>
-            </div>
-            <button @click="incrementDm" class="bg-electric-blue text-white px-3.5 py-2 rounded-xl text-xs font-bold hover:bg-primary transition-all flex items-center gap-1 shadow-xs">
-              <span class="material-symbols-outlined text-[16px]">add</span>
-              +1 Terkirim
-            </button>
-            <button @click="resetDailyDm" title="Reset Counter" class="text-secondary hover:text-urgency-red p-2 rounded-lg transition-colors">
-              <span class="material-symbols-outlined text-[18px]">restart_alt</span>
-            </button>
-          </div>
-        </div>
-
-        <div class="w-full bg-surface-container-high rounded-full h-2.5 mt-4 overflow-hidden">
-          <div
-            class="h-full rounded-full transition-all duration-300"
-            :class="dailyDmCount >= 20 ? 'bg-success-green' : dailyDmCount >= 15 ? 'bg-electric-blue' : 'bg-primary-container'"
-            :style="{ width: Math.min(100, (dailyDmCount / 20) * 100) + '%' }"
-          ></div>
-        </div>
-
-        <div class="mt-4 pt-4 border-t border-border-subtle text-xs text-secondary flex flex-wrap gap-4 items-center">
-          <span class="flex items-center gap-1"><span class="material-symbols-outlined text-success-green text-[16px]">check_circle</span> Target: Mahasiswa Kampus Swasta (Binus, Telkom, Trisakti, UMN, Mercu Buana)</span>
-          <span class="flex items-center gap-1"><span class="material-symbols-outlined text-urgency-red text-[16px]">block</span> Aturan Emas: Jangan lampirkan link di pesan pertama! Tunggu balasan.</span>
-        </div>
-      </div>
-
-      <!-- Generator Workspace (Grid) -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        <!-- Controls (Col 5) -->
-        <div class="lg:col-span-5 bg-surface-white rounded-2xl border border-border-subtle p-5 shadow-sm space-y-5">
-          <h3 class="font-bold text-sm text-on-surface">1. Pilih Template Blueprint</h3>
-          <div class="space-y-2">
-            <label
-              v-for="tpl in outboundTemplates"
-              :key="tpl.id"
-              class="block p-3 rounded-xl border text-xs cursor-pointer transition-all"
-              :class="activeTemplateId === tpl.id ? 'border-electric-blue bg-primary-fixed/20 shadow-xs' : 'border-border-subtle bg-surface-container-lowest hover:border-outline-variant'"
-            >
-              <input v-model="activeTemplateId" type="radio" :value="tpl.id" class="sr-only" />
-              <div class="font-bold text-on-surface flex items-center justify-between">
-                <span>{{ tpl.name }}</span>
-                <span v-if="activeTemplateId === tpl.id" class="w-2 h-2 rounded-full bg-electric-blue"></span>
-              </div>
-              <p class="text-secondary mt-1 text-[11px] leading-relaxed">{{ tpl.targetType }}</p>
-            </label>
-          </div>
-
-          <div class="pt-4 border-t border-border-subtle space-y-3">
-            <h3 class="font-bold text-sm text-on-surface">2. Data Prospek Mahasiswa</h3>
-            <div>
-              <label class="block text-xs font-semibold text-secondary mb-1">Nama Panggilan Mahasiswa</label>
-              <input
-                v-model="outboundTarget.name"
-                type="text"
-                placeholder="Contoh: Budi / Kevin / Sarah"
-                class="w-full rounded-xl border border-border-subtle bg-surface-container-lowest px-3.5 py-2.5 text-xs text-on-surface outline-none focus:border-electric-blue focus:ring-1 focus:ring-electric-blue"
-              />
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-secondary mb-1">Nama Kampus</label>
-              <input
-                v-model="outboundTarget.campus"
-                type="text"
-                placeholder="Contoh: Binus / Telkom / Trisakti"
-                class="w-full rounded-xl border border-border-subtle bg-surface-container-lowest px-3.5 py-2.5 text-xs text-on-surface outline-none focus:border-electric-blue focus:ring-1 focus:ring-electric-blue"
-              />
-            </div>
-          </div>
-        </div>
-
-        <!-- Preview & Copy Action (Col 7) -->
-        <div class="lg:col-span-7 bg-surface-white rounded-2xl border border-border-subtle p-5 sm:p-6 shadow-sm flex flex-col justify-between space-y-4">
-          <div>
-            <div class="flex items-center justify-between pb-3 border-b border-border-subtle">
-              <span class="text-xs font-bold text-secondary uppercase tracking-wider">Preview Pesan DM Siap Kirim</span>
-              <span class="text-[11px] text-electric-blue font-semibold">Variabel otomatis terisi</span>
-            </div>
-            <div class="mt-4 p-4 rounded-xl bg-surface-container-low border border-border-subtle font-mono text-xs sm:text-sm text-on-surface leading-relaxed whitespace-pre-wrap select-all">
-              {{ currentGeneratedDm }}
-            </div>
-          </div>
-
-          <div class="pt-2 flex flex-col sm:flex-row gap-2.5">
-            <button
-              @click="copyCurrentDm"
-              class="flex-1 bg-electric-blue text-white font-bold text-sm py-3 px-4 rounded-xl shadow-md hover:bg-primary transition-all flex items-center justify-center gap-2 active:scale-95"
-            >
-              <span class="material-symbols-outlined text-[18px]">content_copy</span>
-              {{ copyDmSuccess ? '✓ Pesan Berhasil Disalin (+1 DM Counter)!' : 'Salin Pesan DM (+1 Count)' }}
-            </button>
-            <a
-              :href="'https://instagram.com/direct/inbox/'"
-              target="_blank"
-              rel="noopener"
-              class="bg-surface-white border border-border-subtle text-secondary hover:text-on-surface text-xs font-bold py-3 px-4 rounded-xl transition-colors flex items-center justify-center gap-1.5"
-            >
-              <span class="material-symbols-outlined text-[16px]">open_in_new</span>
-              Buka Instagram Web
-            </a>
-          </div>
+    <!-- OUTBOUND: dipindahkan ke halaman antrean terpisah -->
+    <section v-else-if="tab === 'outbound'" class="space-y-5">
+      <div class="bg-surface-white rounded-2xl border border-border-subtle p-5 md:p-7 shadow-sm">
+        <span class="text-xs font-bold text-electric-blue uppercase tracking-wider">Outreach</span>
+        <h2 class="text-lg font-bold text-on-surface mt-1">Antrean DM sekarang punya halaman sendiri</h2>
+        <p class="text-sm text-secondary mt-2 max-w-2xl">
+          Template yang dulu tertanam di sini sudah dipindahkan ke database, dan setiap pesan
+          dicatat per prospek — bukan sekadar penghitung harian di browser.
+        </p>
+        <p class="text-sm text-secondary mt-2 max-w-2xl">
+          Tidak ada ambang jumlah DM yang dijamin aman. Batas yang berlaku adalah penilaian
+          manualmu atas relevansi dan izin penerima.
+        </p>
+        <div class="flex flex-wrap gap-2 mt-5">
+          <RouterLink to="/ops/outreach" class="inline-flex items-center gap-2 bg-electric-blue text-white font-bold text-sm px-4 py-2.5 rounded-xl hover:bg-primary transition-colors">
+            <span class="material-symbols-outlined text-[18px]">send</span>
+            Buka Antrean DM
+          </RouterLink>
+          <RouterLink to="/ops/prospects" class="inline-flex items-center gap-2 border border-electric-blue text-electric-blue font-bold text-sm px-4 py-2.5 rounded-xl hover:bg-surface-container-low transition-colors">
+            <span class="material-symbols-outlined text-[18px]">group</span>
+            Kelola Prospek
+          </RouterLink>
+          <RouterLink to="/ops/templates" class="inline-flex items-center gap-2 border border-outline-variant text-on-surface font-bold text-sm px-4 py-2.5 rounded-xl hover:bg-surface-container-low transition-colors">
+            <span class="material-symbols-outlined text-[18px]">chat</span>
+            Template DM
+          </RouterLink>
         </div>
       </div>
     </section>
