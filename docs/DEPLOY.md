@@ -27,7 +27,18 @@ Script membaca connection string dari **file terpisah**, bukan dari `~/.zshrc`,
 supaya kredensial tidak tercampur dengan konfigurasi shell dan tidak ikut
 ter-share/ter-commit.
 
-Buat sekali:
+**Cara paling mudah (otomatis):**
+```bash
+make db-setup
+```
+Perintah ini akan meminta URI connection string Postgres secara aman (input terselubung), menguji koneksi via `psql`, menyimpannya ke `~/.config/jokitugasit/db.env` (`chmod 600`), lalu langsung menjalankan migrasi `supabase/DEPLOY-ALL-IN-ONE.sql` + verifikasi.
+
+Untuk menjalankan ulang migrasi database di lain waktu tanpa deploy frontend:
+```bash
+make db-push
+```
+
+Atau buat manual sekali:
 
 ```bash
 mkdir -p ~/.config/jokitugasit

@@ -3,7 +3,7 @@
 # Quick CLI automation for deployment, fresh builds, Supabase, and Vercel.
 # ==============================================================================
 
-.PHONY: help deploy fresh build clean dev preview health supabase-check vercel-deploy test-telegram redeploy ship guide gate
+.PHONY: help deploy fresh build clean dev preview health supabase-check vercel-deploy test-telegram redeploy ship guide gate db-setup db-push
 
 # Set default shell and PATH to include Homebrew node & tools
 SHELL := /bin/bash
@@ -39,6 +39,8 @@ help:
 	@echo -e "  ${C_BLUE}make supabase-check${C_RESET} Audit kelengkapan skema & konfigurasi Supabase"
 	@echo -e "  ${C_BLUE}make test-telegram${C_RESET}  Uji kirim notifikasi alert order ke Telegram engineer"
 	@echo -e "  ${C_BLUE}make vercel-deploy${C_RESET}  Deploy cepat (git push origin main)"
+	@echo -e "  ${C_CYAN}make db-setup${C_RESET}       ${C_BOLD}🔑 Simpan URI Supabase aman (~/.config/...) lalu migrasi${C_RESET}"
+	@echo -e "  ${C_CYAN}make db-push${C_RESET}        Jalankan migrasi SQL Supabase tanpa deploy frontend"
 	@echo -e "  ${C_GREEN}make redeploy${C_RESET}       ${C_BOLD}🔥 SATU PERINTAH: test → build → SQL → push → deploy → smoke${C_RESET}"
 	@echo -e "  ${C_GRAY}                 Opsi: make redeploy ARGS=\"--skip-db\" (lihat --help)${C_RESET}"
 	@echo -e "  ${C_CYAN}make guide${C_RESET}          Buka panduan lengkap (HTML) di browser"
@@ -113,6 +115,19 @@ redeploy:
 
 ## ship: Alias untuk redeploy
 ship: redeploy
+
+## db-setup: Simpan connection string Supabase secara aman lalu migrasi + verifikasi
+##   Contoh: make db-setup
+##           make db-setup ARGS="--set-only"
+##           make db-setup ARGS="--url postgresql://..."
+db-setup:
+	@bash ./scripts/db-setup.sh $(ARGS)
+
+## db-push: Terapkan migrasi SQL Supabase tanpa deploy frontend
+##   Contoh: make db-push
+##           make db-push ARGS="--backup"
+db-push:
+	@bash ./scripts/redeploy.sh --only-db $(ARGS)
 
 ## gate: Penjaga wajib — secret scan, unit, DB, build, integritas bundle
 ##   Contoh: make gate            (lengkap)

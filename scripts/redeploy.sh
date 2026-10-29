@@ -133,12 +133,12 @@ if $SELF_TEST; then
     fail "Ada ekspansi variabel berisiko (lihat baris di atas)."
   fi
   # Fungsi wajib ada di bundle SQL.
-  for fn in void_payment import_prospects_batch analytics_campuses register_partner rotate_partner_code delete_prospect; do
+  for fn in void_payment import_prospects_batch analytics_campuses register_partner rotate_partner_code delete_prospect set_prospect_consent outreach_eligibility analytics_campaigns resolve_campaign; do
     grep -q "function public.${fn}" supabase/DEPLOY-ALL-IN-ONE.sql || fail "Bundle SQL tidak memuat ${fn}"
   done
   grep -q "make redeploy" docs/DEPLOY.md || fail "docs/DEPLOY.md belum menyebut make redeploy"
   ok "Tidak ada ekspansi variabel berisiko"
-  ok "Bundle SQL memuat 6 fungsi kunci"
+  ok "Bundle SQL memuat 10 fungsi kunci"
   ok "Dokumentasi deploy tersedia"
   exit 0
 fi
@@ -241,11 +241,11 @@ if ! $SKIP_DB; then
     psql "$DB_URL" -v ON_ERROR_STOP=1 -q -f supabase/DEPLOY-ALL-IN-ONE.sql
     ok "Migration selesai"
 
-    FUNCS="$(psql "$DB_URL" -tAc "select count(*) from pg_proc where proname in ('void_payment','import_prospects_batch','analytics_campuses','register_partner','rotate_partner_code','delete_prospect')" | tr -d '[:space:]')"
-    COLS="$(psql "$DB_URL" -tAc "select count(*) from information_schema.columns where table_schema='public' and table_name='requests' and column_name in ('campus','stack','source','prospect_id')" | tr -d '[:space:]')"
-    [ "$FUNCS" = "6" ] || fail "Verifikasi fungsi gagal: $FUNCS/6. Cek log Supabase."
-    [ "$COLS" = "4" ] || fail "Verifikasi kolom gagal: $COLS/4."
-    ok "Verifikasi database: 6 fungsi + 4 kolom baru"
+    FUNCS="$(psql "$DB_URL" -tAc "select count(*) from pg_proc where proname in ('void_payment','import_prospects_batch','analytics_campuses','register_partner','rotate_partner_code','delete_prospect','set_prospect_consent','outreach_eligibility','analytics_campaigns','resolve_campaign')" | tr -d '[:space:]')"
+    COLS="$(psql "$DB_URL" -tAc "select count(*) from information_schema.columns where table_schema='public' and ((table_name='requests' and column_name in ('campus','stack','source','prospect_id','campaign_id')) or (table_name='prospects' and column_name='consent_status'))" | tr -d '[:space:]')"
+    [ "$FUNCS" = "10" ] || fail "Verifikasi fungsi gagal: $FUNCS/10. Cek log Supabase."
+    [ "$COLS" = "6" ] || fail "Verifikasi kolom gagal: $COLS/6."
+    ok "Verifikasi database: 10 fungsi + 6 kolom baru"
     DB_STATUS="diterapkan + diverifikasi"
   fi
 else
