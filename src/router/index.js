@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { crmEnabled } from '../lib/features'
+import { crmEnabled, outreachEnabled, campaignsEnabled, referralEnabled, inboundEnabled } from '../lib/features'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -169,6 +169,9 @@ const router = createRouter({
       meta: { requiresEngineer: true },
     },
     {
+      path: '/ops/campaigns', name: 'campaigns', component: () => import('../views/CampaignsView.vue'), meta: { requiresEngineer: true, crm: true, campaigns: true },
+    },
+    {
       path: '/engineer/partners',
       name: 'partner-management',
       component: () => import('../views/PartnerManagementView.vue'),
@@ -188,6 +191,10 @@ router.beforeEach(async (to) => {
   if (to.meta.crm && !crmEnabled) {
     return { name: 'dashboard' }
   }
+  if (to.meta.outreach && !outreachEnabled) return { name: 'dashboard' }
+  if (to.meta.campaigns && !campaignsEnabled) return { name: 'dashboard' }
+  if (to.meta.referral && !referralEnabled) return { name: 'dashboard' }
+  if (to.meta.inbound && !inboundEnabled) return { name: 'dashboard' }
 
   if (to.meta.requiresEngineer) {
     const { useAuthStore } = await import('../stores/auth')
@@ -247,6 +254,7 @@ router.afterEach((to) => {
     'target-accounts': 'Akun Target - jokitugasit.my.id',
     'dm-templates': 'Template DM - jokitugasit.my.id',
     'partner-management': 'Partner Referral - jokitugasit.my.id',
+    campaigns: 'Kampanye - jokitugasit.my.id',
     partner: 'Program Partner Referral - jokitugasit.my.id',
     'request-track': 'Cek Status Order - jokitugasit.my.id',
   }

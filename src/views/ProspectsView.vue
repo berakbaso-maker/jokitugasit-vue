@@ -2,6 +2,8 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import SideNav from '../components/SideNav.vue'
 import {
+  CONSENT_LABELS,
+  CONSENT_SOURCE_LABELS,
   PERMISSION_BASIS_LABELS,
   PROSPECT_STATUS,
   clearDoNotContact,
@@ -17,6 +19,7 @@ import {
   listProspectsPage,
   listTargetAccounts,
   normalizeUsername,
+  setProspectConsent,
 } from '../lib/outreach'
 import { buildImportPreview, chunkRows, downloadCsv, toCsv } from '../lib/csv'
 
@@ -36,6 +39,7 @@ const page = ref(1)
 const search = ref('')
 const statusFilter = ref('')
 const campusFilter = ref('')
+const consentFilter = ref('')
 
 const pageCount = computed(() => Math.max(1, Math.ceil(total.value / PAGE_SIZE)))
 const rangeStart = computed(() => (total.value === 0 ? 0 : (page.value - 1) * PAGE_SIZE + 1))
@@ -87,6 +91,7 @@ async function load() {
         search: search.value,
         status: statusFilter.value,
         campus: campusFilter.value,
+        consent: consentFilter.value,
       }),
       listTargetAccounts(),
       getProspectStats(),
@@ -121,7 +126,7 @@ function goPage(next) {
   load()
 }
 
-watch([campusFilter, statusFilter], () => {
+watch([campusFilter, statusFilter, consentFilter], () => {
   page.value = 1
   load()
 })
@@ -244,12 +249,15 @@ async function exportCsv() {
       campus: p.campus || '',
       cohort_year: p.cohort_year || '',
       status: p.status,
+      consent_status: p.consent_status,
+      contact_permission_source: p.contact_permission_source || '',
       do_not_contact: p.do_not_contact ? 'true' : 'false',
       permission_basis: p.permission_basis,
     }))
     downloadCsv(
       `prospek-${new Date().toISOString().slice(0, 10)}.csv`,
-      toCsv(rows, ['ig_username', 'display_name', 'campus', 'cohort_year', 'status', 'do_not_contact', 'permission_basis']),
+      toCsv(rows, ['ig_username', 'display_name', 'campus', 'cohort_year', 'status',
+      'consent_status', 'contact_permission_source', 'do_not_contact', 'permission_basis']),
     )
     notice.value = `${rows.length} prospek diekspor.`
   } catch (err) {
@@ -270,6 +278,24 @@ async function undoDnc(prospect) {
     await load()
   } catch (err) {
     error.value = err.message || 'Gagal melepas status jangan-dihubungi.'
+  }
+}
+
+async function changeConsent(prospect, status) {
+  const label = status === 'OPTED_IN' ? 'Opt-in' : 'Opt-out'
+  if (status === 'OPTED_OUT') {
+    const ok = window.confirm(
+      `Tandai @${prospect.ig_username} sebagai OPT-OUT?\n\nIni menyalakan status jangan-dihubungi. Lepas DNC hanya bisa dengan alasan.`,
+    )
+    if (!ok) return
+  }
+  error.value = ''
+  try {
+    await setProspectConsent(prospect.id, status, 'MANUAL_CONTACT')
+    notice.value = `@${prospect.ig_username}: ${CONSENT_LABELS[status] || status}.`
+    await load()
+  } catch (err) {
+    error.value = err.message || `Gagal mengubah consent (${label}).`
   }
 }
 
@@ -393,6 +419,12 @@ onMounted(async () => {
         <option value="">Semua Kampus</option>
         <option v-for="c in campuses" :key="c" :value="c">{{ c }}</option>
       </select>
+      <select v-model="consentFilter" class="rounded-xl border border-outline-variant bg-surface-white px-3 py-2.5 text-sm">
+        <option value="">Semua Consent</option>
+        <option value="UNKNOWN">Belum diputuskan</option>
+        <option value="OPTED_IN">Opt-in</option>
+        <option value="OPTED_OUT">Opt-out</option>
+      </select>
       <select v-model="statusFilter" class="rounded-xl border border-outline-variant bg-surface-white px-3 py-2.5 text-sm">
         <option value="">Semua Status</option>
         <option v-for="(meta, key) in PROSPECT_STATUS" :key="key" :value="key">{{ meta.label }}</option>
@@ -421,6 +453,7 @@ onMounted(async () => {
             <th class="px-4 py-3 font-bold hidden md:table-cell">Nama</th>
             <th class="px-4 py-3 font-bold hidden lg:table-cell">Kampus</th>
             <th class="px-4 py-3 font-bold">Status</th>
+            <th class="px-4 py-3 font-bold hidden lg:table-cell">Consent</th>
             <th class="px-4 py-3 font-bold hidden xl:table-cell">Sumber</th>
             <th class="px-4 py-3 font-bold text-right">Aksi</th>
           </tr>
@@ -439,6 +472,15 @@ onMounted(async () => {
                 {{ statusMeta(p.status).label }}
               </span>
             </td>
+            <td class="px-4 py-3 hidden lg:table-cell">
+              <span class="text-[11px] font-bold px-2 py-0.5 rounded-full"
+                :class="p.consent_status === 'OPTED_IN' ? 'bg-success-green/15 text-success-green' : p.consent_status === 'OPTED_OUT' ? 'bg-error-container text-on-error-container' : 'bg-surface-container text-on-surface-variant'">
+                {{ CONSENT_LABELS[p.consent_status] || p.consent_status }}
+              </span>
+              <p class="text-[10px] text-on-surface-variant mt-0.5">
+                {{ CONSENT_SOURCE_LABELS[p.contact_permission_source] || p.contact_permission_source || '—' }}
+              </p>
+            </td>
             <td class="px-4 py-3 hidden xl:table-cell text-on-surface-variant text-xs">
               {{ PERMISSION_BASIS_LABELS[p.permission_basis] || p.permission_basis }}
             </td>
@@ -456,6 +498,20 @@ onMounted(async () => {
                 </span>
                 <button v-if="p.do_not_contact" @click="undoDnc(p)" class="text-xs font-bold text-on-surface-variant hover:text-on-surface underline whitespace-nowrap">
                   Lepas DNC
+                </button>
+                <button
+                  v-if="!p.do_not_contact && p.consent_status !== 'OPTED_IN'"
+                  @click="changeConsent(p, 'OPTED_IN')"
+                  class="text-xs font-bold text-success-green hover:underline whitespace-nowrap"
+                >
+                  Opt-in
+                </button>
+                <button
+                  v-if="!p.do_not_contact"
+                  @click="changeConsent(p, 'OPTED_OUT')"
+                  class="text-xs font-bold text-amber-700 hover:underline whitespace-nowrap"
+                >
+                  Opt-out
                 </button>
                 <button @click="removeProspect(p)" class="text-xs font-bold text-urgency-red hover:underline whitespace-nowrap">
                   Hapus

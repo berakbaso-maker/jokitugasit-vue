@@ -19,4 +19,4 @@ make redeploy       # test → build → SQL → push → deploy → smoke
 make guide          # panduan lengkap HTML
 ```
 
-Dokumen acuan: `docs/OUTREACH-CRM.md`, `docs/PRD-OUTREACH.md`, `docs/DEPLOY.md`, `docs/panduan-lengkap.html`.
+Dokumen acuan: `docs/OUTREACH-CRM.md`, `docs/PRD-OUTREACH.md`, `docs/DEPLOY.md`, `docs/GROWTH-PLAYBOOK.md`, `docs/panduan-lengkap.html`.

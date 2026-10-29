@@ -291,3 +291,54 @@ npm run build
 ```
 
 Urutan deploy: **SQL dulu, frontend kemudian.** Lihat `OUTREACH-CRM.md` §1.
+
+---
+
+## 14. V4 — Consent, Campaign & Growth Analytics
+
+### 14.1 Consent (bukan boolean)
+
+| Status | Arti | Manual DM | Otomatis |
+|---|---|---|---|
+| `UNKNOWN` | Belum diputuskan | Ya (review) | Tidak |
+| `OPTED_IN` | Setuju dihubungi | Ya | Ya |
+| `OPTED_OUT` | Menolak | Tidak | Tidak |
+
+- `outreach_eligibility(prospect, channel)` menjadi sumber keputusan.
+- `OPTED_OUT` otomatis menyalakan DNC; re-import tidak menghapusnya.
+- Lepas DNC mereset consent ke `UNKNOWN`.
+
+### 14.2 Campaign
+
+Entity: `campaigns`, `campaign_targets`, `campaign_assets`, `campaign_events`.
+Campaign tidak mengirim pesan; ia menyimpan target, materi, link, dan hasil.
+
+- Link: `/request?campaign=CMP-…&utm_source=…&utm_medium=…`
+- `requests` menyimpan `campaign_id`, 5 kolom UTM, `attribution_at`.
+- Atribusi dikunci setelah request dibuat (first valid touch).
+- Event otomatis: `INQUIRY` (request masuk), `DEAL` (status kerja),
+  `PAID` (lunas), `REFERRAL_PAID` (komisi dibayar).
+
+### 14.3 Growth analytics
+
+- `analytics_campaigns(from,to)` → inquiry, deal, paid, omzet, komisi, biaya, CAC.
+- CAC = `(cost + time_value) / paid_clients`; kosong jika belum ada paid.
+- UI menandai sample kecil (`paid_clients < 5`).
+- Perbandingan channel memakai `source_breakdown` + campaign.
+
+### 14.4 Feature gates
+
+| Flag | Default | Mengontrol |
+|---|---|---|
+| `VITE_ENABLE_CRM` | true | Seluruh modul CRM |
+| `VITE_ENABLE_OUTREACH` | true | Target, prospek, DM, template |
+| `VITE_ENABLE_CAMPAIGNS` | true | Halaman kampanye |
+| `VITE_ENABLE_REFERRAL` | true | Partner & komisi |
+| `VITE_ENABLE_INBOUND` | **false** | Inbound API (belum diimplementasikan) |
+
+### 14.5 Status proyek V4 vs existing
+
+Enum existing dipertahankan: `new, consultation, working, review, done, paid`.
+Mapping: `INQUIRY→new`, `QUOTED→consultation`, `DP_PAID/IN_PROGRESS→working`,
+`DELIVERED→review/done`, `COMPLETED→done`, `CANCELLED→cancelled` (ditambahkan
+bertahap bila diperlukan). Tidak ada migrasi enum destruktif.

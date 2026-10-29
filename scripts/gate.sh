@@ -167,13 +167,13 @@ pass "semua migration & test terdaftar"
 
 # ---------------------------------------------------------------- 5. bundle integrity
 step "Gate 5 — integritas bundle SQL"
-for fn in void_payment import_prospects_batch analytics_campuses register_partner rotate_partner_code delete_prospect; do
+for fn in void_payment import_prospects_batch analytics_campuses register_partner rotate_partner_code delete_prospect set_prospect_consent outreach_eligibility analytics_campaigns resolve_campaign; do
   grep -q "function public\.${fn}" supabase/DEPLOY-ALL-IN-ONE.sql || fail "fungsi ${fn} tidak ada di bundle"
 done
-for col in campus stack source prospect_id; do
+for col in campus stack source prospect_id consent_status campaign_id; do
   grep -qE "add column if not exists ${col}" supabase/DEPLOY-ALL-IN-ONE.sql || fail "kolom ${col} tidak ada di bundle"
 done
-pass "6 fungsi + 4 kolom kunci ada di bundle"
+pass "10 fungsi + 6 kolom kunci ada di bundle"
 
 # ---------------------------------------------------------------- 6. unit test
 if ! $SKIP_TESTS; then

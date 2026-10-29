@@ -1436,6 +1436,7 @@ group by r.id, r.order_no, r.status, r.quote_amount, r.discount_amount, c.status
       <tr><td><code>/ops/prospects</code></td><td>engineer + CRM</td><td>Prospek, import, konversi</td></tr>
       <tr><td><code>/ops/outreach</code></td><td>engineer + CRM</td><td>Antrean DM</td></tr>
       <tr><td><code>/ops/templates</code></td><td>engineer + CRM</td><td>Template DM</td></tr>
+      <tr><td><code>/ops/campaigns</code></td><td>engineer + CRM</td><td>Kampanye, link UTM, CAC</td></tr>
       <tr><td><code>/engineer/partners</code></td><td>engineer + CRM</td><td>Partner &amp; komisi</td></tr>
       <tr><td><code>/earnings</code></td><td>engineer</td><td>Pendapatan</td></tr>
       <tr><td><code>/ig-leads</code></td><td>engineer + CRM</td><td>Instagram legacy</td></tr>
@@ -1502,7 +1503,11 @@ group by r.id, r.order_no, r.status, r.quote_amount, r.discount_amount, c.status
     <tbody>
       <tr><td><code>VITE_SUPABASE_URL</code></td><td>Ya</td><td>URL project Supabase</td></tr>
       <tr><td><code>VITE_SUPABASE_ANON_KEY</code></td><td>Ya</td><td>Key publik (aman, dilindungi RLS)</td></tr>
-      <tr><td><code>VITE_ENABLE_CRM</code></td><td>Ya</td><td>Feature flag modul CRM</td></tr>
+      <tr><td><code>VITE_ENABLE_CRM</code></td><td>Ya</td><td>Master flag CRM</td></tr>
+      <tr><td><code>VITE_ENABLE_OUTREACH</code></td><td>Ya</td><td>Target, prospek, DM, template</td></tr>
+      <tr><td><code>VITE_ENABLE_CAMPAIGNS</code></td><td>Ya</td><td>Halaman kampanye</td></tr>
+      <tr><td><code>VITE_ENABLE_REFERRAL</code></td><td>Ya</td><td>Partner &amp; komisi</td></tr>
+      <tr><td><code>VITE_ENABLE_INBOUND</code></td><td>Ya</td><td>Inbound API — default <strong>false</strong></td></tr>
       <tr><td><code>SUPABASE_URL</code>, <code>SUPABASE_SERVICE_ROLE_KEY</code></td><td><strong>Tidak</strong></td><td>Functions server</td></tr>
       <tr><td><code>IG_*</code></td><td><strong>Tidak</strong></td><td>Webhook/Graph API</td></tr>
       <tr><td><code>TELEGRAM_*</code>, <code>RESEND_*</code>, <code>APP_URL</code></td><td><strong>Tidak</strong></td><td>Notifikasi &amp; email</td></tr>
@@ -1601,6 +1606,83 @@ select * from public.outreach_logs order by sent_at;</code></pre></div>
     <p>Dokumen ini diturunkan dari kode di repository <code>jokitugasit-vue</code>. Untuk detail teknis schema/RLS, lihat <code>docs/OUTREACH-CRM.md</code>; untuk produk &amp; model omzet, lihat <code>docs/PRD-OUTREACH.md</code>; untuk deploy, lihat <code>docs/DEPLOY.md</code>.</p>
     <p>Tips: tekan <kbd>T</kbd> untuk ganti tema, <kbd>/</kbd> untuk mencari, dan <kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>P</kbd> untuk menyimpan sebagai PDF.</p>
   </div>
+</section>
+
+
+<!-- ============================================================
+     17
+     ============================================================ -->
+<section class="part" id="s17" data-title="Kampanye &amp; consent (V4)">
+  <div class="sec-label"><span class="dot"></span>Bagian 17</div>
+  <h2 id="h17">Kampanye &amp; consent (V4)</h2>
+
+  <p class="lead">Modul kampanye mengukur distribusi berizin. Ia <strong>tidak mengirim pesan</strong> — hanya menyimpan target, materi, link, dan hasil.</p>
+
+  <h3>17.1 Consent — bukan boolean</h3>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Status</th><th>Arti</th><th>Manual DM</th><th>Otomatis</th></tr></thead>
+    <tbody>
+      <tr><td><code>UNKNOWN</code></td><td>Ditemukan/diimpor, belum diputuskan</td><td><span class="badge b-ok">Boleh, setelah review</span></td><td><span class="badge b-bad">Tidak</span></td></tr>
+      <tr><td><code>OPTED_IN</code></td><td>Menyatakan setuju dihubungi</td><td><span class="badge b-ok">Boleh</span></td><td><span class="badge b-ok">Boleh</span></td></tr>
+      <tr><td><code>OPTED_OUT</code></td><td>Menolak / minta berhenti</td><td><span class="badge b-bad">Tidak</span></td><td><span class="badge b-bad">Tidak</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>Di <code>/ops/prospects</code>: filter consent, badge per baris, tombol <strong>Opt-in</strong> / <strong>Opt-out</strong>. Opt-out otomatis menyalakan DNC; re-import tidak menghapusnya. Lepas DNC mereset consent ke <code>UNKNOWN</code> — bukan diam-diam opt-in.</p>
+  <p>Keputusan dihitung database lewat <code>outreach_eligibility(prospect, channel)</code>. Kanal <code>AUTOMATED_DM</code> butuh <code>OPTED_IN</code>; <code>MANUAL_DM</code> boleh untuk <code>UNKNOWN</code> setelah Anda meninjau.</p>
+
+  <h3>17.2 Membuat campaign</h3>
+  <ol class="steps">
+    <li><div class="st-t">Buka <code>/ops/campaigns</code></div><div class="st-b">Klik <strong>Buat Campaign</strong>.</div></li>
+    <li><div class="st-t">Isi tujuan &amp; channel</div><div class="st-b">Distribusi Admin / Outreach Personal / Referral / Inbound; channel DM manual, IG Story partner, WhatsApp referral, atau website opt-in.</div></li>
+    <li><div class="st-t">Isi biaya &amp; nilai waktu</div><div class="st-b">Dipakai menghitung CAC. Boleh 0, tetapi CAC jadi tidak jujur jika waktu tidak dihitung.</div></li>
+    <li><div class="st-t">Salin link</div><div class="st-b">Format: <code>/request?campaign=CMP-XXXXXXXX&amp;utm_source=instagram&amp;utm_medium=…&amp;utm_campaign=…</code>. Tambahkan <code>&amp;ref=REF-…</code> bila ingin atribusi referral.</div></li>
+    <li><div class="st-t">Tambah target</div><div class="st-b">Pilih akun angkatan; tandai status <em>Direncanakan / Dihubungi / Izin diberikan / Menolak / Jadi klien</em>.</div></li>
+  </ol>
+
+  <h3>17.3 Event &amp; atribusi</h3>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Event</th><th>Kapan tercatat</th></tr></thead>
+    <tbody>
+      <tr><td><code>INQUIRY</code></td><td>Request masuk dengan kode campaign</td></tr>
+      <tr><td><code>DEAL</code></td><td>Proyek mulai dikerjakan (status berubah)</td></tr>
+      <tr><td><code>PAID</code></td><td>Proyek lunas</td></tr>
+      <tr><td><code>REFERRAL_PAID</code></td><td>Komisi partner ditandai lunas</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="callout warn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l9 16H3z"/><path d="M12 9v4M12 16h.01"/></svg>
+    <div><p><strong>Atribusi dikunci</strong> setelah request dibuat (first valid touch). Mengubah campaign proyek setelah deal ditolak database. Kode campaign yang tidak aktif diabaikan — request tetap masuk sebagai <code>INBOUND</code>.</p></div>
+  </div>
+
+  <h3>17.4 Metrik &amp; CAC</h3>
+  <div class="codewrap" data-lang="text"><pre><code>conversion = klien lunas / inquiry
+CAC        = (biaya campaign + nilai waktu) / klien lunas</code></pre></div>
+  <p>Kartu campaign menampilkan inquiry, deal, lunas, dan CAC. Jika klien lunas &lt; 5, UI menandai <em>data masih kecil</em> — jangan menyimpulkan pemenang channel dari sample sekecil itu. Dashboard juga menampilkan ringkasan kampanye pada periode yang dipilih.</p>
+
+  <h3>17.5 Feature flag</h3>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Flag</th><th>Default</th><th>Mengontrol</th></tr></thead>
+    <tbody>
+      <tr><td><code>VITE_ENABLE_CRM</code></td><td>true</td><td>Seluruh modul CRM</td></tr>
+      <tr><td><code>VITE_ENABLE_OUTREACH</code></td><td>true</td><td>Target, prospek, DM, template</td></tr>
+      <tr><td><code>VITE_ENABLE_CAMPAIGNS</code></td><td>true</td><td>Halaman kampanye</td></tr>
+      <tr><td><code>VITE_ENABLE_REFERRAL</code></td><td>true</td><td>Partner &amp; komisi</td></tr>
+      <tr><td><code>VITE_ENABLE_INBOUND</code></td><td><strong>false</strong></td><td>Inbound API — belum aktif sampai prasyarat Meta terpenuhi</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="callout danger">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l9 16H3z"/><path d="M12 9v4M12 16h.01"/></svg>
+    <div><p><strong>Inbound API tetap OFF.</strong> Tidak ada auto-reply, scraping followers, atau blast DM. Aktivasi hanya setelah app review Meta, token, window respons, dan aturan messaging diverifikasi. Sampai itu, semua balasan manual dari aplikasi Instagram.</p></div>
+  </div>
+
+  <p class="lead" style="font-size:13.5px">Playbook lengkap: <code>docs/GROWTH-PLAYBOOK.md</code>.</p>
 </section>
 
 </div><!-- /content -->

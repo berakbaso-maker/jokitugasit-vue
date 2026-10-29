@@ -50,6 +50,19 @@ Lokasi file bisa diganti lewat `DEPLOY_ENV_FILE=/path/lain.env`.
 Kalau ingin tanpa file: `make redeploy ARGS="--db-url postgresql://..."` atau
 `SUPABASE_DB_URL="..." make redeploy`.
 
+## Feature flag modul
+
+| Variabel | Default | Efek |
+|---|---|---|
+| `VITE_ENABLE_CRM` | true | Master CRM; false = menu CRM hilang |
+| `VITE_ENABLE_OUTREACH` | true | Target, prospek, DM, template |
+| `VITE_ENABLE_CAMPAIGNS` | true | Halaman `/ops/campaigns` |
+| `VITE_ENABLE_REFERRAL` | true | Partner & komisi |
+| `VITE_ENABLE_INBOUND` | **false** | Inbound API (belum aktif) |
+
+Set di Vercel → Environment Variables, lalu deploy ulang frontend.
+Panduan kampanye/consent: `docs/GROWTH-PLAYBOOK.md`.
+
 ## Gate wajib sebelum commit/deploy
 
 ```bash

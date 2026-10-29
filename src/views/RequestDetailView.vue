@@ -5,7 +5,7 @@ import SideNav from '../components/SideNav.vue'
 import {
   getRequest, updateRequest, waLink, DEADLINE_LABELS, STATUS_LABELS, CATEGORY_LABELS,
   SOURCE_LABELS, formatRupiah, listPayments, listCommissions, recordPayment, voidPayment,
-  recomputeCommission, getAttachmentSignedUrl,
+  recomputeCommission, getAttachmentSignedUrl, getCampaign,
 } from '../lib/api'
 import {
   PAYMENT_KIND_LABELS, PAYMENT_STATUS_LABELS, paymentKey, remainingAmount,
@@ -45,6 +45,7 @@ const payForm = ref({ kind: 'DP', amount: '', method: 'transfer', proofUrl: '', 
 const paymentsSection = ref(null)
 const attachmentLoading = ref(false)
 const attachmentError = ref('')
+const campaignName = ref('')
 
 const savedTotal = computed(() =>
   Math.max(Number(request.value?.quote_amount || 0) - Number(request.value?.discount_amount || 0), 0)
@@ -88,6 +89,14 @@ async function load() {
     loading.value = false
   }
   await loadMoney()
+  if (request.value?.campaign_id) {
+    try {
+      const c = await getCampaign(request.value.campaign_id)
+      campaignName.value = c ? `${c.name} (${c.code})` : ''
+    } catch {
+      campaignName.value = ''
+    }
+  }
 }
 
 onMounted(load)
@@ -404,6 +413,16 @@ const typeColor = (c) => {
               <div>
                 <p class="text-label-sm font-label-sm text-secondary mb-1">Name</p>
                 <p class="font-body-md font-medium">{{ request.customer_name }}</p>
+              </div>
+              <div>
+                <p class="text-label-sm font-label-sm text-secondary mb-1">Sumber / Kampanye</p>
+                <p class="font-body-md font-medium">
+                  {{ SOURCE_LABELS[request.source] || request.source || '—' }}
+                </p>
+                <p v-if="campaignName" class="text-[11px] text-secondary mt-0.5">{{ campaignName }}</p>
+                <p v-else-if="request.utm_campaign || request.utm_source" class="text-[11px] text-secondary mt-0.5">
+                  UTM: {{ [request.utm_source, request.utm_medium, request.utm_campaign].filter(Boolean).join(' / ') }}
+                </p>
               </div>
               <div>
                 <p class="text-label-sm font-label-sm text-secondary mb-1">WhatsApp</p>

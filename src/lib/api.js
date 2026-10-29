@@ -39,6 +39,12 @@ export async function createRequest(payload) {
     p_file_url: payload.file_url || null,
     p_email: payload.email || null,
     p_referral_code: payload.referral_code || null,
+    p_campaign_code: payload.campaign_code || null,
+    p_utm_source: payload.utm_source || null,
+    p_utm_medium: payload.utm_medium || null,
+    p_utm_campaign: payload.utm_campaign || null,
+    p_utm_content: payload.utm_content || null,
+    p_utm_term: payload.utm_term || null,
   })
   if (error) throw error
   return { order_no: data }
@@ -345,6 +351,110 @@ export async function voidPayment(paymentId, reason) {
   })
   if (error) throw error
   return Array.isArray(data) ? data[0] : data
+}
+
+// ---------- CAMPAIGN ----------
+
+export const CAMPAIGN_OBJECTIVES = {
+  ADMIN_DISTRIBUTION: 'Distribusi Admin',
+  DIRECT_OUTREACH: 'Outreach Personal',
+  REFERRAL: 'Referral Partner',
+  INBOUND: 'Inbound Website',
+}
+
+export const CAMPAIGN_CHANNELS = {
+  INSTAGRAM_MANUAL_DM: 'Instagram DM Manual',
+  IG_STORY_PARTNER: 'IG Story Partner',
+  WHATSAPP_REFERRAL: 'WhatsApp Referral',
+  WEBSITE_OPT_IN: 'Website Opt-in',
+}
+
+export const CAMPAIGN_STATUS = {
+  DRAFT: 'Draf',
+  ACTIVE: 'Aktif',
+  PAUSED: 'Dijeda',
+  COMPLETED: 'Selesai',
+}
+
+export async function listCampaigns() {
+  const { data, error } = await supabase
+    .from('campaigns')
+    .select('*')
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return data || []
+}
+
+export async function createCampaign(payload) {
+  const { data, error } = await supabase.from('campaigns').insert(payload).select().single()
+  if (error) throw error
+  return data
+}
+
+export async function updateCampaign(id, patch) {
+  const { data, error } = await supabase
+    .from('campaigns')
+    .update({ ...patch, updated_at: new Date().toISOString() })
+    .eq('id', id)
+    .select()
+    .single()
+  if (error) throw error
+  return data
+}
+
+export async function resolveCampaign(code) {
+  const clean = String(code || '').trim().toUpperCase()
+  if (!clean) return null
+  const { data, error } = await supabase.rpc('resolve_campaign', { p_code: clean })
+  if (error) throw error
+  return Array.isArray(data) ? data[0] || null : data || null
+}
+
+export async function getCampaign(id) {
+  const { data, error } = await supabase.from('campaigns').select('*').eq('id', id).maybeSingle()
+  if (error) throw error
+  return data
+}
+
+export async function listCampaignTargets(campaignId) {
+  const { data, error } = await supabase
+    .from('campaign_targets')
+    .select('*, target_accounts(ig_username, campus, relationship_status)')
+    .eq('campaign_id', campaignId)
+    .order('created_at', { ascending: true })
+  if (error) throw error
+  return data || []
+}
+
+export async function addCampaignTarget({ campaignId, targetAccountId = null, prospectId = null }) {
+  const { data, error } = await supabase
+    .from('campaign_targets')
+    .insert({
+      campaign_id: campaignId,
+      target_account_id: targetAccountId,
+      prospect_id: prospectId,
+    })
+    .select()
+    .single()
+  if (error) throw error
+  return data
+}
+
+export async function updateCampaignTarget(id, patch) {
+  const { data, error } = await supabase
+    .from('campaign_targets')
+    .update(patch)
+    .eq('id', id)
+    .select()
+    .single()
+  if (error) throw error
+  return data
+}
+
+export async function getAnalyticsCampaigns(from = null, to = null) {
+  const { data, error } = await supabase.rpc('analytics_campaigns', { p_from: from, p_to: to })
+  if (error) throw error
+  return data || []
 }
 
 // ---------- ANALYTICS ----------

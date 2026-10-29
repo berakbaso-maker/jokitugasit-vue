@@ -48,6 +48,8 @@ run "migration-referral-integrity"    "$ROOT/migration-referral-integrity.sql"
 run "migration-data-rights"           "$ROOT/migration-data-rights.sql"
 run "migration-project-details"       "$ROOT/migration-project-details.sql"
 run "migration-hardening"             "$ROOT/migration-hardening.sql"
+run "migration-consent-guard"         "$ROOT/migration-consent-guard.sql"
+run "migration-campaigns"             "$ROOT/migration-campaigns.sql"
 run "05_grants (supabase default)"     "$DIR/05_grants.sql"
 
 echo "tests"
@@ -62,6 +64,8 @@ run "80_referral_integrity.sql"        "$DIR/80_referral_integrity.sql"
 run "90_data_rights.sql"               "$DIR/90_data_rights.sql"
 run "95_project_details.sql"           "$DIR/95_project_details.sql"
 run "99_hardening.sql"                 "$DIR/99_hardening.sql"
+run "100_consent.sql"                  "$DIR/100_consent.sql"
+run "110_campaigns.sql"                "$DIR/110_campaigns.sql"
 
 echo
 echo "${c_green}semua migration + test lulus${c_reset}"

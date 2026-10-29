@@ -102,6 +102,7 @@ export async function listProspects(filters = {}) {
 
   if (filters.status) query = query.eq('status', filters.status)
   if (filters.campus) query = query.eq('campus', filters.campus)
+  if (filters.consent) query = query.eq('consent_status', filters.consent)
   if (filters.sourceAccountId) query = query.eq('source_account_id', filters.sourceAccountId)
   if (filters.search) query = query.ilike('ig_username', `%${normalizeUsername(filters.search)}%`)
   if (filters.limit) query = query.limit(filters.limit)
@@ -160,6 +161,40 @@ export async function logOutreach({
   if (error) throw error
 }
 
+export const CONSENT_LABELS = {
+  UNKNOWN: 'Belum diputuskan',
+  OPTED_IN: 'Opt-in',
+  OPTED_OUT: 'Opt-out',
+}
+
+export const CONSENT_SOURCE_LABELS = {
+  WEBSITE_FORM: 'Form website',
+  INBOUND_IG_DM: 'DM masuk',
+  ADMIN_PARTNER_SHARED_OPT_IN: 'Dibagikan admin (opt-in)',
+  MANUAL_CONTACT: 'Kontak manual',
+}
+
+/** Ubah consent secara eksplisit; OPTED_OUT otomatis menyalakan DNC. */
+export async function setProspectConsent(prospectId, status, source = 'MANUAL_CONTACT') {
+  const { data, error } = await supabase.rpc('set_prospect_consent', {
+    p_prospect_id: prospectId,
+    p_status: status,
+    p_source: source,
+  })
+  if (error) throw error
+  return Array.isArray(data) ? data[0] : data
+}
+
+export async function outreachEligibility(prospectId, channel = 'MANUAL_DM') {
+  const { data, error } = await supabase.rpc('outreach_eligibility', {
+    p_prospect_id: prospectId,
+    p_channel: channel,
+  })
+  if (error) throw error
+  const row = Array.isArray(data) ? data[0] : data
+  return row || { eligible: false, reason: 'NOT_FOUND' }
+}
+
 /** Lepas status DNC secara sengaja (hanya engineer, melalui override). */
 export async function clearDoNotContact(prospectId, reason) {
   const { data, error } = await supabase.rpc('clear_do_not_contact', {
@@ -204,6 +239,7 @@ export async function listProspectsPage(filters = {}) {
 
   if (filters.status) query = query.eq('status', filters.status)
   if (filters.campus) query = query.eq('campus', filters.campus)
+  if (filters.consent) query = query.eq('consent_status', filters.consent)
 
   const search = sanitizeSearch(filters.search)
   if (search) {

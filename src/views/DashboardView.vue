@@ -5,7 +5,9 @@ import SideNav from '../components/SideNav.vue'
 import {
   listRequests, formatRupiah, DEADLINE_LABELS, STATUS_LABELS, CATEGORY_LABELS, SOURCE_LABELS, waLink,
   getAnalyticsOverview, getAnalyticsFunnel, getAnalyticsCampuses,
+  getAnalyticsCampaigns,
 } from '../lib/api'
+import { campaignsEnabled } from '../lib/features'
 
 const router = useRouter()
 const requests = ref([])
@@ -14,6 +16,7 @@ const analytics = ref(null)
 const funnel = ref([])
 const analyticsError = ref('')
 const period = ref('all') // all | 30d | month
+const campaignRows = ref([])
 const campus = ref('')
 const campusOptions = ref([])
 
@@ -91,6 +94,17 @@ async function loadAnalytics() {
     ])
     analytics.value = overview
     funnel.value = funnelRows || []
+
+    // Campaign punya migration sendiri; jangan memblokir analytics utama.
+    if (campaignsEnabled) {
+      try {
+        campaignRows.value = await getAnalyticsCampaigns(from, to)
+      } catch {
+        campaignRows.value = []
+      }
+    } else {
+      campaignRows.value = []
+    }
   } catch (err) {
     // Analytics butuh migration-money-schema.sql + outreach; jangan
     // sampai memblokir dashboard kalau belum dipasang.
@@ -322,6 +336,43 @@ const statusClass = (s) => {
             </div>
           </div>
         </div>
+      </div>
+
+      <!-- Kampanye -->
+      <div v-if="campaignsEnabled && campaignRows.length" class="bg-surface-white p-5 rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] lg:col-span-2">
+        <div class="flex items-baseline justify-between mb-1">
+          <h3 class="text-body-lg font-bold">Kampanye</h3>
+          <RouterLink to="/ops/campaigns" class="text-[11px] text-electric-blue hover:underline">Kelola →</RouterLink>
+        </div>
+        <p class="text-label-sm text-secondary mb-4">Inquiry dan omzet per kampanye pada periode ini.</p>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="text-left text-[11px] uppercase tracking-wide text-secondary">
+                <th class="py-2 pr-3">Kampanye</th>
+                <th class="py-2 px-3">Inquiry</th>
+                <th class="py-2 px-3">Lunas</th>
+                <th class="py-2 px-3">Omzet</th>
+                <th class="py-2 pl-3">CAC</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="c in campaignRows.slice(0, 5)" :key="c.campaign_id" class="border-t border-border-subtle">
+                <td class="py-2 pr-3">
+                  <p class="font-bold truncate max-w-[200px]">{{ c.name }}</p>
+                  <p class="text-[10px] text-secondary font-mono">{{ c.code }}</p>
+                </td>
+                <td class="py-2 px-3">{{ c.inquiries }}</td>
+                <td class="py-2 px-3">{{ c.paid_clients }}</td>
+                <td class="py-2 px-3">{{ formatRupiah(c.gross) }}</td>
+                <td class="py-2 pl-3">{{ c.cac == null ? '—' : formatRupiah(c.cac) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p v-if="campaignRows.some(c => Number(c.paid_clients) < 5)" class="text-[11px] text-amber-700 mt-3">
+          Sebagian kampanye punya &lt;5 klien lunas — angka belum cukup untuk menyimpulkan pemenang.
+        </p>
       </div>
     </div>
 

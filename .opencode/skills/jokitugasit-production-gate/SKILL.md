@@ -57,6 +57,7 @@ Baca yang relevan:
 - `docs/OUTREACH-CRM.md` (schema, RLS, aturan uang)
 - `docs/PRD-OUTREACH.md` (alur, status, compliance)
 - `docs/DEPLOY.md` (deploy & rollback)
+- `docs/GROWTH-PLAYBOOK.md` (consent, campaign, 14-day validation)
 
 Lalu periksa:
 
@@ -140,7 +141,7 @@ Periksa manual:
 - [ ] Migration baru masuk `supabase/tests/run.sh` dan `DEPLOY-ALL-IN-ONE.sql`.
 - [ ] Fungsi baru diberi `revoke`/`grant` yang benar.
 - [ ] RLS aktif untuk tabel baru + policy engineer.
-- [ ] Dokumentasi diperbarui.
+- [ ] Dokumentasi diperbarui (termasuk growth playbook bila menyentuh campaign/consent).
 - [ ] Rollback diketahui.
 
 **Berhenti jika:** secret terdeteksi, RLS tidak jelas, atau migration tidak tercakup bundle.

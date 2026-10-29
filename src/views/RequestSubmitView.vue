@@ -1,12 +1,39 @@
 <script setup>
 import { ref, watch } from 'vue'
-import { useRouter, RouterLink } from 'vue-router'
+import { useRouter, useRoute, RouterLink } from 'vue-router'
 import TopAppBar from '../components/TopAppBar.vue'
 import BottomNavBar from '../components/BottomNavBar.vue'
 import FooterBar from '../components/FooterBar.vue'
-import { createRequest, uploadAttachment, validateReferralCode, CATEGORY_LABELS, DEADLINE_LABELS } from '../lib/api'
+import {
+  createRequest, uploadAttachment, validateReferralCode, resolveCampaign,
+  CATEGORY_LABELS, DEADLINE_LABELS,
+} from '../lib/api'
 
 const router = useRouter()
+const route = useRoute()
+
+function queryString(value) {
+  if (Array.isArray(value)) return String(value[0] || '').trim()
+  return typeof value === 'string' ? value.trim() : ''
+}
+
+// Atribusi campaign/UTM dibaca sekali saat halaman dibuka (first touch).
+const attribution = {
+  campaign_code: queryString(route.query.campaign),
+  utm_source: queryString(route.query.utm_source),
+  utm_medium: queryString(route.query.utm_medium),
+  utm_campaign: queryString(route.query.utm_campaign),
+  utm_content: queryString(route.query.utm_content),
+  utm_term: queryString(route.query.utm_term),
+}
+const campaignName = ref('')
+const campaignError = ref(false)
+
+if (attribution.campaign_code) {
+  resolveCampaign(attribution.campaign_code)
+    .then((c) => { campaignName.value = c?.name || ''; campaignError.value = !c })
+    .catch(() => { campaignError.value = true })
+}
 
 const categories = [
   { label: 'Website / Web App', value: 'web' },
@@ -36,7 +63,7 @@ const form = ref({
   deadline: 'besok',
   deadline_date: '',
   link: '',
-  referral_code: '',
+  referral_code: queryString(route.query.ref),
 })
 
 const file = ref(null)
@@ -136,6 +163,12 @@ async function handleSubmit() {
       link: form.value.link.trim() || null,
       file_url: fileUrl,
       referral_code: referralStatus.value === 'valid' ? form.value.referral_code.trim().toUpperCase() : null,
+      campaign_code: attribution.campaign_code || null,
+      utm_source: attribution.utm_source || null,
+      utm_medium: attribution.utm_medium || null,
+      utm_campaign: attribution.utm_campaign || null,
+      utm_content: attribution.utm_content || null,
+      utm_term: attribution.utm_term || null,
     })
 
     // Kirim notifikasi instan ke Telegram Engineer via Vercel Serverless Function (non-blocking)
@@ -219,6 +252,14 @@ async function handleSubmit() {
             <span class="w-2.5 h-2.5 rounded-full bg-success-green animate-pulse"></span>
             <span class="font-label-sm text-label-sm text-on-surface-variant">Engineer siap bantu</span>
           </div>
+        </div>
+
+        <div v-if="campaignName" class="mb-4 flex items-center gap-2 rounded-xl bg-primary-fixed/30 border border-electric-blue/20 px-4 py-2.5 text-xs text-on-surface">
+          <span class="material-symbols-outlined text-[16px] text-electric-blue">campaign</span>
+          <span>Kamu datang dari kampanye <strong>{{ campaignName }}</strong> — terima kasih!</span>
+        </div>
+        <div v-else-if="campaignError" class="mb-4 rounded-xl bg-surface-container-low border border-border-subtle px-4 py-2.5 text-xs text-secondary">
+          Kode kampanye tidak dikenali; form tetap bisa dikirim.
         </div>
 
         <div class="bg-surface-white rounded-2xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] p-4 sm:p-6 md:p-8 border border-border-subtle/60">
