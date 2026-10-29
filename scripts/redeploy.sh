@@ -47,6 +47,7 @@ Opsi:
   --message <text>    Pesan commit (default: chore(deploy): <timestamp>)
   --allow-branch      Izinkan deploy dari branch selain main
   --check             Preflight saja, tidak mengubah apa pun
+  --self-test         Uji skrip + bundle SQL (tanpa deploy)
   -h, --help          Bantuan ini
 
 Contoh:
@@ -66,6 +67,7 @@ ONLY_DEPLOY=false
 BACKUP=false
 ALLOW_BRANCH=false
 CHECK_ONLY=false
+SELF_TEST=false
 COMMIT_MSG="chore(deploy): $(date '+%Y-%m-%d %H:%M')"
 DB_URL="${SUPABASE_DB_URL:-${DATABASE_URL:-}}"
 PROD_BASE="${PROD_URL:-https://jokitugasit.my.id}"
@@ -82,6 +84,7 @@ while [ $# -gt 0 ]; do
     --backup)      BACKUP=true ;;
     --allow-branch) ALLOW_BRANCH=true ;;
     --check)       CHECK_ONLY=true ;;
+    --self-test)   SELF_TEST=true ;;
     --db-url)      DB_URL="${2:-}"; shift ;;
     --message)     COMMIT_MSG="${2:-}"; shift ;;
     -h|--help)     usage; exit 0 ;;
@@ -100,6 +103,28 @@ mask_url() {
   # Jangan pernah mencetak password/host penuh.
   printf '%s' "$1" | sed -E 's#(postgres(ql)?://)[^@]*@#\1***@#'
 }
+
+# ---------- self test (tanpa menyentuh repo/deploy) ----------
+if $SELF_TEST; then
+  step "Self test"
+  command -v bash >/dev/null || fail "bash tidak ada"
+  # Pastikan tidak ada ekspansi variabel yang tidak sengaja (mis. variabel diikuti elipsis).
+  RISKY="$(grep -nE '\$[A-Za-z_][A-Za-z0-9_]*[^A-Za-z0-9_ "/:.$)}]' "$0" \
+    | grep -vE '\$ALLOW_BRANCH|\$SMOKE_PATHS|if ! \$|if \$' || true)"
+  if [ -n "$RISKY" ]; then
+    printf '%s\n' "$RISKY"
+    fail "Ada ekspansi variabel berisiko (lihat baris di atas)."
+  fi
+  # Fungsi wajib ada di bundle SQL.
+  for fn in void_payment import_prospects_batch analytics_campuses register_partner rotate_partner_code delete_prospect; do
+    grep -q "function public.${fn}" supabase/DEPLOY-ALL-IN-ONE.sql || fail "Bundle SQL tidak memuat ${fn}"
+  done
+  grep -q "make redeploy" docs/DEPLOY.md || fail "docs/DEPLOY.md belum menyebut make redeploy"
+  ok "Tidak ada ekspansi variabel berisiko"
+  ok "Bundle SQL memuat 6 fungsi kunci"
+  ok "Dokumentasi deploy tersedia"
+  exit 0
+fi
 
 # ---------- 0. preflight ----------
 step "0/7 Preflight"
@@ -214,7 +239,7 @@ if ! $SKIP_PUSH; then
       PUSH_OK=true
       break
     fi
-    warn "Push gagal (percobaan $PA/3)."
+    warn "Push gagal (percobaan ${PA}/3)."
     PA=$((PA + 1))
     [ "$PA" -le 3 ] && sleep 5
   done
@@ -233,18 +258,18 @@ if ! $SKIP_DEPLOY; then
   MAX_ATTEMPT=3
   SUCCESS=false
   while [ "$ATTEMPT" -le "$MAX_ATTEMPT" ]; do
-    info "Percobaan $ATTEMPT/$MAX_ATTEMPT…"
+    info "Percobaan ${ATTEMPT}/${MAX_ATTEMPT}"
     if vercel --prod --yes --archive=tgz >"$LOG" 2>&1; then
       SUCCESS=true
       break
     fi
-    warn "Deploy gagal pada percobaan $ATTEMPT."
+    warn "Deploy gagal pada percobaan ${ATTEMPT}."
     ATTEMPT=$((ATTEMPT + 1))
     [ "$ATTEMPT" -le "$MAX_ATTEMPT" ] && sleep 5
   done
 
   tail -n 20 "$LOG" || true
-  $SUCCESS || fail "Deploy gagal setelah $MAX_ATTEMPT percobaan. Log: $LOG"
+  $SUCCESS || fail "Deploy gagal setelah ${MAX_ATTEMPT} percobaan. Log: ${LOG}"
   DEPLOY_URL="$(grep -Eo 'https://[A-Za-z0-9._-]+\.vercel\.app' "$LOG" | head -1 || true)"
   ok "Deploy selesai${DEPLOY_URL:+ · $DEPLOY_URL}"
   rm -f "$LOG"
