@@ -38,6 +38,11 @@ Untuk menjalankan ulang migrasi database di lain waktu tanpa deploy frontend:
 make db-push
 ```
 
+> **Project Supabase baru?** `DEPLOY-ALL-IN-ONE.sql` berisi *migration*, bukan
+> pembuatan proyek. Pada database yang belum pernah dibuatkan tabel, jalankan
+> `supabase/schema.sql` lebih dulu (lihat `docs/OUTREACH-CRM.md` §1), baru
+> `make db-push`. Proyek produksi sudah punya schema, jadi biasanya tidak perlu.
+
 Atau buat manual sekali:
 
 ```bash

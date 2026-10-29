@@ -82,6 +82,8 @@ fi
 
 DB_URL="${SUPABASE_DB_URL:-${DATABASE_URL:-}}"
 if printf '%s' "$DB_URL" | grep -q '<PASSWORD>'; then
+  warn "SUPABASE_DB_URL masih berisi placeholder <PASSWORD> → dianggap kosong."
+  warn "Jalankan: make db-setup  (input tersembunyi, disimpan chmod 600)."
   DB_URL=""
   DB_PLACEHOLDER=true
 else
