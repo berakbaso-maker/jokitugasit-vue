@@ -207,7 +207,18 @@ if ! $SKIP_PUSH; then
   else
     info "Tidak ada perubahan untuk di-commit."
   fi
-  git push origin main
+  PUSH_OK=false
+  PA=1
+  while [ "$PA" -le 3 ]; do
+    if git push origin main; then
+      PUSH_OK=true
+      break
+    fi
+    warn "Push gagal (percobaan $PA/3)."
+    PA=$((PA + 1))
+    [ "$PA" -le 3 ] && sleep 5
+  done
+  $PUSH_OK || fail "Push ke origin/main gagal. Deploy dibatalkan agar kode & live tetap sinkron (atau pakai --skip-push)."
   ok "Push ke origin/main"
 else
   step "5/7 Commit & push dilewati"
