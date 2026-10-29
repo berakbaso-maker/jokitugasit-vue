@@ -1,0 +1,135 @@
+# Deploy satu perintah — `make redeploy`
+
+Satu perintah untuk seluruh siklus: **test → build → migration Supabase →
+commit/push → deploy Vercel → smoke test**.
+
+```bash
+make redeploy
+```
+
+Dari root repo (`/Users/.../joki-tugas`) juga bisa, karena Makefile root
+meneruskan ke `jokitugasit-vue`.
+
+---
+
+## Prasyarat (sekali saja)
+
+```bash
+npm install
+npm i -g vercel
+vercel login
+vercel link          # project jokitugasit-vue
+```
+
+Migration otomatis butuh connection string Postgres:
+
+```bash
+export SUPABASE_DB_URL="postgresql://postgres.<ref>:<password>@<host>:5432/postgres?sslmode=require"
+```
+
+Ambil dari **Supabase → Project Settings → Database → Connection string (URI)**.
+Jangan pernah commit nilai ini. Script hanya mencetaknya dalam bentuk
+`postgresql://***@host`.
+
+Alternatif: `make redeploy ARGS="--db-url postgresql://..."`.
+
+---
+
+## Yang dijalankan script
+
+| # | Langkah | Gagal → |
+|---|---|---|
+| 0 | Preflight: branch `main`, Node, npm, git, Vercel, psql | berhenti |
+| 1 | `npm test` (unit) | berhenti |
+| 2 | `npm run test:db` kalau PostgreSQL lokal aktif | berhenti |
+| 3 | `npm run build` | berhenti |
+| 4 | Backup schema + `psql -f supabase/DEPLOY-ALL-IN-ONE.sql` + verifikasi 6 fungsi/4 kolom | berhenti |
+| 5 | `git add -A` → commit → `git push origin main` | berhenti |
+| 6 | `vercel --prod --yes --archive=tgz` (retry 3×) | berhenti |
+| 7 | Smoke test 5 route publik (`/`, `/request`, `/track`, `/partner`, `/harga`) | berhenti |
+
+Langkah 4 hanya berjalan kalau `SUPABASE_DB_URL` tersedia. Kalau tidak,
+script memberi peringatan dan tetap deploy frontend — **fitur CRM baru akan
+error sampai SQL dijalankan**.
+
+Migration memakai `supabase/DEPLOY-ALL-IN-ONE.sql` yang idempoten, jadi aman
+diulang. Backup default hanya schema (`pg_dump --schema-only`); pakai
+`--backup` untuk dump penuh.
+
+---
+
+## Opsi
+
+```bash
+make redeploy ARGS="--help"
+
+# Lewati migration (mis. SQL sudah dijalankan manual)
+make redeploy ARGS="--skip-db"
+
+# Hanya migration (tidak build/deploy)
+make redeploy ARGS="--db-url postgresql://... --only-db"
+
+# Hanya build + deploy (hotfix frontend)
+make redeploy ARGS="--only-deploy"
+
+# Backup penuh sebelum migration
+SUPABASE_DB_URL="postgresql://..." make redeploy ARGS="--backup"
+
+# Pesan commit kustom
+make redeploy ARGS="--message 'feat: tambah filter kampus'"
+
+# Cek prasyarat tanpa mengubah apa pun
+make redeploy ARGS="--check"
+
+# Deploy dari branch selain main (tidak disarankan)
+make redeploy ARGS="--allow-branch"
+```
+
+| Flag | Efek |
+|---|---|
+| `--skip-tests` | lewati unit + DB test |
+| `--skip-db` | lewati migration |
+| `--skip-push` | lewati commit/push |
+| `--skip-deploy` | lewati Vercel + smoke |
+| `--only-db` | hanya migration |
+| `--only-deploy` | build + deploy |
+| `--db-url <url>` | connection string (atau env) |
+| `--backup` | `pg_dump -Fc` penuh sebelum migration |
+| `--message <text>` | pesan commit |
+| `--allow-branch` | izinkan branch non-main |
+| `--check` | preflight saja |
+| `--yes` | diterima (no-op, untuk automation lain) |
+
+---
+
+## Rollback
+
+```bash
+vercel rollback                                  # kembali ke deployment sebelumnya
+git revert <sha> --no-edit && git push origin main
+```
+
+Migration bersifat additive; tidak ada `db reset`. Kalau perlu mengembalikan
+fungsi tertentu, jalankan ulang file migration sebelumnya (mis.
+`migration-analytics-source.sql`).
+
+Untuk mematikan modul CRM tanpa rollback kode:
+
+```bash
+vercel env add VITE_ENABLE_CRM production   # isi: false
+make redeploy ARGS="--only-deploy"
+```
+
+Website publik, form request, tracking, dan portal partner tetap berjalan.
+
+---
+
+## Troubleshooting
+
+| Gejala | Penyebab / solusi |
+|---|---|
+| `Branch saat ini 'x'` | checkout `main` atau `--allow-branch` |
+| `psql tidak ditemukan` | `brew install postgresql` |
+| `Deploy gagal ... fetch failed` | script retry 3×; kalau tetap gagal cek koneksi/Vercel status |
+| Migration sukses tapi fitur error | pastikan frontend yang live adalah build terbaru; cek `vercel inspect` |
+| Ingin lihat perintah tanpa eksekusi | `--check` (preflight) atau `--skip-*` sesuai kebutuhan |

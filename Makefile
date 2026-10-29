@@ -3,7 +3,7 @@
 # Quick CLI automation for deployment, fresh builds, Supabase, and Vercel.
 # ==============================================================================
 
-.PHONY: help deploy fresh build clean dev preview health supabase-check vercel-deploy test-telegram
+.PHONY: help deploy fresh build clean dev preview health supabase-check vercel-deploy test-telegram redeploy ship
 
 # Set default shell and PATH to include Homebrew node & tools
 SHELL := /bin/bash
@@ -39,6 +39,8 @@ help:
 	@echo -e "  ${C_BLUE}make supabase-check${C_RESET} Audit kelengkapan skema & konfigurasi Supabase"
 	@echo -e "  ${C_BLUE}make test-telegram${C_RESET}  Uji kirim notifikasi alert order ke Telegram engineer"
 	@echo -e "  ${C_BLUE}make vercel-deploy${C_RESET}  Deploy cepat (git push origin main)"
+	@echo -e "  ${C_GREEN}make redeploy${C_RESET}       ${C_BOLD}🔥 SATU PERINTAH: test → build → SQL → push → deploy → smoke${C_RESET}"
+	@echo -e "  ${C_GRAY}                 Opsi: make redeploy ARGS=\"--skip-db\" (lihat --help)${C_RESET}"
 	@echo ""
 
 ## deploy: Jalankan full interactive fresh deployment pipeline
@@ -99,6 +101,16 @@ vercel-deploy:
 	@echo -e "${C_BLUE}🚀 Memicu deployment Vercel via Git...${C_RESET}"
 	@git push origin main
 	@echo -e "${C_GREEN}✓ Commit telah ter-push ke origin/main!${C_RESET}"
+
+## redeploy: Satu perintah penuh — test, build, migration, commit/push, deploy, smoke test
+##   Contoh: make redeploy
+##           make redeploy ARGS="--skip-db"
+##           SUPABASE_DB_URL="postgresql://..." make redeploy
+redeploy:
+	@bash ./scripts/redeploy.sh $(ARGS)
+
+## ship: Alias untuk redeploy
+ship: redeploy
 
 ## test-telegram: Kirim notifikasi tes ke Telegram engineer
 test-telegram:

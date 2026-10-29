@@ -44,3 +44,7 @@ __screenshots__/
 !.env.example
 .vercel
 .env*
+
+# Redeploy artifacts
+backups/
+.redeploy.log
