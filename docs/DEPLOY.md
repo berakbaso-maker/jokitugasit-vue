@@ -64,6 +64,17 @@ tidak tercakup bundle/test, fungsi kunci hilang, atau test/build gagal.
 Aturan lengkapnya ada di `AGENTS.md` dan skill
 `.opencode/skills/jokitugasit-production-gate/SKILL.md`.
 
+Skill ini **khusus repo ini** (bukan global). Saat sesi dibuka dari folder induk
+`/Users/rahoolll/joki-tugas`, sumbernya didaftarkan di
+`/Users/rahoolll/joki-tugas/.opencode/opencode.jsonc`:
+
+```jsonc
+{ "skills": ["/Users/rahoolll/joki-tugas/jokitugasit-vue/.opencode/skills"] }
+```
+
+Isinya tetap satu salinan di repo. Path repo lain bisa diarahkan lewat
+`JOKITUGASIT_REPO`.
+
 ## Yang dijalankan script
 
 | # | Langkah | Gagal → |

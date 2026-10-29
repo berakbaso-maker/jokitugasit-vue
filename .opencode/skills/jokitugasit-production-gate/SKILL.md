@@ -6,15 +6,18 @@ description: KHUSUS repo jokitugasit-vue. WAJIB dipakai untuk setiap perubahan k
 
 ## Lingkup: hanya repo ini
 
-Skill ini **hanya berlaku di repo `jokitugasit-vue`**. Sebelum memakai:
+Skill ini **hanya berlaku di repo `jokitugasit-vue`**. Guard-nya berbasis folder repo, bukan current directory — karena sesi bisa dibuka dari folder induk `/Users/rahoolll/joki-tugas`.
 
 ```bash
-git remote get-url origin 2>/dev/null | grep -q 'jokitugasit-vue' || echo "BUKAN repo ini"
+REPO="${JOKITUGASIT_REPO:-$HOME/joki-tugas/jokitugasit-vue}"
+git -C "$REPO" remote get-url origin 2>/dev/null | grep -q 'jokitugasit-vue' || echo "BUKAN repo ini"
 ```
 
 - Jika remote bukan `jokitugasit-vue`, **jangan pakai skill ini** dan jangan terapkan aturannya ke repo lain.
 - Skill ini tinggal di `.opencode/skills/jokitugasit-production-gate/` (project scope) dan tidak dipasang di `~/.config/opencode/skills`.
+- Saat bekerja dari folder induk, sumber skill didaftarkan di `/Users/rahoolll/joki-tugas/.opencode/opencode.jsonc` → `skills: [".../jokitugasit-vue/.opencode/skills"]`. Isi skill tetap satu salinan di repo.
 - ID unik: `jokitugasit-production-gate`; tidak menimpa skill global.
+- Path repo berbeda? Set `JOKITUGASIT_REPO=/path/ke/repo`.
 
 ## Tujuan
 
