@@ -28,7 +28,7 @@ export async function getPublicOrder(orderNo) {
  * Mengembalikan order_no.
  */
 export async function createRequest(payload) {
-  const { data, error } = await supabase.rpc('create_public_request', {
+  const args = {
     p_customer_name: payload.customer_name,
     p_whatsapp: payload.whatsapp,
     p_description: payload.description,
@@ -45,7 +45,25 @@ export async function createRequest(payload) {
     p_utm_campaign: payload.utm_campaign || null,
     p_utm_content: payload.utm_content || null,
     p_utm_term: payload.utm_term || null,
-  })
+  }
+
+  let { data, error } = await supabase.rpc('create_public_request', args)
+
+  // Kompatibilitas saat SQL campaign belum dijalankan: form publik tetap
+  // bisa submit lewat signature lama (tanpa atribusi campaign/UTM).
+  const missingFunction = error && (
+    error.code === 'PGRST202'
+    || /could not find the function|function .* does not exist/i.test(error.message || '')
+  )
+  if (missingFunction) {
+    const legacy = { ...args }
+    for (const key of ['p_campaign_code', 'p_utm_source', 'p_utm_medium',
+      'p_utm_campaign', 'p_utm_content', 'p_utm_term']) {
+      delete legacy[key]
+    }
+    ;({ data, error } = await supabase.rpc('create_public_request', legacy))
+  }
+
   if (error) throw error
   return { order_no: data }
 }
