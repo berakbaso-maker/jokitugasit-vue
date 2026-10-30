@@ -16,6 +16,7 @@ import {
 } from '../lib/api'
 import { listTargetAccounts } from '../lib/outreach'
 import { downloadCsv, toCsv } from '../lib/csv'
+import { pesanGalat } from '../lib/galat'
 
 const campaigns = ref([])
 const analytics = ref([])
@@ -88,7 +89,7 @@ async function load() {
   } catch (err) {
     error.value = err.code === '42P01' || err.message?.includes('relation')
       ? 'Tabel campaign belum terpasang. Jalankan migration-consent-guard.sql lalu migration-campaigns.sql.'
-      : (err.message || 'Gagal memuat campaign.')
+      : pesanGalat(err, 'Gagal memuat campaign.')
   } finally {
     loading.value = false
   }
@@ -129,7 +130,7 @@ async function submitCreate() {
     notice.value = `Campaign "${campaign.name}" dibuat dengan kode ${campaign.code}.`
     await load()
   } catch (err) {
-    formError.value = err.message || 'Gagal membuat campaign.'
+    formError.value = pesanGalat(err, 'Gagal membuat campaign.')
   } finally {
     saving.value = false
   }
@@ -141,7 +142,7 @@ async function setStatus(campaign, status) {
     Object.assign(campaign, updated)
     notice.value = `${campaign.name}: ${CAMPAIGN_STATUS[status] || status}.`
   } catch (err) {
-    error.value = err.message || 'Gagal mengubah status campaign.'
+    error.value = pesanGalat(err, 'Gagal mengubah status campaign.')
   }
 }
 
@@ -180,7 +181,7 @@ async function openTargets(campaign) {
   try {
     targets.value = await listCampaignTargets(campaign.id)
   } catch (err) {
-    error.value = err.message || 'Gagal memuat target campaign.'
+    error.value = pesanGalat(err, 'Gagal memuat target campaign.')
   } finally {
     targetsLoading.value = false
   }
@@ -199,7 +200,7 @@ async function addTarget() {
   } catch (err) {
     error.value = err.code === '23505'
       ? 'Akun itu sudah ada di campaign ini.'
-      : (err.message || 'Gagal menambah target.')
+      : pesanGalat(err, 'Gagal menambah target.')
   }
 }
 
@@ -208,7 +209,7 @@ async function setTargetStatus(row, status) {
     const updated = await updateCampaignTarget(row.id, { status })
     Object.assign(row, updated)
   } catch (err) {
-    error.value = err.message || 'Gagal mengubah status target.'
+    error.value = pesanGalat(err, 'Gagal mengubah status target.')
   }
 }
 

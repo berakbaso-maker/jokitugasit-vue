@@ -14,6 +14,7 @@ import {
   normalizeUsername,
   renderTemplate,
 } from '../lib/outreach'
+import { pesanGalat } from '../lib/galat'
 
 const WEBSITE_URL = 'https://jokitugasit.my.id'
 
@@ -133,7 +134,7 @@ async function load() {
   } catch (err) {
     error.value = err.message.includes('relation')
       ? 'Schema outreach belum dipasang. Jalankan supabase/migration-outreach-schema.sql dan migration-import-batches.sql.'
-      : (err.message || 'Gagal memuat data outreach.')
+      : pesanGalat(err, 'Gagal memuat data outreach.')
   } finally {
     loading.value = false
   }
@@ -181,7 +182,7 @@ async function record(prospect, outcome) {
     activeProspect.value = null
     await load()
   } catch (err) {
-    error.value = err.message || 'Gagal mencatat hasil kontak.'
+    error.value = pesanGalat(err, 'Gagal mencatat hasil kontak.')
   } finally {
     saving.value = false
   }

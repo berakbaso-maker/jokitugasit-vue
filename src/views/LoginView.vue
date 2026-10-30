@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
+import { pesanGalat } from '../lib/galat'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 
@@ -28,7 +29,7 @@ async function handleLogin() {
     await auth.login(email.value.trim(), password.value)
     router.replace(route.query.redirect || '/dashboard')
   } catch (err) {
-    errorMsg.value = err.message || 'Login gagal. Periksa email & password.'
+    errorMsg.value = pesanGalat(err, 'Login gagal. Periksa email & password.')
   } finally {
     loading.value = false
   }

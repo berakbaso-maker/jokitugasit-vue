@@ -15,6 +15,7 @@ import {
   PROJECT_STATUSES, PRIORITIES,
 } from '../lib/internal'
 import { formatRupiah } from '../lib/api'
+import { pesanGalat } from '../lib/galat'
 
 const loading = ref(true)
 const error = ref('')
@@ -61,7 +62,7 @@ async function load() {
   try {
     projects.value = await listProjects()
   } catch (e) {
-    error.value = e.message
+    error.value = pesanGalat(e, 'Terjadi kesalahan. Coba lagi ya.')
   } finally {
     loading.value = false
   }
@@ -125,7 +126,7 @@ async function save() {
     showForm.value = false
     await load()
   } catch (e) {
-    formError.value = e.message
+    formError.value = pesanGalat(e, 'Terjadi kesalahan. Coba lagi ya.')
   } finally {
     saving.value = false
   }
@@ -139,7 +140,7 @@ async function onMove({ item, to }) {
     await updateProject(item.id, { status: to })
   } catch (e) {
     projects.value = prev
-    error.value = `Gagal memindahkan proyek: ${e.message}`
+    error.value = `Gagal memindahkan proyek: ${pesanGalat(e)}`
   }
 }
 
@@ -165,7 +166,7 @@ async function addTask() {
     tasks.value.push(t)
     newTask.value = ''
   } catch (e) {
-    error.value = e.message
+    error.value = pesanGalat(e, 'Terjadi kesalahan. Coba lagi ya.')
   }
 }
 
@@ -175,7 +176,7 @@ async function toggleTask(t) {
     await updateProjectTask(t.id, { status: next })
     t.status = next
   } catch (e) {
-    error.value = e.message
+    error.value = pesanGalat(e, 'Terjadi kesalahan. Coba lagi ya.')
   }
 }
 
@@ -184,7 +185,7 @@ async function removeTask(t) {
     await deleteProjectTask(t.id)
     tasks.value = tasks.value.filter(x => x.id !== t.id)
   } catch (e) {
-    error.value = e.message
+    error.value = pesanGalat(e, 'Terjadi kesalahan. Coba lagi ya.')
   }
 }
 
@@ -197,7 +198,7 @@ async function setProgress(v) {
     const i = projects.value.findIndex(p => p.id === active.value.id)
     if (i >= 0) projects.value[i] = { ...projects.value[i], progress_pct: n }
   } catch (e) {
-    error.value = e.message
+    error.value = pesanGalat(e, 'Terjadi kesalahan. Coba lagi ya.')
   }
 }
 
@@ -210,7 +211,7 @@ async function removeProject() {
     active.value = null
     await load()
   } catch (e) {
-    error.value = e.message
+    error.value = pesanGalat(e, 'Terjadi kesalahan. Coba lagi ya.')
   }
 }
 

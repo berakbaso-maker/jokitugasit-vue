@@ -8,6 +8,7 @@ import EmptyState from '../components/ui/EmptyState.vue'
 import DataTable from '../components/ui/DataTable.vue'
 import { getReportsSummary, getInternalTrends, getReportBreakdown } from '../lib/internal'
 import { formatRupiah } from '../lib/api'
+import { pesanGalat } from '../lib/galat'
 
 const loading = ref(true)
 const error = ref('')
@@ -38,7 +39,7 @@ async function load() {
     trends.value = t || []
     await loadBreakdown()
   } catch (e) {
-    error.value = e.message
+    error.value = pesanGalat(e, 'Terjadi kesalahan. Coba lagi ya.')
   } finally {
     loading.value = false
   }

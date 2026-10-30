@@ -11,6 +11,7 @@ import {
   PAYMENT_KIND_LABELS, PAYMENT_STATUS_LABELS, paymentKey, remainingAmount,
   summarizePayments, toRupiahInteger,
 } from '../lib/money'
+import { pesanGalat } from '../lib/galat'
 
 const route = useRoute()
 const router = useRouter()
@@ -84,7 +85,7 @@ async function load() {
       walkthroughNotes.value = request.value.walkthrough_notes || ''
     }
   } catch (err) {
-    errorMsg.value = err.message || 'Gagal memuat detail request.'
+    errorMsg.value = pesanGalat(err, 'Gagal memuat detail request.')
   } finally {
     loading.value = false
   }
@@ -150,7 +151,7 @@ async function save() {
     savedMsg.value = 'Perubahan tersimpan.'
     setTimeout(() => (savedMsg.value = ''), 2500)
   } catch (err) {
-    savedMsg.value = err.message || 'Gagal menyimpan.'
+    savedMsg.value = pesanGalat(err, 'Gagal menyimpan.')
   } finally {
     saving.value = false
   }
@@ -199,7 +200,7 @@ async function setStatus(next) {
     request.value = updated
     status.value = next
   } catch (err) {
-    alert(err.message || 'Gagal update status.')
+    alertpesanGalat(err, 'Gagal update status.')
   } finally {
     saving.value = false
   }
@@ -221,7 +222,7 @@ async function loadMoney() {
   } catch (err) {
     moneyError.value = err.message?.includes('relation') || err.code === '42P01'
       ? 'Tabel pembayaran belum terpasang. Jalankan migration-money-schema.sql lalu migration-payment-flow.sql.'
-      : (err.message || 'Gagal memuat data pembayaran.')
+      : pesanGalat(err, 'Gagal memuat data pembayaran.')
   } finally {
     moneyLoading.value = false
   }
@@ -257,7 +258,7 @@ async function openAttachment() {
     const url = await getAttachmentSignedUrl(target)
     window.open(url, '_blank', 'noopener')
   } catch (err) {
-    attachmentError.value = err.message || 'Gagal membuka lampiran.'
+    attachmentError.value = pesanGalat(err, 'Gagal membuka lampiran.')
   } finally {
     attachmentLoading.value = false
   }
@@ -330,7 +331,7 @@ async function addPayment() {
     payMsg.value = `${PAYMENT_KIND_LABELS[payForm.value.kind] || payForm.value.kind} ${formatRupiah(amount)} tercatat.`
     setTimeout(() => (payMsg.value = ''), 3000)
   } catch (err) {
-    payError.value = err.message || 'Gagal mencatat pembayaran.'
+    payError.value = pesanGalat(err, 'Gagal mencatat pembayaran.')
   } finally {
     paySaving.value = false
   }
@@ -352,7 +353,7 @@ async function cancelPayment(payment) {
     payMsg.value = 'Pembayaran dibatalkan dan komisi dihitung ulang.'
     setTimeout(() => (payMsg.value = ''), 3000)
   } catch (err) {
-    payError.value = err.message || 'Gagal membatalkan pembayaran.'
+    payError.value = pesanGalat(err, 'Gagal membatalkan pembayaran.')
   }
 }
 

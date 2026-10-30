@@ -11,6 +11,7 @@ import {
   listCampuses, createCampus, updateCampus, deleteCampus, importCampuses,
   COMMUNITY_TYPES, CONSENT_LABEL, PROVENANCE_LABEL,
 } from '../lib/internal'
+import { pesanGalat } from '../lib/galat'
 
 const loading = ref(true)
 const error = ref('')
@@ -54,7 +55,7 @@ async function load() {
       consent_status: filterConsent.value || undefined,
     })
   } catch (e) {
-    error.value = e.message
+    error.value = pesanGalat(e, 'Terjadi kesalahan. Coba lagi ya.')
   } finally {
     loading.value = false
   }
@@ -117,7 +118,7 @@ async function save() {
     showModal.value = false
     await load()
   } catch (e) {
-    formError.value = e.message
+    formError.value = pesanGalat(e, 'Terjadi kesalahan. Coba lagi ya.')
   } finally {
     saving.value = false
   }
@@ -129,7 +130,7 @@ async function remove(row) {
     await deleteCampus(row.id)
     await load()
   } catch (e) {
-    error.value = e.message
+    error.value = pesanGalat(e, 'Terjadi kesalahan. Coba lagi ya.')
   }
 }
 
@@ -176,7 +177,7 @@ async function onFile(e) {
     importReport.value = { ...res, total: parsed.length }
     await load()
   } catch (err) {
-    importReport.value = { error: err.message }
+    importReport.value = { error: pesanGalat(err) }
   } finally {
     if (fileInput.value) fileInput.value.value = ''
   }

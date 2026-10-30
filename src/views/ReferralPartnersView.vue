@@ -12,6 +12,7 @@ import {
 } from '../lib/internal'
 import { listPartners, updatePartner, ensureUniqueReferralCode } from '../lib/api'
 import { formatRupiah } from '../lib/api'
+import { pesanGalat } from '../lib/galat'
 
 const loading = ref(true)
 const error = ref('')
@@ -36,7 +37,7 @@ async function load() {
     attributions.value = a || []
     commissions.value = c || []
   } catch (e) {
-    error.value = e.message
+    error.value = pesanGalat(e, 'Terjadi kesalahan. Coba lagi ya.')
   } finally {
     loading.value = false
   }
@@ -90,7 +91,7 @@ async function approve(p) {
     }).catch(() => {})
     await load()
   } catch (e) {
-    error.value = e.message
+    error.value = pesanGalat(e, 'Terjadi kesalahan. Coba lagi ya.')
   }
 }
 
@@ -100,7 +101,7 @@ async function suspend(p) {
     await updatePartner(p.id, { status: 'inactive' })
     await load()
   } catch (e) {
-    error.value = e.message
+    error.value = pesanGalat(e, 'Terjadi kesalahan. Coba lagi ya.')
   }
 }
 
@@ -132,7 +133,7 @@ async function createPartner() {
     form.value = { full_name: '', whatsapp: '', campus: '', ewallet_info: '', notes: '' }
     await load()
   } catch (e) {
-    formError.value = e.message
+    formError.value = pesanGalat(e, 'Terjadi kesalahan. Coba lagi ya.')
   } finally {
     saving.value = false
   }

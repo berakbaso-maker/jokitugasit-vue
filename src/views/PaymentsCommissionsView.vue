@@ -8,6 +8,7 @@ import StatusBadge from '../components/ui/StatusBadge.vue'
 import KpiCard from '../components/ui/KpiCard.vue'
 import { listPayments, listCommissions, verifyPayment, getReportsSummary } from '../lib/internal'
 import { formatRupiah } from '../lib/api'
+import { pesanGalat } from '../lib/galat'
 
 const loading = ref(true)
 const error = ref('')
@@ -26,7 +27,7 @@ async function load() {
     commissions.value = c || []
     try { summary.value = await getReportsSummary() } catch { summary.value = null }
   } catch (e) {
-    error.value = e.message
+    error.value = pesanGalat(e, 'Terjadi kesalahan. Coba lagi ya.')
   } finally {
     loading.value = false
   }
@@ -94,7 +95,7 @@ async function confirmPayment(p) {
     await verifyPayment(p.id)
     await load()
   } catch (e) {
-    error.value = `Gagal verifikasi: ${e.message}`
+    error.value = `Gagal verifikasi: ${pesanGalat(e)}`
   } finally {
     busy.value = ''
   }

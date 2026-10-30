@@ -10,6 +10,7 @@ import {
   CATEGORY_LABELS,
   waLink,
 } from '../lib/api'
+import { pesanGalat } from '../lib/galat'
 
 const WA_ENGINEER = '6285166337257'
 
@@ -48,7 +49,7 @@ async function handleCheckPartner() {
     }
     partnerData.value = data
   } catch (err) {
-    checkError.value = err.message || 'Gagal memeriksa komisi. Coba lagi.'
+    checkError.value = pesanGalat(err, 'Gagal memeriksa komisi. Coba lagi.')
   } finally {
     checkLoading.value = false
   }

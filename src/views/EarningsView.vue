@@ -7,6 +7,7 @@ import {
 import {
   PAYMENT_KIND_LABELS, PAYMENT_STATUS_LABELS, summarizePayments,
 } from '../lib/money'
+import { pesanGalat } from '../lib/galat'
 
 const payments = ref([])
 const commissions = ref([])
@@ -76,7 +77,7 @@ onMounted(async () => {
   } catch (err) {
     error.value = err.message?.includes('relation') || err.code === '42P01'
       ? 'Tabel pembayaran/komisi belum terpasang. Jalankan migration-money-schema.sql lalu migration-payment-flow.sql.'
-      : (err.message || 'Gagal memuat data pendapatan.')
+      : pesanGalat(err, 'Gagal memuat data pendapatan.')
   } finally {
     loading.value = false
   }

@@ -22,6 +22,7 @@ import {
   setProspectConsent,
 } from '../lib/outreach'
 import { buildImportPreview, chunkRows, downloadCsv, toCsv } from '../lib/csv'
+import { pesanGalat } from '../lib/galat'
 
 const PAGE_SIZE = 25
 
@@ -105,7 +106,7 @@ async function load() {
   } catch (err) {
     error.value = err.message.includes('relation')
       ? 'Schema outreach belum dipasang. Jalankan supabase/migration-outreach-schema.sql dan migration-import-batches.sql.'
-      : (err.message || 'Gagal memuat prospek.')
+      : pesanGalat(err, 'Gagal memuat prospek.')
   } finally {
     loading.value = false
   }
@@ -164,7 +165,7 @@ async function addProspect() {
   } catch (err) {
     addError.value = err.code === '23505'
       ? 'Username ini sudah ada di daftar prospek.'
-      : (err.message || 'Gagal menambah prospek.')
+      : pesanGalat(err, 'Gagal menambah prospek.')
   } finally {
     adding.value = false
   }
@@ -228,7 +229,7 @@ async function commitImport() {
     page.value = 1
     await Promise.all([load(), loadBatches()])
   } catch (err) {
-    error.value = err.message || 'Gagal menyimpan hasil import.'
+    error.value = pesanGalat(err, 'Gagal menyimpan hasil import.')
   } finally {
     importing.value = false
   }
@@ -261,7 +262,7 @@ async function exportCsv() {
     )
     notice.value = `${rows.length} prospek diekspor.`
   } catch (err) {
-    error.value = err.message || 'Gagal mengekspor prospek.'
+    error.value = pesanGalat(err, 'Gagal mengekspor prospek.')
   } finally {
     exporting.value = false
   }
@@ -277,7 +278,7 @@ async function undoDnc(prospect) {
     notice.value = `Status jangan-dihubungi @${prospect.ig_username} dilepas dan tercatat di audit log.`
     await load()
   } catch (err) {
-    error.value = err.message || 'Gagal melepas status jangan-dihubungi.'
+    error.value = pesanGalat(err, 'Gagal melepas status jangan-dihubungi.')
   }
 }
 
@@ -295,7 +296,7 @@ async function changeConsent(prospect, status) {
     notice.value = `@${prospect.ig_username}: ${CONSENT_LABELS[status] || status}.`
     await load()
   } catch (err) {
-    error.value = err.message || `Gagal mengubah consent (${label}).`
+    error.value = pesanGalat(err, `Gagal mengubah consent (${label}).`)
   }
 }
 
@@ -319,7 +320,7 @@ async function removeProspect(prospect) {
       : `@${prospect.ig_username} dihapus tanpa suppression.`
     await load()
   } catch (err) {
-    error.value = err.message || 'Gagal menghapus prospek.'
+    error.value = pesanGalat(err, 'Gagal menghapus prospek.')
   }
 }
 
@@ -347,7 +348,7 @@ async function submitConvert() {
   } catch (err) {
     convertError.value = err.message === 'PROSPEK_SUDAH_DIKONVERSI' || err.code === '23505'
       ? 'Prospek ini sudah punya proyek.'
-      : (err.message || 'Gagal membuat proyek dari prospek.')
+      : pesanGalat(err, 'Gagal membuat proyek dari prospek.')
   } finally {
     converting.value = false
   }

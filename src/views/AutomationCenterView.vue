@@ -11,6 +11,7 @@ import {
   listWorkflowDefinitions, toggleWorkflow, listWorkflowRuns, listWorkflowLogs,
   runWorkflow, retryKey,
 } from '../lib/internal'
+import { pesanGalat } from '../lib/galat'
 
 const loading = ref(true)
 const error = ref('')
@@ -35,7 +36,7 @@ async function load() {
     workflows.value = w || []
     runs.value = r || []
   } catch (e) {
-    error.value = e.message
+    error.value = pesanGalat(e, 'Terjadi kesalahan. Coba lagi ya.')
   } finally {
     loading.value = false
   }
@@ -87,7 +88,7 @@ async function toggle(w) {
     await toggleWorkflow(w.id, !w.enabled)
     w.enabled = !w.enabled
   } catch (e) {
-    error.value = e.message
+    error.value = pesanGalat(e, 'Terjadi kesalahan. Coba lagi ya.')
   } finally {
     busy.value = ''
   }
@@ -99,7 +100,7 @@ async function retry(r) {
     await runWorkflow(r.event_key, retryKey(r.idempotency_key || r.id, (r.attempts || 0) + 1), r.payload || {})
     await load()
   } catch (e) {
-    error.value = `Retry gagal: ${e.message}`
+    error.value = `Retry gagal: ${pesanGalat(e)}`
   } finally {
     busy.value = ''
   }

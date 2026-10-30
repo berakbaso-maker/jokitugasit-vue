@@ -14,6 +14,7 @@ import {
   listLeadActivities, addLeadNote, findDuplicateLeads,
   LEAD_STAGES, LEAD_CLOSED_STAGES, LEAD_STAGE_LABEL,
 } from '../lib/internal'
+import { pesanGalat } from '../lib/galat'
 
 const loading = ref(true)
 const error = ref('')
@@ -60,7 +61,7 @@ async function load() {
   try {
     leads.value = await listLeads()
   } catch (e) {
-    error.value = e.message
+    error.value = pesanGalat(e, 'Terjadi kesalahan. Coba lagi ya.')
   } finally {
     loading.value = false
   }
@@ -110,7 +111,7 @@ async function save() {
     showForm.value = false
     await load()
   } catch (e) {
-    formError.value = e.message
+    formError.value = pesanGalat(e, 'Terjadi kesalahan. Coba lagi ya.')
   } finally {
     saving.value = false
   }
@@ -125,7 +126,7 @@ async function onMove({ item, to }) {
     await updateLeadStage(item.id, item.stage, to)
   } catch (e) {
     leads.value = prev
-    error.value = `Gagal memindahkan lead: ${e.message}`
+    error.value = `Gagal memindahkan lead: ${pesanGalat(e)}`
   }
 }
 
@@ -152,7 +153,7 @@ async function changeStage(stage) {
     if (i >= 0) leads.value[i] = updated
     activities.value = await listLeadActivities(updated.id)
   } catch (e) {
-    error.value = e.message
+    error.value = pesanGalat(e, 'Terjadi kesalahan. Coba lagi ya.')
   }
 }
 
@@ -163,7 +164,7 @@ async function saveNote() {
     noteText.value = ''
     activities.value = await listLeadActivities(active.value.id)
   } catch (e) {
-    error.value = e.message
+    error.value = pesanGalat(e, 'Terjadi kesalahan. Coba lagi ya.')
   }
 }
 
@@ -176,7 +177,7 @@ async function removeLead() {
     active.value = null
     await load()
   } catch (e) {
-    error.value = e.message
+    error.value = pesanGalat(e, 'Terjadi kesalahan. Coba lagi ya.')
   }
 }
 

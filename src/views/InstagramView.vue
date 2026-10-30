@@ -10,6 +10,7 @@ import {
   listInstagramPosts,
   updateInstagramLead,
 } from '../lib/instagram'
+import { pesanGalat } from '../lib/galat'
 
 const tab = ref('leads')
 const leads = ref([])
@@ -38,7 +39,7 @@ async function load() {
   } catch (err) {
     error.value = err.message.includes('relation')
       ? 'Schema Instagram belum dipasang. Jalankan supabase/ig-schema.sql terlebih dahulu.'
-      : err.message
+      : pesanGalat(err)
   } finally {
     loading.value = false
   }
@@ -51,7 +52,7 @@ async function setLeadStatus(lead, status) {
     await updateInstagramLead(lead.id, { status })
   } catch (err) {
     lead.status = previous
-    error.value = err.message
+    error.value = pesanGalat(err, 'Terjadi kesalahan. Coba lagi ya.')
   }
 }
 
@@ -69,7 +70,7 @@ async function queuePost() {
     form.value = { caption: '', media_url: '', media_type: 'IMAGE', scheduled_at: '' }
     tab.value = 'posts'
   } catch (err) {
-    error.value = err.message
+    error.value = pesanGalat(err, 'Terjadi kesalahan. Coba lagi ya.')
   } finally {
     saving.value = false
   }

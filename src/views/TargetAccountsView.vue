@@ -11,6 +11,7 @@ import {
   normalizeUsername,
   updateTargetAccount,
 } from '../lib/outreach'
+import { pesanGalat } from '../lib/galat'
 
 const loading = ref(true)
 const error = ref('')
@@ -43,7 +44,7 @@ async function load() {
   } catch (err) {
     error.value = err.message.includes('relation')
       ? 'Schema outreach belum dipasang. Jalankan supabase/migration-outreach-schema.sql.'
-      : (err.message || 'Gagal memuat akun target.')
+      : pesanGalat(err, 'Gagal memuat akun target.')
   } finally {
     loading.value = false
   }
@@ -107,7 +108,7 @@ async function saveAccount() {
   } catch (err) {
     formError.value = err.code === '23505'
       ? 'Username ini sudah dipakai akun lain.'
-      : (err.message || 'Gagal menyimpan akun.')
+      : pesanGalat(err, 'Gagal menyimpan akun.')
   } finally {
     savingForm.value = false
   }
@@ -126,7 +127,7 @@ async function removeAccount(account) {
     notice.value = `Akun @${account.ig_username} dihapus.`
     await load()
   } catch (err) {
-    error.value = err.message || 'Gagal menghapus akun.'
+    error.value = pesanGalat(err, 'Gagal menghapus akun.')
   } finally {
     deletingId.value = ''
   }
@@ -143,7 +144,7 @@ async function setStatus(account, status) {
     Object.assign(account, updated)
     notice.value = `Status @${account.ig_username}: ${RELATIONSHIP_LABELS[status]}`
   } catch (err) {
-    error.value = err.message || 'Gagal mengubah status.'
+    error.value = pesanGalat(err, 'Gagal mengubah status.')
   }
 }
 

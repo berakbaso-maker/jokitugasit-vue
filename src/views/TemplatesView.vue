@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import SideNav from '../components/SideNav.vue'
 import { createTemplate, listTemplates, renderTemplate, updateTemplate } from '../lib/outreach'
+import { pesanGalat } from '../lib/galat'
 
 const CATEGORY_LABELS = {
   ADMIN: 'Admin Angkatan',
@@ -51,7 +52,7 @@ async function load(selectId = null) {
   } catch (err) {
     error.value = err.message.includes('relation')
       ? 'Schema outreach belum dipasang. Jalankan supabase/migration-outreach-schema.sql.'
-      : (err.message || 'Gagal memuat template.')
+      : pesanGalat(err, 'Gagal memuat template.')
   } finally {
     loading.value = false
   }
@@ -92,7 +93,7 @@ async function save() {
     if (idx >= 0) templates.value[idx] = updated
     notice.value = 'Template disimpan.'
   } catch (err) {
-    error.value = err.message || 'Gagal menyimpan template.'
+    error.value = pesanGalat(err, 'Gagal menyimpan template.')
   } finally {
     saving.value = false
   }
@@ -114,7 +115,7 @@ async function duplicate() {
     selectTemplate(created.id)
     notice.value = 'Salinan dibuat (nonaktif).'
   } catch (err) {
-    error.value = err.message || 'Gagal menyalin template.'
+    error.value = pesanGalat(err, 'Gagal menyalin template.')
   } finally {
     saving.value = false
   }

@@ -8,6 +8,7 @@ import {
   getAnalyticsCampaigns,
 } from '../lib/api'
 import { campaignsEnabled } from '../lib/features'
+import { pesanGalat } from '../lib/galat'
 
 const router = useRouter()
 const requests = ref([])
@@ -108,7 +109,7 @@ async function loadAnalytics() {
   } catch (err) {
     // Analytics butuh migration-money-schema.sql + outreach; jangan
     // sampai memblokir dashboard kalau belum dipasang.
-    analyticsError.value = err.message || ''
+    analyticsError.value = pesanGalat(err, '')
     console.error(err)
   }
 }

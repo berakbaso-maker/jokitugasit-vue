@@ -12,6 +12,7 @@ import {
   listTasks, updateTask, LEAD_STAGE_LABEL,
 } from '../lib/internal'
 import { formatRupiah } from '../lib/api'
+import { pesanGalat } from '../lib/galat'
 
 const loading = ref(true)
 const error = ref('')
@@ -42,7 +43,7 @@ async function load() {
     activity.value = Array.isArray(a) ? a : []
     tasks.value = tk || []
   } catch (e) {
-    error.value = e.message || 'Gagal memuat data.'
+    error.value = pesanGalat(e, 'Gagal memuat data.')
   } finally {
     loading.value = false
   }

@@ -6,6 +6,7 @@ import {
   listCommissions, markCommissionPaid, rotatePartnerCode, formatRupiah, CATEGORY_LABELS,
 } from '../lib/api'
 import { downloadCsv, toCsv } from '../lib/csv'
+import { pesanGalat } from '../lib/galat'
 
 const partners = ref([])
 const commissions = ref([])
@@ -114,7 +115,7 @@ async function load() {
     ;[partners.value, commissions.value] = await Promise.all([listPartners(), listCommissions()])
   } catch (err) {
     console.error(err)
-    actionError.value = err.message || 'Gagal memuat data partner.'
+    actionError.value = pesanGalat(err, 'Gagal memuat data partner.')
   } finally {
     loading.value = false
   }
@@ -150,7 +151,7 @@ async function handleAddPartner() {
     addForm.value = { full_name: '', whatsapp: '', campus: '', ewallet_info: '' }
     actionNotice.value = `Partner ${newPartner.full_name} ditambahkan dengan kode ${newPartner.referral_code}.`
   } catch (err) {
-    addError.value = 'Gagal tambah partner: ' + (err.message || 'Coba lagi.')
+    addError.value = 'Gagal tambah partner: ' + pesanGalat(err, 'Coba lagi.')
   } finally {
     adding.value = false
   }
@@ -185,7 +186,7 @@ async function rotateCode() {
     if (idx !== -1) partners.value[idx].referral_code = code
     actionNotice.value = `Kode referral baru: ${code}. Bagikan ulang ke partner.`
   } catch (err) {
-    editError.value = err.message || 'Gagal mengganti kode referral.'
+    editError.value = pesanGalat(err, 'Gagal mengganti kode referral.')
   } finally {
     rotating.value = false
   }
@@ -211,7 +212,7 @@ async function saveEdit() {
     showEditModal.value = false
     actionNotice.value = `Data partner ${updated.full_name} diperbarui. Kode referral tidak berubah.`
   } catch (err) {
-    editError.value = err.message || 'Gagal menyimpan perubahan.'
+    editError.value = pesanGalat(err, 'Gagal menyimpan perubahan.')
   } finally {
     savingEdit.value = false
   }
@@ -237,7 +238,7 @@ async function confirmPay() {
     actionNotice.value = `Komisi ${formatRupiah(updated.amount)} untuk ${partnerLabel} ditandai lunas.`
     payTarget.value = null
   } catch (err) {
-    payError.value = err.message || 'Gagal menandai komisi lunas.'
+    payError.value = pesanGalat(err, 'Gagal menandai komisi lunas.')
   } finally {
     paySaving.value = false
   }
@@ -269,7 +270,7 @@ function exportCommissions() {
     )
     actionNotice.value = `${rows.length} baris komisi diekspor.`
   } catch (err) {
-    actionError.value = err.message || 'Gagal mengekspor komisi.'
+    actionError.value = pesanGalat(err, 'Gagal mengekspor komisi.')
   } finally {
     exporting.value = false
   }
