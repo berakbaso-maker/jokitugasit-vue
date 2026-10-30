@@ -169,10 +169,10 @@ const referralPoin = [
 // "bantuan seperti apa" yang didapat pengunjung, tanpa foto stok.
 // ---------------------------------------------------------------------------
 const percakapan = [
-  { dari: 'klien', isi: 'Tugas struktur data saya error terus di bagian sorting. Deadline besok malam.' },
-  { dari: 'kita', isi: 'Boleh kirim file dan pesan error-nya? Saya cek dulu akar masalahnya.' },
-  { dari: 'klien', isi: 'Sudah saya kirim ya.' },
-  { dari: 'kita', isi: 'Ketemu. Index-nya lewat batas array. Saya perbaiki, lalu saya jelaskan baris per baris.' },
+  { dari: 'klien', waktu: '19.41', isi: 'Tugas struktur data saya error terus di bagian sorting. Deadline besok malam.' },
+  { dari: 'kita', waktu: '19.42', isi: 'Boleh kirim file dan pesan error-nya? Saya cek dulu akar masalahnya.' },
+  { dari: 'klien', waktu: '19.44', isi: 'Sudah saya kirim ya.' },
+  { dari: 'kita', waktu: '19.47', isi: 'Ketemu. Index-nya lewat batas array. Saya perbaiki, lalu saya jelaskan baris per baris.' },
 ]
 
 const tampil = ref(0)          // berapa pesan yang sudah muncul
@@ -308,57 +308,100 @@ onBeforeUnmount(() => clearTimeout(timer))
               </ul>
             </div>
 
-            <!-- Kolom kanan: demo percakapan. Menggambarkan bentuk bantuan
-                 secara konkret, tanpa foto stok dan tanpa testimoni karangan. -->
+            <!-- Kolom kanan: jendela percakapan. Ditampilkan seperti aplikasi
+                 chat sungguhan (avatar, nama, jam, tanda dibaca, kolom ketik)
+                 supaya pengunjung langsung membayangkan alur bantuannya.
+                 Isinya contoh alur nyata, bukan testimoni dan bukan angka. -->
             <div class="reveal reveal-delay-2 relative">
               <div
-                class="tilt relative overflow-hidden rounded-2xl border border-border-subtle bg-surface-white p-1 shadow-card-hover"
+                class="tilt relative overflow-hidden rounded-[22px] border border-border-subtle bg-surface-white shadow-card-hover"
               >
                 <div class="tilt-glow" aria-hidden="true"></div>
 
-                <!-- Kepala jendela percakapan -->
-                <div class="flex items-center gap-3 rounded-xl bg-surface-container-low px-4 py-3">
-                  <span
-                    class="material-symbols-outlined rounded-lg bg-accent-fill p-1.5 text-lg text-white"
-                    aria-hidden="true"
-                    >forum</span
-                  >
+                <!-- Kepala: identitas lawan bicara + status -->
+                <div
+                  class="flex items-center gap-3 border-b border-border-subtle bg-surface-container-low px-4 py-3"
+                >
+                  <span class="relative inline-flex shrink-0">
+                    <span
+                      class="grid h-9 w-9 place-items-center rounded-full bg-accent-fill text-[13px] font-extrabold text-white"
+                      aria-hidden="true"
+                      >JT</span
+                    >
+                    <span
+                      class="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-surface-container-low bg-success-fill"
+                      aria-hidden="true"
+                    ></span>
+                  </span>
                   <div class="min-w-0 flex-1">
-                    <p class="truncate text-sm font-bold text-on-surface">Contoh percakapan</p>
-                    <p class="flex items-center gap-1.5 text-[11px] text-secondary">
-                      <span class="inline-block h-1.5 w-1.5 rounded-full bg-success-fill"></span>
-                      engineer online
+                    <p class="truncate text-[13px] font-bold leading-tight text-on-surface">
+                      Tim Jokitugasit
                     </p>
+                    <p class="text-[11px] leading-tight text-success">Online sekarang</p>
                   </div>
-                  <span class="text-[11px] font-bold uppercase tracking-wide text-muted">Demo</span>
+                  <span
+                    class="material-symbols-outlined text-lg text-muted"
+                    aria-hidden="true"
+                    >more_vert</span
+                  >
                 </div>
 
-                <!-- Isi percakapan -->
-                <div class="space-y-2.5 px-4 py-4" aria-live="polite">
+                <!-- Riwayat pesan. Latar dibuat seperti wallpaper chat. -->
+                <div
+                  class="chat-latar space-y-2 px-3 py-4"
+                  aria-live="polite"
+                  aria-label="Contoh percakapan dengan tim"
+                >
+                  <p class="mb-1 text-center text-[10px] font-semibold uppercase tracking-wider text-muted">
+                    Hari ini
+                  </p>
+
                   <template v-for="(pesan, i) in percakapan" :key="i">
-                    <div
-                      v-if="i < tampil"
-                      class="flex chat-masuk"
-                      :class="pesan.dari === 'kita' ? 'justify-end' : 'justify-start'"
-                    >
-                      <p
-                        class="max-w-[85%] rounded-2xl px-3.5 py-2.5 text-[13px] leading-relaxed"
+                    <div v-if="i < tampil" class="flex items-end gap-2 chat-masuk">
+                      <!-- Avatar hanya untuk pesan klien, seperti di WhatsApp -->
+                      <span
+                        v-if="pesan.dari === 'klien'"
+                        class="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-surface-container-high text-[10px] font-bold text-secondary"
+                        aria-hidden="true"
+                        >A</span
+                      >
+                      <span v-else class="w-6 shrink-0" aria-hidden="true"></span>
+
+                      <div
+                        class="max-w-[78%] rounded-2xl px-3 py-2 shadow-sm"
                         :class="
                           pesan.dari === 'kita'
-                            ? 'rounded-br-md bg-accent-fill text-white'
-                            : 'rounded-bl-md bg-surface-container text-on-surface'
+                            ? 'rounded-br-sm bg-accent-fill text-white'
+                            : 'rounded-bl-sm bg-surface-container-lowest text-on-surface'
                         "
                       >
-                        {{ pesan.isi }}
-                      </p>
+                        <p class="whitespace-pre-line text-[13px] leading-relaxed">{{ pesan.isi }}</p>
+                        <p
+                          class="mt-1 flex items-center justify-end gap-1 text-[10px] leading-none"
+                          :class="pesan.dari === 'kita' ? 'text-white/70' : 'text-muted'"
+                        >
+                          {{ pesan.waktu }}
+                          <span
+                            v-if="pesan.dari === 'kita'"
+                            class="material-symbols-outlined text-[13px] leading-none"
+                            aria-hidden="true"
+                            >done_all</span
+                          >
+                        </p>
+                      </div>
                     </div>
                   </template>
 
-                  <!-- Indikator mengetik -->
-                  <div v-if="sedangKetik" class="flex justify-end">
+                  <!-- Indikator sedang mengetik, dari sisi lawan bicara -->
+                  <div v-if="sedangKetik" class="flex items-end gap-2">
                     <span
-                      class="ketik flex items-center gap-1 rounded-2xl rounded-br-md bg-surface-container px-3.5 py-3"
-                      aria-label="Sedang mengetik"
+                      class="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-surface-container-high text-[10px] font-bold text-secondary"
+                      aria-hidden="true"
+                      >JT</span
+                    >
+                    <span
+                      class="ketik flex items-center gap-1 rounded-2xl rounded-bl-sm bg-surface-container-lowest px-3.5 py-3 shadow-sm"
+                      aria-label="Tim sedang mengetik"
                     >
                       <span class="h-1.5 w-1.5 rounded-full bg-secondary"></span>
                       <span class="h-1.5 w-1.5 rounded-full bg-secondary"></span>
@@ -367,18 +410,24 @@ onBeforeUnmount(() => clearTimeout(timer))
                   </div>
                 </div>
 
-                <!-- Kaki: jembatan ke CTA nyata -->
-                <div class="border-t border-border-subtle px-4 py-3">
+                <!-- Kolom ketik. Nonaktif karena ini contoh, tapi terasa familiar. -->
+                <div class="flex items-center gap-2 border-t border-border-subtle px-3 py-2.5">
+                  <span
+                    class="material-symbols-outlined text-lg text-muted"
+                    aria-hidden="true"
+                    >add_circle</span
+                  >
+                  <p
+                    class="flex-1 truncate rounded-full bg-surface-container px-3 py-2 text-[12px] text-secondary"
+                  >
+                    Tulis pesan…
+                  </p>
                   <RouterLink
                     to="/request"
-                    class="group flex items-center justify-between gap-2 text-sm font-bold text-primary"
+                    class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-accent-fill text-white"
+                    aria-label="Mulai percakapan sungguhan"
                   >
-                    Ceritakan kondisimu
-                    <span
-                      class="material-symbols-outlined text-base transition-transform duration-200 group-hover:translate-x-0.5"
-                      aria-hidden="true"
-                      >arrow_forward</span
-                    >
+                    <span class="material-symbols-outlined text-base" aria-hidden="true">send</span>
                   </RouterLink>
                 </div>
               </div>
