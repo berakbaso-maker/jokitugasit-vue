@@ -5,6 +5,8 @@ import TopAppBar from '../components/TopAppBar.vue'
 import BottomNavBar from '../components/BottomNavBar.vue'
 import FooterBar from '../components/FooterBar.vue'
 import { getPublicOrder, DEADLINE_LABELS, STATUS_LABELS, CATEGORY_LABELS, formatRupiah, waLink } from '../lib/api'
+import { bisaDiulang, detailGalat, pesanGalat } from '../lib/galat'
+import KotakGalat from '../components/KotakGalat.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -12,6 +14,8 @@ const orderNo = ref(String(route.params.orderNo || route.query.order || '').toUp
 const request = ref(null)
 const loading = ref(false)
 const errorMsg = ref('')
+const errorDetail = ref('')
+const errorBisaUlang = ref(false)
 const steps = [
   { key: 'new', label: 'Request diterima', icon: 'inbox', copy: 'Detail project sudah masuk ke sistem.' },
   { key: 'consultation', label: 'Konsultasi', icon: 'forum', copy: 'Engineer sedang memeriksa kebutuhan project.' },
@@ -26,7 +30,7 @@ const stepIndex = computed(() => {
 })
 const isComplete = (i) => i <= stepIndex.value
 async function track() {
-  errorMsg.value = ''; request.value = null
+  errorMsg.value = ''; errorDetail.value = ''; errorBisaUlang.value = false; request.value = null
   const value = orderNo.value.trim().toUpperCase()
   if (!value) { errorMsg.value = 'Masukkan nomor order terlebih dahulu.'; return }
   loading.value = true
@@ -34,7 +38,12 @@ async function track() {
     const data = await getPublicOrder(value)
     if (!data) throw new Error('Nomor order tidak ditemukan. Periksa kembali penulisannya.')
     request.value = data; orderNo.value = value
-  } catch (error) { errorMsg.value = error.message || 'Gagal mencari request. Coba lagi.' }
+  } catch (error) {
+    // Jangan pernah tampilkan error.message mentah ("TypeError: Failed to fetch").
+    errorMsg.value = pesanGalat(error, 'Gagal mencari request. Coba lagi.')
+    errorDetail.value = detailGalat(error)
+    errorBisaUlang.value = bisaDiulang(error)
+  }
   finally { loading.value = false }
 }
 if (route.params.orderNo || route.query.order) track()
@@ -51,7 +60,14 @@ if (route.params.orderNo || route.query.order) track()
       </section>
       <section class="max-w-2xl mx-auto bg-surface-white rounded-xl shadow-[0px_4px_20px_rgb(var(--shadow-color) / 0.08)] p-5 md:p-7 mb-8">
         <form class="flex flex-col sm:flex-row gap-3" @submit.prevent="track"><label class="sr-only" for="order-number">Nomor order</label><input id="order-number" v-model="orderNo" type="text" placeholder="Contoh: JT1024" autocomplete="off" class="flex-1 min-w-0 h-12 rounded-lg border border-outline-variant bg-surface px-4 font-body-md text-on-surface uppercase outline-none focus:border-electric-blue focus:ring-2 focus:ring-electric-blue/20" /><button type="submit" :disabled="loading" class="h-12 px-6 rounded-lg bg-accent-fill text-white font-label-bold text-label-bold shadow-md hover:bg-accent-fill disabled:opacity-60 transition-colors"><span v-if="loading" class="material-symbols-outlined animate-spin align-middle">progress_activity</span><span v-else>Cek Status</span></button></form>
-        <p v-if="errorMsg" class="mt-4 flex items-start gap-2 text-sm text-urgency-red" role="alert"><span class="material-symbols-outlined text-[18px]">error</span>{{ errorMsg }}</p>
+        <KotakGalat
+          v-if="errorMsg"
+          class="mt-4"
+          :pesan="errorMsg"
+          :detail="errorDetail"
+          :bisa-ulang="errorBisaUlang"
+          @coba-lagi="track"
+        />
       </section>
       <section v-if="request" class="max-w-3xl mx-auto space-y-6">
         <div class="bg-surface-white rounded-xl shadow-[0px_4px_20px_rgb(var(--shadow-color) / 0.08)] p-6 md:p-8"><div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 border-b border-border-subtle pb-6 mb-7"><div><p class="font-label-sm text-label-sm text-secondary uppercase tracking-wider mb-2">Nomor order</p><h2 class="font-headline-md text-headline-md font-bold">#{{ request.order_no }}</h2><p class="text-sm text-secondary mt-1">{{ request.customer_name }} · {{ CATEGORY_LABELS[request.category] || request.category }}</p></div><span class="self-start inline-flex rounded-full px-3 py-1.5 bg-primary-container text-white font-label-sm text-label-sm">{{ STATUS_LABELS[request.status] || request.status }}</span></div>

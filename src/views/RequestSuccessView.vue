@@ -2,6 +2,8 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getPublicOrder, waLink, DEADLINE_LABELS, STATUS_LABELS, CATEGORY_LABELS } from '../lib/api'
+import { bisaDiulang, detailGalat, pesanGalat } from '../lib/galat'
+import KotakGalat from '../components/KotakGalat.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -9,18 +11,28 @@ const router = useRouter()
 const request = ref(null)
 const loading = ref(true)
 const errorMsg = ref('')
+const errorDetail = ref('')
+const errorBisaUlang = ref(false)
 
-onMounted(async () => {
+async function muat() {
+  errorMsg.value = ''
+  errorDetail.value = ''
+  errorBisaUlang.value = false
+  loading.value = true
   try {
     const data = await getPublicOrder(route.params.orderNo)
     request.value = data
   } catch (err) {
     console.error(err)
-    errorMsg.value = err.message || 'Gagal memuat status request.'
+    errorMsg.value = pesanGalat(err, 'Gagal memuat status request. Coba lagi.')
+    errorDetail.value = detailGalat(err)
+    errorBisaUlang.value = bisaDiulang(err)
   } finally {
     loading.value = false
   }
-})
+}
+
+onMounted(muat)
 </script>
 
 <template>
@@ -33,8 +45,14 @@ onMounted(async () => {
 
       <div v-else-if="errorMsg" class="bg-surface-white rounded-xl shadow-[0px_4px_20px_rgb(var(--shadow-color) / 0.08)] p-8 text-center">
         <span class="material-symbols-outlined text-urgency-red text-5xl">error</span>
-        <h1 class="font-headline-lg text-headline-lg text-on-surface mb-2 mt-4">Request tidak ditemukan</h1>
-        <p class="font-body-md text-body-md text-secondary mb-6">{{ errorMsg }}</p>
+        <h1 class="font-headline-lg text-headline-lg text-on-surface mb-2 mt-4">{{ errorBisaUlang ? 'Gagal memuat request' : 'Request tidak ditemukan' }}</h1>
+        <KotakGalat
+          class="mb-6 text-left"
+          :pesan="errorMsg"
+          :detail="errorDetail"
+          :bisa-ulang="errorBisaUlang"
+          @coba-lagi="muat"
+        />
         <button
           class="w-full h-[48px] bg-accent-fill hover:bg-accent-fill text-white font-label-bold text-label-bold rounded-lg active:scale-[0.98] transition-transform shadow-md"
           @click="router.push('/request')"

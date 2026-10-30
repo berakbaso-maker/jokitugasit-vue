@@ -9,6 +9,8 @@ import {
   CATEGORY_LABELS, DEADLINE_LABELS,
 } from '../lib/api'
 import { KATEGORI_VALID } from '../lib/kategori'
+import { bisaDiulang, detailGalat, pesanGalat } from '../lib/galat'
+import KotakGalat from '../components/KotakGalat.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -85,6 +87,8 @@ const file = ref(null)
 const fileLabel = ref('ZIP, PNG, JPG maksimal 10MB')
 const submitting = ref(false)
 const errorMsg = ref('')
+const errorDetail = ref('')
+const errorBisaUlang = ref(false)
 
 // Referral code validation
 const referralStatus = ref('') // '' | 'checking' | 'valid' | 'invalid'
@@ -231,7 +235,9 @@ async function handleSubmit() {
     router.push({ name: 'request-success', params: { orderNo: created.order_no } })
   } catch (err) {
     console.error(err)
-    errorMsg.value = err.message || 'Gagal mengirim request. Coba lagi.'
+    errorMsg.value = pesanGalat(err, 'Gagal mengirim request. Coba lagi.')
+    errorDetail.value = detailGalat(err)
+    errorBisaUlang.value = bisaDiulang(err)
   } finally {
     submitting.value = false
   }
@@ -465,9 +471,14 @@ async function handleSubmit() {
             </div>
 
             <!-- Error -->
-            <div v-if="errorMsg" class="bg-error-container text-on-error-container rounded-lg px-4 py-3 font-body-md text-body-md">
-              {{ errorMsg }}
-            </div>
+            <KotakGalat
+              v-if="errorMsg"
+              :pesan="errorMsg"
+              :detail="errorDetail"
+              :bisa-ulang="errorBisaUlang"
+              aksi-label="Kirim ulang"
+              @coba-lagi="handleSubmit"
+            />
 
             <!-- Trust Badges (dekat CTA) -->
             <div class="flex justify-center items-center gap-4 pt-1">
