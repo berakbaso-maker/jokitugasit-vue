@@ -170,17 +170,6 @@ const referralPoin = [
 // ---------------------------------------------------------------------------
 const daftarSkenario = [
   {
-    kunci: 'skripsi',
-    label: 'Skripsi',
-    ikon: 'school',
-    pesan: [
-      { dari: 'klien', waktu: '09.12', isi: 'Bab 4 saya ditolak pembimbing. Katanya analisisnya cuma deskriptif, belum ada uji.' },
-      { dari: 'kita', waktu: '09.14', isi: 'Boleh kirim file Bab 3 dan 4-nya? Saya perlu lihat variabel dan rumusan masalahnya dulu.' },
-      { dari: 'klien', waktu: '09.20', isi: 'Sudah saya kirim, pakai SPSS tapi belum tau uji apa.' },
-      { dari: 'kita', waktu: '09.34', isi: 'Variabelmu 2 bebas 1 terikat, jadi arahnya regresi berganda. Saya susun ulang tabelnya plus uji asumsi klasik, lalu saya tuliskan cara membaca hasilnya.' },
-    ],
-  },
-  {
     kunci: 'project',
     label: 'Project Web',
     ikon: 'code',
@@ -189,6 +178,17 @@ const daftarSkenario = [
       { dari: 'kita', waktu: '13.08', isi: 'Boleh lihat desainnya? Sekalian saya tanya: perlu multi-user dengan hak akses berbeda, atau satu kasir saja?' },
       { dari: 'klien', waktu: '13.15', isi: 'Multi-user. Pemilik toko bisa lihat laporan, kasir cuma bisa transaksi.' },
       { dari: 'kita', waktu: '13.22', isi: 'Berarti perlu peran dan pembatasan data di level database, bukan cuma disembunyikan di tampilan. Saya kirim rincian modul dan alurnya dulu untuk kamu setujui.' },
+    ],
+  },
+  {
+    kunci: 'skripsi',
+    label: 'Skripsi',
+    ikon: 'school',
+    pesan: [
+      { dari: 'klien', waktu: '09.12', isi: 'Bab 4 saya ditolak pembimbing. Katanya analisisnya cuma deskriptif, belum ada uji.' },
+      { dari: 'kita', waktu: '09.14', isi: 'Boleh kirim file Bab 3 dan 4-nya? Saya perlu lihat variabel dan rumusan masalahnya dulu.' },
+      { dari: 'klien', waktu: '09.20', isi: 'Sudah saya kirim, pakai SPSS tapi belum tau uji apa.' },
+      { dari: 'kita', waktu: '09.34', isi: 'Variabelmu 2 bebas 1 terikat, jadi arahnya regresi berganda. Saya susun ulang tabelnya plus uji asumsi klasik, lalu saya tuliskan cara membaca hasilnya.' },
     ],
   },
   {
@@ -215,7 +215,9 @@ const daftarSkenario = [
   },
 ]
 
-const skenarioAktif = ref(daftarSkenario[0].kunci)
+// Project Web jadi tampilan awal: kasus paling umum dan paling mudah
+// dipahami pengunjung baru.
+const skenarioAktif = ref('project')
 const percakapan = computed(
   () => daftarSkenario.find((s) => s.kunci === skenarioAktif.value).pesan,
 )
