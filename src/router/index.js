@@ -12,6 +12,7 @@ const router = createRouter({
     {
       path: '/layanan',
       name: 'services',
+      meta: { navAktif: '/layanan' },
       component: () => import('../views/ServicesView.vue'),
     },
     {
@@ -32,51 +33,61 @@ const router = createRouter({
     {
       path: '/joki-tugas-kuliah-it',
       name: 'joki-tugas-kuliah',
+      meta: { navAktif: '/layanan' },
       component: () => import('../views/JokiTugasKuliahView.vue'),
     },
     {
       path: '/joki-skripsi-it',
       name: 'joki-skripsi',
+      meta: { navAktif: '/layanan' },
       component: () => import('../views/JokiSkripsiView.vue'),
     },
     {
       path: '/joki-tugas-mobile-app',
       name: 'joki-mobile',
+      meta: { navAktif: '/layanan' },
       component: () => import('../views/JokiMobileView.vue'),
     },
     {
       path: '/joki-project-web',
       name: 'joki-web',
+      meta: { navAktif: '/layanan' },
       component: () => import('../views/JokiWebView.vue'),
     },
     {
       path: '/solusi-tugas-it',
       name: 'solusi-tugas',
+      meta: { navAktif: '/layanan' },
       component: () => import('../views/SolusiTugasView.vue'),
     },
     {
       path: '/joki-database-api',
       name: 'joki-database-api',
+      meta: { navAktif: '/layanan' },
       component: () => import('../views/JokiDatabaseApiView.vue'),
     },
     {
       path: '/joki-aplikasi-desktop',
       name: 'joki-desktop',
+      meta: { navAktif: '/layanan' },
       component: () => import('../views/JokiDesktopView.vue'),
     },
     {
       path: '/joki-data-science-ai',
       name: 'joki-data-science',
+      meta: { navAktif: '/layanan' },
       component: () => import('../views/JokiDataScienceView.vue'),
     },
     {
       path: '/joki-desain-ui-ux',
       name: 'joki-design',
+      meta: { navAktif: '/layanan' },
       component: () => import('../views/JokiDesignView.vue'),
     },
     {
       path: '/joki-debug-error',
       name: 'joki-debug',
+      meta: { navAktif: '/layanan' },
       component: () => import('../views/JokiDebugView.vue'),
     },
     {
@@ -155,6 +166,83 @@ const router = createRouter({
       name: 'dashboard',
       component: () => import('../views/DashboardView.vue'),
       meta: { requiresEngineer: true },
+    },
+
+    // ---------------------------------------------------------------
+    // Platform internal (admin only). Semua rute butuh engineer auth;
+    // RLS di Supabase tetap menjadi lapisan otorisasi sebenarnya.
+    // ---------------------------------------------------------------
+    {
+      path: '/admin/overview',
+      name: 'admin-overview',
+      component: () => import('../views/OverviewView.vue'),
+      meta: { requiresEngineer: true, title: 'Overview' },
+    },
+    {
+      path: '/admin/campuses',
+      name: 'admin-campuses',
+      component: () => import('../views/CampusDatabaseView.vue'),
+      meta: { requiresEngineer: true, title: 'Campus Database' },
+    },
+    {
+      path: '/admin/leads',
+      name: 'admin-leads',
+      component: () => import('../views/LeadsCrmView.vue'),
+      meta: { requiresEngineer: true, title: 'Leads CRM' },
+    },
+    {
+      path: '/admin/projects',
+      name: 'admin-projects',
+      component: () => import('../views/ProjectManagerView.vue'),
+      meta: { requiresEngineer: true, title: 'Project Manager' },
+    },
+    {
+      path: '/admin/partners',
+      name: 'admin-partners',
+      component: () => import('../views/ReferralPartnersView.vue'),
+      meta: { requiresEngineer: true, title: 'Referral Partners' },
+    },
+    {
+      path: '/admin/payments',
+      name: 'admin-payments',
+      component: () => import('../views/PaymentsCommissionsView.vue'),
+      meta: { requiresEngineer: true, title: 'Payments & Commissions' },
+    },
+    {
+      path: '/admin/automation',
+      name: 'admin-automation',
+      component: () => import('../views/AutomationCenterView.vue'),
+      meta: { requiresEngineer: true, title: 'Automation Center' },
+    },
+    {
+      path: '/admin/reports',
+      name: 'admin-reports',
+      component: () => import('../views/ReportsView.vue'),
+      meta: { requiresEngineer: true, title: 'Reports' },
+    },
+
+    // Modul yang belum diimplementasikan di ronde ini: arahkan ke modul
+    // terdekat yang sudah berfungsi, jangan tampilkan halaman palsu.
+    {
+      path: '/__ui-preview',
+      name: 'ui-preview',
+      component: () => import('../views/__UiPreview.vue'),
+    },
+    {
+      path: '/admin',
+      redirect: '/admin/overview',
+    },
+    {
+      path: '/admin/outreach',
+      redirect: '/ops/outreach',
+    },
+    {
+      path: '/admin/campaigns',
+      redirect: '/ops/campaigns',
+    },
+    {
+      path: '/admin/settings',
+      redirect: '/settings',
     },
     {
       path: '/requests/:id',

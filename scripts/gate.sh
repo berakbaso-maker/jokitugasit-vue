@@ -93,7 +93,11 @@ if printf '%s\n' "$NAMES" | grep -E '(^|/)\.env($|\.)' | grep -qv '\.env\.exampl
 fi
 
 # pola rahasia
-if printf '%s' "$DIFF" | grep -nE 'eyJh''bGciOi|-----BEGIN [A-Z ]*PRIVATE KEY-----|SUPABASE_SERVICE_ROLE_KEY=[A-Za-z0-9._-]{20,}|IG_ACCESS_TOKEN=[A-Za-z0-9._-]{20,}|TELEGRAM_BOT_TOKEN=[0-9]{6,}:' >/tmp/jt_gate_sec 2>/dev/null; then
+# Hanya pindai baris yang DITAMBAHKAN (^+). Hunk header (`@@ ... @@ teks`) berisi
+# cuplikan baris lama — termasuk placeholder seperti `SUPABASE_SERVICE_ROLE_KEY=...`
+# — dan sebelumnya memicu false positive saat mengedit blok di dekatnya.
+ADDED_LINES="$(printf '%s\n' "$DIFF" | grep -E '^\+' | grep -vE '^\+\+\+' || true)"
+if printf '%s' "$ADDED_LINES" | grep -nE 'eyJh''bGciOi|-----BEGIN [A-Z ]*PRIVATE KEY-----|SUPABASE_SERVICE_ROLE_KEY=[A-Za-z0-9._-]{20,}|IG_ACCESS_TOKEN=[A-Za-z0-9._-]{20,}|TELEGRAM_BOT_TOKEN=[0-9]{6,}:' >/tmp/jt_gate_sec 2>/dev/null; then
   sed -E 's/(.{160}).*/\1…/' /tmp/jt_gate_sec | sed 's/^/  /'
   fail "pola rahasia terdeteksi di $SCOPE"
 fi

@@ -8,6 +8,21 @@ const router = useRouter()
 const auth = useAuthStore()
 
 const ALL_NAV_ITEMS = [
+  { label: 'Overview', icon: 'dashboard', to: '/admin/overview' },
+  { label: 'Campus Database', icon: 'school', to: '/admin/campuses' },
+  { label: 'Instagram Outreach', icon: 'photo_camera', to: '/admin/outreach' },
+  { label: 'Campaign Manager', icon: 'campaign', to: '/admin/campaigns' },
+  { label: 'Leads CRM', icon: 'groups', to: '/admin/leads' },
+  { label: 'Referral Partners', icon: 'handshake', to: '/admin/partners' },
+  { label: 'Project Manager', icon: 'folder_open', to: '/admin/projects' },
+  { label: 'Payments & Commissions', icon: 'payments', to: '/admin/payments' },
+  { label: 'Automation Center', icon: 'account_tree', to: '/admin/automation' },
+  { label: 'Reports', icon: 'bar_chart', to: '/admin/reports' },
+  { label: 'Settings', icon: 'settings', to: '/admin/settings' },
+]
+
+// Navigasi lama dipertahankan di grup Legacy agar tidak ada rute yang hilang.
+const LEGACY_NAV_ITEMS = [
   { label: 'Dasbor', icon: 'dashboard', to: '/dashboard' },
   { label: 'Permintaan', icon: 'list_alt', to: '/requests' },
   { label: 'Antrean DM', icon: 'send', to: '/ops/outreach', crm: true, flag: outreachEnabled },
@@ -22,6 +37,7 @@ const ALL_NAV_ITEMS = [
 ]
 
 const navItems = ALL_NAV_ITEMS.filter(item => (crmEnabled || !item.crm) && item.flag !== false)
+const legacyNavItems = LEGACY_NAV_ITEMS.filter(item => (crmEnabled || !item.crm) && item.flag !== false)
 
 const isActive = (to) => route.path.startsWith(to)
 
@@ -70,6 +86,21 @@ async function handleKeluar() {
           <span class="material-symbols-outlined text-[22px]">{{ item.icon }}</span>
           <span class="font-label-bold text-label-bold">{{ item.label }}</span>
         </RouterLink>
+
+        <details class="mt-4 pt-3 border-t border-border-subtle">
+          <summary class="px-3 py-1.5 text-label-sm text-secondary cursor-pointer select-none hover:text-on-surface">
+            Menu lama
+          </summary>
+          <RouterLink
+            v-for="item in legacyNavItems"
+            :key="item.label"
+            :to="item.to"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all text-on-surface-variant hover:bg-surface-container-low"
+          >
+            <span class="material-symbols-outlined text-[18px]">{{ item.icon }}</span>
+            <span class="text-[13px]">{{ item.label }}</span>
+          </RouterLink>
+        </details>
       </nav>
       <div class="px-4 pb-2 mt-auto space-y-2 border-t border-border-subtle pt-4">
         <div v-if="auth.profile" class="flex items-center gap-3 px-1 pb-2">

@@ -2,77 +2,17 @@
 import { ref, computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import { waLink } from '../lib/api'
+import {
+  SERVICE_TYPES, TECH_STACKS, URGENCIES, ADDONS,
+  hitungEstimasi, formatRupiah,
+} from '../lib/pricing'
 
-const serviceTypes = [
-  {
-    id: 'quick_fix',
-    name: 'Quick Fix / Debug Error',
-    badge: 'Tercepat',
-    desc: 'Benerin bug error spesifik, runtime exception, query macet, atau kode mentok ChatGPT.',
-    baseMin: 150000,
-    baseMax: 300000,
-    eta: '1 – 3 Jam',
-    icon: 'bug_report',
-  },
-  {
-    id: 'feature',
-    name: 'Feature Sprint / CRUD / API',
-    badge: 'Populer',
-    desc: 'Pembuatan modul fitur baru, integrasi database relasional, payment gateway, atau REST API.',
-    baseMin: 500000,
-    baseMax: 1200000,
-    eta: '1 – 3 Hari',
-    icon: 'code',
-  },
-  {
-    id: 'capstone',
-    name: 'Skripsi / Capstone / Full App',
-    badge: 'Lengkap',
-    desc: 'Pendampingan pembuatan aplikasi utuh web/mobile, sistem cerdas AI/ML, sampai siap demo dosen.',
-    baseMin: 1500000,
-    baseMax: 3500000,
-    eta: '1 – 2 Minggu',
-    icon: 'school',
-  },
-]
-
-const techStacks = [
-  { id: 'web', name: 'Web (Laravel / React / Vue / PHP)', multiplier: 1.0 },
-  { id: 'mobile', name: 'Mobile (Flutter / React Native)', multiplier: 1.15 },
-  { id: 'ai', name: 'Python (AI / Machine Learning / Data)', multiplier: 1.2 },
-  { id: 'backend', name: 'Backend API & Database (Node / Go / SQL)', multiplier: 1.05 },
-  { id: 'desktop', name: 'Desktop (Java / C++ / Python)', multiplier: 1.0 },
-]
-
-const urgencies = [
-  { id: 'santai', name: 'Santai (> 1 Minggu)', multiplier: 0.95, sub: 'Diskon santai' },
-  { id: 'normal', name: 'Normal (3 – 5 Hari)', multiplier: 1.0, sub: 'Jadwal reguler' },
-  { id: 'mendesak', name: 'Mendesak (Hari Ini / < 48 Jam)', multiplier: 1.25, sub: 'Prioritas utama' },
-]
-
-const addons = [
-  {
-    id: 'video_walkthrough',
-    name: 'Video Walkthrough Kode',
-    price: 50000,
-    desc: 'Rekaman video penjelasan logika fungsi agar kamu paham saat ditanya dosen.',
-    icon: 'smart_display',
-  },
-  {
-    id: 'demo_cheatsheet',
-    name: 'Cheatsheet Sidang / Tanya Dosen',
-    price: 100000,
-    desc: 'Catatan ringkas konsep teknis & prediksi pertanyaan dosen penguji saat demo.',
-    icon: 'description',
-  },
-  {
-    id: 'meet_setup',
-    name: '1-on-1 Setup via Google Meet',
-    price: 75000,
-    desc: 'Panduan langsung setup database & run localhost di laptopmu sampai jalan.',
-    icon: 'video_camera_front',
-  },
-]
+// Data & rumus diambil dari src/lib/pricing.js supaya kalkulator di /harga
+// dan estimasi di /request SELALU memakai angka yang sama.
+const serviceTypes = SERVICE_TYPES
+const techStacks = TECH_STACKS
+const urgencies = URGENCIES
+const addons = ADDONS
 
 const selectedService = ref('feature')
 const selectedStack = ref('web')
@@ -99,25 +39,16 @@ const addonTotal = computed(() => {
   }, 0)
 })
 
-const estimatedMin = computed(() => {
-  const base = currentService.value.baseMin * currentStack.value.multiplier * currentUrgency.value.multiplier
-  const total = Math.round((base + addonTotal.value) / 10000) * 10000
-  return total
-})
+const hasil = computed(() => hitungEstimasi({
+  serviceId: selectedService.value,
+  stackId: selectedStack.value,
+  urgencyId: selectedUrgency.value,
+  addonIds: selectedAddons.value,
+}))
 
-const estimatedMax = computed(() => {
-  const base = currentService.value.baseMax * currentStack.value.multiplier * currentUrgency.value.multiplier
-  const total = Math.round((base + addonTotal.value) / 10000) * 10000
-  return total
-})
-
-const estimatedDp = computed(() => {
-  return Math.round(estimatedMin.value / 2 / 10000) * 10000
-})
-
-function formatRupiah(num) {
-  return 'Rp ' + Number(num).toLocaleString('id-ID')
-}
+const estimatedMin = computed(() => hasil.value.min)
+const estimatedMax = computed(() => hasil.value.max)
+const estimatedDp = computed(() => hasil.value.dp)
 
 const waMessage = computed(() => {
   const addonNames = selectedAddons.value.map(id => addons.find(a => a.id === id)?.name).filter(Boolean).join(', ')
@@ -303,7 +234,7 @@ Apakah bisa konsultasi detail untuk project saya?`
           </a>
 
           <RouterLink
-            :to="{ path: '/request', query: { category: currentService.id === 'quick_fix' ? 'debug' : currentService.id === 'capstone' ? 'skripsi' : 'web' } }"
+            :to="{ path: '/request', query: { category: currentService.id === 'quick_fix' ? 'debug' : currentService.id === 'capstone' ? 'skripsi' : 'web', deadline: currentUrgency.id === 'mendesak' ? 'hari_ini' : currentUrgency.id === 'santai' ? 'fleksibel' : 'besok' } }"
             class="w-full bg-surface-white border-2 border-border-subtle text-on-surface font-label-bold text-label-bold py-3 px-4 rounded-xl flex items-center justify-center gap-1.5 hover:border-electric-blue hover:text-electric-blue transition-all active:scale-95 text-xs text-center"
           >
             <span class="material-symbols-outlined text-[16px]">edit_document</span>

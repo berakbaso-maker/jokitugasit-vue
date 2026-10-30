@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRouter, useRoute, RouterLink } from 'vue-router'
 import TopAppBar from '../components/TopAppBar.vue'
 import BottomNavBar from '../components/BottomNavBar.vue'
@@ -8,6 +8,7 @@ import {
   createRequest, uploadAttachment, validateReferralCode, resolveCampaign,
   CATEGORY_LABELS, DEADLINE_LABELS,
 } from '../lib/api'
+import { estimasiDariForm, formatRupiah, KATEGORI_VALID } from '../lib/pricing'
 
 const router = useRouter()
 const route = useRoute()
@@ -54,19 +55,40 @@ const deadlines = [
   { label: 'Pilih Tanggal', sub: '(Fleksibel)', icon: 'calendar_month', value: 'fleksibel', fill: false },
 ]
 
+// Kalkulator di /harga mengirim ?category=... ke halaman ini. Sebelumnya
+// parameter itu diabaikan sehingga pilihan user hilang dan form balik ke 'web'.
+const kategoriAwal = (() => {
+  const dariQuery = queryString(route.query.category)
+  return KATEGORI_VALID.includes(dariQuery) ? dariQuery : 'web'
+})()
+
+const DEADLINE_VALID = ['hari_ini', 'besok', 'fleksibel']
+const deadlineAwal = (() => {
+  const dariQuery = queryString(route.query.deadline)
+  return DEADLINE_VALID.includes(dariQuery) ? dariQuery : 'besok'
+})()
+
 const form = ref({
   customer_name: '',
   email: '',
   whatsapp: '',
-  category: 'web',
+  category: kategoriAwal,
   description: '',
-  deadline: 'besok',
+  deadline: deadlineAwal,
   deadline_date: '',
   link: '',
   referral_code: queryString(route.query.ref),
 })
 
 const file = ref(null)
+
+// Estimasi ringkas yang ikut berubah saat kategori/deadline diganti.
+// Tujuannya: user tahu kisaran biaya SEBELUM klik kirim, bukan setelah ditawar.
+const estimasi = computed(() => estimasiDariForm({
+  category: form.value.category,
+  deadline: form.value.deadline,
+}))
+
 const fileLabel = ref('ZIP, PNG, JPG maksimal 10MB')
 const submitting = ref(false)
 const errorMsg = ref('')
@@ -423,6 +445,30 @@ async function handleSubmit() {
                 Kode valid! Direferensikan oleh <strong>{{ referralPartnerName }}</strong>
               </p>
               <p v-else-if="referralStatus === 'invalid'" class="text-xs text-urgency-red mt-1.5">Kode tidak ditemukan. Periksa kembali.</p>
+            </div>
+
+            <!-- Estimasi biaya (transparansi sebelum kirim) -->
+            <div class="rounded-xl border border-electric-blue/30 bg-electric-blue/5 px-4 py-3.5">
+              <div class="flex items-start gap-3">
+                <span class="material-symbols-outlined text-electric-blue text-[20px] mt-0.5" aria-hidden="true">payments</span>
+                <div class="flex-1 min-w-0">
+                  <p class="text-[11px] font-semibold uppercase tracking-wide text-on-surface-variant">Kisaran biaya untuk pilihanmu</p>
+                  <p class="mt-1 text-lg font-bold text-on-background leading-tight">
+                    {{ formatRupiah(estimasi.min) }} <span class="text-on-surface-variant font-normal">–</span> {{ formatRupiah(estimasi.max) }}
+                  </p>
+                  <p class="mt-1 text-xs text-secondary leading-relaxed">
+                    Mulai dari DP <strong>{{ formatRupiah(estimasi.dp) }}</strong>.
+                    Ini estimasi awal, bukan tagihan — harga final ditetapkan setelah engineer cek kodenya.
+                  </p>
+                  <RouterLink
+                    to="/harga"
+                    class="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-electric-blue hover:underline"
+                  >
+                    Atur detail & lihat rincian
+                    <span class="material-symbols-outlined text-[14px]" aria-hidden="true">arrow_forward</span>
+                  </RouterLink>
+                </div>
+              </div>
             </div>
 
             <!-- Error -->

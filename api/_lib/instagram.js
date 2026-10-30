@@ -31,6 +31,30 @@ export function requireAutomationSecret(req, res) {
   return true
 }
 
+/*
+ * Endpoint scheduler bisa dipanggil dari dua sumber:
+ *  1. Vercel Cron — mengirim header `Authorization: Bearer $CRON_SECRET`
+ *     (atau custom header bila dikonfigurasi di vercel.json).
+ *  2. GitHub Actions / curl manual — memakai `IG_AUTOMATION_SECRET`.
+ *
+ * Keduanya harus cocok persis; tidak ada jalur tanpa secret.
+ */
+export function requireSchedulerSecret(req, res) {
+  const cronSecret = process.env.CRON_SECRET
+  const automationSecret = process.env.IG_AUTOMATION_SECRET
+  const supplied = String(req.headers.authorization || '').replace(/^Bearer\s+/i, '')
+
+  if (!supplied) {
+    res.status(401).json({ error: 'Unauthorized' })
+    return false
+  }
+  const candidates = [cronSecret, automationSecret].filter(Boolean)
+  if (candidates.some((secret) => safeEqual(supplied, secret))) return true
+
+  res.status(401).json({ error: 'Unauthorized' })
+  return false
+}
+
 export function verifyMetaSignature(rawBody, signature) {
   const secret = process.env.IG_APP_SECRET
   if (!secret || !signature?.startsWith('sha256=')) return false
@@ -111,9 +135,11 @@ export function extractInstagramEvents(payload) {
   for (const entry of payload?.entry || []) {
     for (const change of entry.changes || []) {
       const value = change.value || {}
+      const eventType = change.field || 'unknown'
+      const externalId = value.id || value.comment_id || value.media_id || null
       events.push({
-        eventType: change.field || 'unknown',
-        externalId: value.id || value.comment_id || value.media_id || null,
+        eventType,
+        externalId: externalId || fallbackEventId(eventType, entry.id, value),
         senderId: value.from?.id || value.sender_id || null,
         username: value.from?.username || value.username || null,
         message: value.text || value.message || value.comment_text || null,
@@ -126,7 +152,7 @@ export function extractInstagramEvents(payload) {
     for (const messaging of entry.messaging || []) {
       events.push({
         eventType: 'messages',
-        externalId: messaging.message?.mid || null,
+        externalId: messaging.message?.mid || fallbackEventId('messages', entry.id, messaging),
         senderId: messaging.sender?.id || null,
         username: null,
         message: messaging.message?.text || null,
@@ -138,4 +164,18 @@ export function extractInstagramEvents(payload) {
     }
   }
   return events
+}
+
+/*
+ * Meta tidak selalu mengirim id unik. Tanpa kunci fallback, upsert dengan
+ * external_id = null akan menulis baris baru setiap kali webhook di-retry.
+ * Hash isi event membuat retry idempoten.
+ */
+function fallbackEventId(eventType, entryId, value) {
+  const digest = crypto
+    .createHash('sha256')
+    .update(JSON.stringify({ eventType, entryId: entryId || null, value: value || null }))
+    .digest('hex')
+    .slice(0, 32)
+  return `fallback:${eventType}:${digest}`
 }

@@ -2,26 +2,239 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Material Icons variable font settings */
+/* ==========================================================================
+   Material Icons
+   ========================================================================== */
 .material-symbols-outlined {
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
-/* Pulse animations */
+/* ==========================================================================
+   Indikator "live" — DIPERTAHANKAN dari versi lama.
+   Dipakai di 14 view (SideNav, semua halaman Joki*, Pricing, About,
+   RequestSuccess). Menghapusnya akan membuat dot status kehilangan denyut.
+   ========================================================================== */
 .animate-pulse-slow {
-  animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 .pulse-dot {
-  animation: pulse 1.5s infinite;
+  animation: pulse-ring 2s infinite;
 }
 
-@keyframes pulse {
-  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
-  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
-  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+@keyframes pulse-ring {
+  0%   { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(21, 128, 61, 0.55); }
+  70%  { transform: scale(1);    box-shadow: 0 0 0 6px rgba(21, 128, 61, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(21, 128, 61, 0); }
 }
 
-/* Hide scrollbar utility */
-.no-scrollbar::-webkit-scrollbar { display: none; }
-.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+/* ==========================================================================
+   Layer dasar
+   ========================================================================== */
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+    /* Offset untuk sticky header saat anchor link diklik */
+    scroll-padding-top: 5rem;
+  }
+
+  body {
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ------------------------------------------------------------------
+     Focus visible. Sebelumnya NOL di seluruh aplikasi: pengguna keyboard
+     tidak punya indikator fokus sama sekali. Pakai outline (bukan
+     box-shadow) agar tetap terlihat di atas latar apa pun, termasuk
+     blok gelap, dan tidak tertimpa overflow:hidden pada kartu.
+     ------------------------------------------------------------------ */
+  :focus-visible {
+    outline: 2px solid #2563EB;
+    outline-offset: 2px;
+    border-radius: 0.25rem;
+  }
+
+  /* Di atas permukaan gelap, cincin biru kurang kontras -> pakai putih.
+     CATATAN: hanya untuk elemen yang benar-benar berada di dalam blok gelap.
+     Jangan pernah memberi cincin putih pada tombol biru di atas latar putih
+     (putih di atas putih = tidak terlihat). */
+  .bg-inverse-surface :focus-visible,
+  .bg-tertiary :focus-visible {
+    outline-color: #FFFFFF;
+  }
+
+  /* Jangan tampilkan outline pada klik mouse, hanya keyboard */
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  ::selection {
+    background-color: #DBEAFE;
+    color: #0F172A;
+  }
+}
+
+/* ==========================================================================
+   Komponen
+   ========================================================================== */
+@layer components {
+  /* ------------------------------------------------------------------
+     Scroll reveal. Elemen mulai transparan, lalu .is-visible dipasang
+     oleh IntersectionObserver (lihat composable useScrollReveal).
+     PENTING: tanpa JS / tanpa observer, konten harus TETAP terlihat.
+     Karena itu kelas ini hanya aktif bila <html> punya .js-reveal,
+     yang dipasang skrip. Progressive enhancement, bukan konten tersembunyi.
+     ------------------------------------------------------------------ */
+  .js-reveal .reveal {
+    opacity: 0;
+    transform: translateY(14px);
+    transition:
+      opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .js-reveal .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Stagger ringan untuk grid kartu */
+  .js-reveal .reveal-delay-1 { transition-delay: 60ms; }
+  .js-reveal .reveal-delay-2 { transition-delay: 120ms; }
+  .js-reveal .reveal-delay-3 { transition-delay: 180ms; }
+  .js-reveal .reveal-delay-4 { transition-delay: 240ms; }
+
+  /* Tombol dasar: satu sumber kebenaran untuk padding, radius, transisi */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg font-bold
+           focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2;
+    /* Transisi eksplisit: JANGAN transition-all. Dengan transition-all, cincin
+       fokus ikut dianimasikan sehingga sempat tidak terlihat saat Tab ditekan. */
+    transition:
+      background-color 200ms cubic-bezier(0.16, 1, 0.3, 1),
+      border-color 200ms cubic-bezier(0.16, 1, 0.3, 1),
+      color 200ms cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 200ms cubic-bezier(0.16, 1, 0.3, 1),
+      transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .btn-primary {
+    @apply btn bg-primary text-on-primary px-6 py-3 shadow-cta
+           hover:bg-primary-container hover:-translate-y-0.5 hover:shadow-card-hover
+           active:translate-y-0 active:shadow-card;
+  }
+
+  .btn-secondary {
+    @apply btn bg-surface-white text-on-surface px-6 py-3
+           border border-border-subtle shadow-card
+           hover:border-outline hover:bg-surface-container-low hover:-translate-y-0.5
+           active:translate-y-0;
+  }
+
+  /* Tombol berlatar biru berada di atas kanvas putih. Cincin biru muda
+     akan menyatu dengan tombol, cincin putih menyatu dengan latar.
+     Slate gelap #0F172A terbaca jelas di keduanya. */
+  .btn-primary:focus-visible,
+  .bg-primary:focus-visible,
+  .bg-electric-blue:focus-visible {
+    outline-color: #0F172A;
+  }
+
+  .btn-ghost {
+    @apply btn text-on-surface px-4 py-2 hover:bg-surface-container;
+  }
+
+  /* Kartu: border tipis + bayangan halus, lift saat hover */
+  .card {
+    @apply rounded-2xl border border-border-subtle bg-surface-white shadow-card
+           transition-all duration-200;
+  }
+
+  .card-interactive {
+    @apply card hover:-translate-y-1 hover:border-outline-variant hover:shadow-card-hover;
+  }
+
+  /* Label kecil di atas judul section */
+  .eyebrow {
+    @apply inline-flex items-center gap-2 text-label-bold font-label-bold
+           uppercase tracking-widest text-primary;
+  }
+}
+
+/* ==========================================================================
+   Utilitas
+   ========================================================================== */
+@layer utilities {
+  /* Gradient teks halus untuk aksen judul — dibatasi, tidak dipakai di mana-mana */
+  .text-gradient {
+    background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Grid halus untuk latar hero, sangat rendah kontras */
+  .bg-grid {
+    background-image:
+      linear-gradient(to right, rgba(15, 23, 42, 0.04) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(15, 23, 42, 0.04) 1px, transparent 1px);
+    background-size: 56px 56px;
+  }
+
+  /* Mask agar grid memudar ke tepi */
+  .mask-fade-b {
+    -webkit-mask-image: linear-gradient(to bottom, #000 40%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 40%, transparent 100%);
+  }
+
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Cegah layout shift pada media yang belum termuat */
+  .media-stable {
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    background-color: #F1F5F9;
+  }
+}
+
+/* ==========================================================================
+   Aksesibilitas gerak
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  /* Matikan SEMUA animasi & transisi, termasuk yang datang dari utility
+     Tailwind (hover lift, animate-*, transition-*). */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Reveal: langsung tampil, tanpa pergeseran */
+  .js-reveal .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* Hover lift dimatikan agar tidak ada gerakan tak diinginkan */
+  .btn-primary:hover,
+  .btn-secondary:hover,
+  .card-interactive:hover {
+    transform: none !important;
+  }
+}

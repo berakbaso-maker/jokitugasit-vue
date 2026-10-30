@@ -6,6 +6,12 @@
       "destination": "/"
     }
   ],
+  "crons": [
+    {
+      "path": "/api/ig-run-schedule",
+      "schedule": "*/15 * * * *"
+    }
+  ],
   "framework": "vite",
   "headers": [
     {
