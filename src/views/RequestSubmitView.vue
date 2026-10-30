@@ -192,20 +192,11 @@ async function handleSubmit() {
 
     // Kirim notifikasi instan ke Telegram Engineer via Vercel Serverless Function (non-blocking)
     try {
+      // Server hanya butuh orderNo: isi pesan diambil dari database.
       fetch('/api/notify-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          orderNo: created.order_no,
-          customerName: form.value.customer_name.trim(),
-          whatsapp: cleanWa,
-          category: form.value.category,
-          deadline: form.value.deadline,
-          deadlineDate: form.value.deadline === 'fleksibel' ? form.value.deadline_date : null,
-          description: form.value.description.trim(),
-          link: form.value.link.trim() || null,
-          fileUrl: fileUrl,
-        }),
+        body: JSON.stringify({ orderNo: created.order_no }),
       }).catch((err) => console.warn('Telegram notification trigger warning:', err))
     } catch (notifyErr) {
       console.warn('Telegram notification error:', notifyErr)
@@ -214,18 +205,11 @@ async function handleSubmit() {
     // Kirim email booking (opsional) — tidak menggagalkan alur jika gagal
     if (form.value.email.trim()) {
       try {
+        // Server hanya butuh orderNo: alamat & isi email diambil dari database.
         await fetch('/api/send-email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: form.value.email.trim(),
-            orderNo: created.order_no,
-            customerName: form.value.customer_name.trim(),
-            category: CATEGORY_LABELS[form.value.category] || form.value.category,
-            deadline: DEADLINE_LABELS[form.value.deadline] || form.value.deadline,
-            description: form.value.description.trim(),
-            quoteAmount: null,
-          }),
+          body: JSON.stringify({ orderNo: created.order_no }),
         })
       } catch (err) {
         console.error('Email booking gagal:', err)

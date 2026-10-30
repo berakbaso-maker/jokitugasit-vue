@@ -52,6 +52,7 @@ run "migration-consent-guard"         "$ROOT/migration-consent-guard.sql"
 run "migration-campaigns"             "$ROOT/migration-campaigns.sql"
 run "migration-internal-platform"     "$ROOT/migration-internal-platform.sql"
 run "migration-testimonials"         "$ROOT/migration-testimonials.sql"
+run "migration-notify-guard"      "$ROOT/migration-notify-guard.sql"
 run "05_grants (supabase default)"     "$DIR/05_grants.sql"
 
 echo "tests"
