@@ -732,7 +732,7 @@ begin
   values (v_def.id, p_event_key, 'RUNNING', p_idempotency_key, p_payload, 1, now())
   returning * into v_run;
 
-  insert into public.workflow_run_logs (run_id, level, message, data)
+  insert into public.workflow_run_logs (run_id, level, message, meta)
   values (v_run.id, 'INFO', 'Workflow started', p_payload);
 
   -- Efek nyata per event. Semua idempoten terhadap data.
