@@ -5,7 +5,7 @@ import TopAppBar from '../components/TopAppBar.vue'
 import BottomNavBar from '../components/BottomNavBar.vue'
 import FooterBar from '../components/FooterBar.vue'
 import { supabase } from '../lib/supabase'
-import { waLink } from '../lib/api'
+import { waLink } from '../lib/tautan'
 
 const testimonials = ref([])
 const loading = ref(true)
@@ -67,7 +67,7 @@ onMounted(loadTestimonials)
 <template>
   <div class="min-h-screen bg-background text-on-surface font-body-md antialiased flex flex-col">
     <TopAppBar />
-    <main class="flex-1 w-full max-w-container-max-width mx-auto px-gutter py-12 md:py-20">
+    <main id="konten-utama" tabindex="-1" class="flex-1 w-full max-w-container-max-width mx-auto px-gutter py-12 md:py-20">
       <!-- Header -->
       <section class="text-center max-w-2xl mx-auto mb-12">
         <div class="inline-flex items-center gap-2 bg-surface-white border border-border-subtle rounded-full px-4 py-1.5 shadow-sm mb-4">

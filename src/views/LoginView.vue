@@ -36,7 +36,7 @@ async function handleLogin() {
 </script>
 
 <template>
-  <div class="bg-background text-on-background font-body-md antialiased min-h-screen flex flex-col items-center justify-center p-gutter">
+  <main id="konten-utama" tabindex="-1" class="bg-background text-on-background font-body-md antialiased min-h-screen flex flex-col items-center justify-center p-gutter">
     <div class="w-full max-w-md">
       <div class="text-center mb-8">
         <div class="inline-flex items-center justify-center w-16 h-16 bg-accent-fill rounded-2xl shadow-lg mb-4">
@@ -105,5 +105,5 @@ async function handleLogin() {
         </a>
       </p>
     </div>
-  </div>
+  </main>
 </template>

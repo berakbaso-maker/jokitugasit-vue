@@ -4,7 +4,7 @@ import { RouterLink } from 'vue-router'
 import TopAppBar from '../components/TopAppBar.vue'
 import BottomNavBar from '../components/BottomNavBar.vue'
 import FooterBar from '../components/FooterBar.vue'
-import { waLink } from '../lib/api'
+import { waLink } from '../lib/tautan'
 import { useScrollReveal } from '../composables/useScrollReveal'
 import { useTilt, useProgresGulir } from '../composables/useInteraksi'
 
@@ -302,15 +302,129 @@ const { pindaiUlang } = useScrollReveal('.reveal')
 useTilt('.tilt')
 useProgresGulir('.timeline-rail')
 
-onMounted(mulaiPercakapan)
-onBeforeUnmount(hentikan)
+// --- Penanda posisi baca ---------------------------------------------
+// Beranda panjangnya ~10x tinggi layar. Tanpa penanda, pengunjung tidak
+// tahu sudah di mana dan masih berapa jauh. Dua penanda: garis progres di
+// atas (selalu ada) dan titik navigasi seksi (hanya desktop, karena di HP
+// layarnya sempit).
+const daftarSeksi = [
+  { id: 'layanan', label: 'Layanan' },
+  { id: 'cara-kerja', label: 'Cara kerja' },
+  { id: 'kenapa-kami', label: 'Kenapa kami' },
+  { id: 'contoh', label: 'Contoh' },
+  { id: 'referral', label: 'Referral' },
+  { id: 'tanya-jawab', label: 'Tanya jawab' },
+]
+const progresBaca = ref(0)
+const seksiAktif = ref('')
+
+let pengamat = null
+let gambarUlang = null
+
+function ukurProgres() {
+  const max = document.documentElement.scrollHeight - window.innerHeight
+  progresBaca.value = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0
+}
+
+function perbarui() {
+  if (gambarUlang) return
+  gambarUlang = requestAnimationFrame(() => {
+    gambarUlang = null
+    ukurProgres()
+  })
+}
+
+function lompatKe(id) {
+  const el = document.getElementById(id)
+  if (!el) return
+  const kurangi = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  el.scrollIntoView({ behavior: kurangi ? 'auto' : 'smooth', block: 'start' })
+  // Pindahkan fokus ke seksi tujuan supaya pembaca layar ikut pindah.
+  el.setAttribute('tabindex', '-1')
+  el.focus({ preventScroll: true })
+}
+
+onMounted(() => {
+  mulaiPercakapan()
+  ukurProgres()
+  window.addEventListener('scroll', perbarui, { passive: true })
+  window.addEventListener('resize', perbarui, { passive: true })
+
+  // Tandai seksi yang sedang terlihat di tengah layar.
+  if ('IntersectionObserver' in window) {
+    pengamat = new IntersectionObserver(
+      (entri) => {
+        for (const e of entri) {
+          if (e.isIntersecting) seksiAktif.value = e.target.id
+        }
+      },
+      { rootMargin: '-45% 0px -45% 0px', threshold: 0 },
+    )
+    for (const s of daftarSeksi) {
+      const el = document.getElementById(s.id)
+      if (el) pengamat.observe(el)
+    }
+  }
+})
+
+onBeforeUnmount(() => {
+  hentikan()
+  window.removeEventListener('scroll', perbarui)
+  window.removeEventListener('resize', perbarui)
+  if (gambarUlang) cancelAnimationFrame(gambarUlang)
+  if (pengamat) pengamat.disconnect()
+})
 </script>
 
 <template>
   <div class="min-h-screen bg-background font-sans text-on-surface">
     <TopAppBar />
 
-    <main>
+    <!-- Garis progres baca: menunjukkan seberapa jauh pengunjung sudah
+         menggulir halaman. Diletakkan tepat di bawah header yang sticky. -->
+    <div
+      class="pointer-events-none fixed inset-x-0 top-16 z-40 h-0.5 bg-transparent"
+      aria-hidden="true"
+    >
+      <div
+        class="h-full origin-left bg-accent-fill transition-transform duration-150 ease-out"
+        :style="{ transform: `scaleX(${progresBaca})` }"
+      ></div>
+    </div>
+
+    <!-- Navigasi titik per seksi. Disembunyikan di bawah layar besar
+         karena ruangnya sempit dan berpotensi menutupi konten. -->
+    <nav
+      class="fixed right-5 top-1/2 z-40 hidden -translate-y-1/2 flex-col gap-1 xl:flex"
+      aria-label="Navigasi seksi beranda"
+    >
+      <button
+        v-for="s in daftarSeksi"
+        :key="s.id"
+        type="button"
+        class="group flex items-center justify-end gap-2 rounded-full py-1.5 pl-3 pr-1.5 transition-colors"
+        :aria-current="seksiAktif === s.id ? 'true' : undefined"
+        :aria-label="`Ke seksi ${s.label}`"
+        @click="lompatKe(s.id)"
+      >
+        <span
+          class="whitespace-nowrap rounded-md bg-inverse-surface px-2 py-1 text-[11px] font-semibold text-inverse-on-surface opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
+          aria-hidden="true"
+          >{{ s.label }}</span
+        >
+        <span
+          class="h-2.5 w-2.5 rounded-full border-2 transition-all"
+          :class="
+            seksiAktif === s.id
+              ? 'scale-125 border-accent-fill bg-accent-fill'
+              : 'border-secondary bg-surface-white group-hover:border-accent-fill'
+          "
+          aria-hidden="true"
+        ></span>
+      </button>
+    </nav>
+
+    <main id="konten-utama" tabindex="-1">
       <!-- ================= HERO ================= -->
       <section class="relative overflow-hidden border-b border-border-subtle">
         <!-- Latar: grid halus + dua bidang cahaya yang bergerak lambat.
@@ -425,7 +539,7 @@ onBeforeUnmount(hentikan)
                     v-for="s in daftarSkenario"
                     :key="s.kunci"
                     type="button"
-                    class="inline-flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-bold transition"
+                    class="inline-flex min-h-11 shrink-0 items-center gap-1 rounded-full border px-3 py-2 text-[12px] font-bold transition"
                     :class="
                       s.kunci === skenarioAktif
                         ? 'border-accent-fill bg-accent-fill text-white'
@@ -447,7 +561,7 @@ onBeforeUnmount(hentikan)
                   aria-live="polite"
                   aria-label="Contoh percakapan dengan tim"
                 >
-                  <p class="mb-1 text-center text-[10px] font-semibold uppercase tracking-wider text-muted">
+                  <p class="mb-1 text-center text-[11px] font-semibold uppercase tracking-wider text-muted">
                     Hari ini
                   </p>
 
@@ -456,11 +570,11 @@ onBeforeUnmount(hentikan)
                       <!-- Avatar hanya untuk pesan klien, seperti di WhatsApp -->
                       <span
                         v-if="pesan.dari === 'klien'"
-                        class="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-surface-container-high text-[10px] font-bold text-secondary"
+                        class="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-surface-container-high text-[11px] font-bold text-secondary"
                         aria-hidden="true"
                         >A</span
                       >
-                      <span v-else class="w-6 shrink-0" aria-hidden="true"></span>
+                      <span v-else class="w-7 shrink-0" aria-hidden="true"></span>
 
                       <div
                         class="max-w-[78%] rounded-2xl px-3 py-2 shadow-sm"
@@ -470,9 +584,9 @@ onBeforeUnmount(hentikan)
                             : 'rounded-bl-sm bg-surface-container-lowest text-on-surface'
                         "
                       >
-                        <p class="whitespace-pre-line text-[13px] leading-relaxed">{{ pesan.isi }}</p>
+                        <p class="whitespace-pre-line text-[13.5px] leading-relaxed">{{ pesan.isi }}</p>
                         <p
-                          class="mt-1 flex items-center justify-end gap-1 text-[10px] leading-none"
+                          class="mt-1 flex items-center justify-end gap-1 text-[11px] leading-none"
                           :class="pesan.dari === 'kita' ? 'text-white/70' : 'text-muted'"
                         >
                           {{ pesan.waktu }}
@@ -490,7 +604,7 @@ onBeforeUnmount(hentikan)
                   <!-- Indikator sedang mengetik, dari sisi lawan bicara -->
                   <div v-if="sedangKetik" class="flex items-end gap-2">
                     <span
-                      class="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-surface-container-high text-[10px] font-bold text-secondary"
+                      class="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-surface-container-high text-[11px] font-bold text-secondary"
                       aria-hidden="true"
                       >JT</span
                     >
@@ -632,7 +746,7 @@ onBeforeUnmount(hentikan)
       </section>
 
       <!-- ================= CARA KERJA ================= -->
-      <section class="border-y border-border-subtle bg-surface-container-low">
+      <section id="cara-kerja" class="border-y border-border-subtle bg-surface-container-low">
         <div class="mx-auto max-w-container-max-width px-gutter py-16 md:py-24">
           <div class="max-w-2xl">
             <p class="eyebrow reveal">Cara kerja</p>
@@ -681,7 +795,7 @@ onBeforeUnmount(hentikan)
       </section>
 
       <!-- ================= JAMINAN ================= -->
-      <section class="mx-auto max-w-container-max-width px-gutter py-16 md:py-24">
+      <section id="kenapa-kami" class="mx-auto max-w-container-max-width px-gutter py-16 md:py-24">
         <div class="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
           <div>
             <p class="eyebrow reveal">Kenapa kami</p>
@@ -735,7 +849,7 @@ onBeforeUnmount(hentikan)
       </section>
 
       <!-- ================= STUDI KASUS ================= -->
-      <section class="border-y border-border-subtle bg-surface-container-low">
+      <section id="contoh" class="border-y border-border-subtle bg-surface-container-low">
         <div class="mx-auto max-w-container-max-width px-gutter py-16 md:py-24">
           <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div class="max-w-2xl">
@@ -830,7 +944,7 @@ onBeforeUnmount(hentikan)
       </section>
 
       <!-- ================= REFERRAL ================= -->
-      <section class="mx-auto max-w-container-max-width px-gutter py-16 md:py-24">
+      <section id="referral" class="mx-auto max-w-container-max-width px-gutter py-16 md:py-24">
         <div class="overflow-hidden rounded-2xl border border-border-subtle bg-surface-white shadow-card">
           <div class="grid lg:grid-cols-[1.1fr_0.9fr]">
             <!-- Kiri: penjelasan -->
@@ -901,7 +1015,7 @@ onBeforeUnmount(hentikan)
       </section>
 
       <!-- ================= FAQ ================= -->
-      <section class="border-t border-border-subtle bg-surface-container-low">
+      <section id="tanya-jawab" class="border-t border-border-subtle bg-surface-container-low">
         <div class="mx-auto max-w-container-max-width px-gutter py-16 md:py-24">
           <div class="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
             <div>

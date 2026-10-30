@@ -5,7 +5,7 @@ import TopAppBar from '../components/TopAppBar.vue'
 import BottomNavBar from '../components/BottomNavBar.vue'
 import FooterBar from '../components/FooterBar.vue'
 import { getPost, posts } from '../data/posts'
-import { waLink } from '../lib/api'
+import { waLink } from '../lib/tautan'
 
 const route = useRoute()
 const post = computed(() => getPost(route.params.slug))
@@ -14,7 +14,7 @@ const post = computed(() => getPost(route.params.slug))
 <template>
   <div class="min-h-screen bg-background text-on-surface font-body-md antialiased flex flex-col">
     <TopAppBar />
-    <main class="flex-1 w-full max-w-container-max-width mx-auto px-gutter py-12 md:py-20">
+    <main id="konten-utama" tabindex="-1" class="flex-1 w-full max-w-container-max-width mx-auto px-gutter py-12 md:py-20">
       <template v-if="post">
         <article class="max-w-3xl mx-auto">
           <div class="flex items-center gap-2 text-sm text-secondary mb-4">

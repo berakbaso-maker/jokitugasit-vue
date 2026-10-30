@@ -31,7 +31,7 @@ const label = computed(() =>
 <template>
   <div class="flex min-h-screen flex-col bg-background font-body-md text-on-surface antialiased">
     <TopAppBar />
-    <main class="mx-auto w-full max-w-container-max-width flex-1 px-gutter py-10 md:py-14">
+    <main id="konten-utama" tabindex="-1" class="mx-auto w-full max-w-container-max-width flex-1 px-gutter py-10 md:py-14">
     <!-- Tidak ditemukan -->
     <template v-if="!proyek">
       <EmptyState

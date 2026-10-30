@@ -162,11 +162,9 @@ export async function listTransactions() {
   return data
 }
 
-export function waLink(phoneNumber, text = '') {
-  const num = String(phoneNumber || '').replace(/[^0-9]/g, '')
-  const msg = encodeURIComponent(text)
-  return `https://wa.me/${num}${msg ? `?text=${msg}` : ''}`
-}
+// waLink tinggal di `tautan.js` (tanpa Supabase). Di-re-export di sini
+// agar pemanggil lama tidak perlu diubah.
+export { waLink } from './tautan'
 
 
 export const CATEGORY_LABELS = {

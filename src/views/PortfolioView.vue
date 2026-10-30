@@ -23,6 +23,7 @@ import {
   hitungPerKategori,
   statistik,
   LABEL_KATEGORI,
+  URUTAN,
 } from '../lib/portfolio'
 
 const route = useRoute()
@@ -32,6 +33,11 @@ const kategoriAktif = ref(
   typeof route.query.kategori === 'string' && route.query.kategori ? route.query.kategori : 'semua',
 )
 const kataKunci = ref('')
+const urutan = ref(
+  typeof route.query.urut === 'string' && URUTAN.some((u) => u.nilai === route.query.urut)
+    ? route.query.urut
+    : 'default',
+)
 
 const kategori = kategoriTerpakai()
 const jumlah = hitungPerKategori()
@@ -40,7 +46,7 @@ const stat = statistik()
 const unggulan = proyekUnggulan(3)
 
 const hasil = computed(() =>
-  filterProyek({ kategori: kategoriAktif.value, q: kataKunci.value }),
+  filterProyek({ kategori: kategoriAktif.value, q: kataKunci.value, urut: urutan.value }),
 )
 
 /** Proyek unggulan hanya ditampilkan saat tidak sedang memfilter/mencari. */
@@ -59,24 +65,27 @@ function pilihKategori(k) {
   kategoriAktif.value = k
 }
 
-// Sinkronkan filter -> query string (tanpa menambah riwayat baru).
-watch(kategoriAktif, (k) => {
+// Sinkronkan filter + urutan -> query string (tanpa menambah riwayat baru).
+watch([kategoriAktif, urutan], ([k, u]) => {
   const query = { ...route.query }
   if (k === 'semua') delete query.kategori
   else query.kategori = k
+  if (u === 'default') delete query.urut
+  else query.urut = u
   router.replace({ query })
 })
 
 function resetFilter() {
   kategoriAktif.value = 'semua'
   kataKunci.value = ''
+  urutan.value = 'default'
 }
 </script>
 
 <template>
   <div class="flex min-h-screen flex-col bg-background font-body-md text-on-surface antialiased">
     <TopAppBar />
-    <main class="mx-auto w-full max-w-container-max-width flex-1 px-gutter py-12 md:py-16">
+    <main id="konten-utama" tabindex="-1" class="mx-auto w-full max-w-container-max-width flex-1 px-gutter py-12 md:py-16">
     <!-- Hero -->
     <section class="mb-10 max-w-3xl">
       <div
@@ -122,10 +131,14 @@ function resetFilter() {
     <!-- Filter + pencarian -->
     <section class="mb-8">
       <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div class="-mx-1 flex flex-wrap gap-2 px-1">
+        <div
+          class="-mx-1 flex flex-wrap gap-2 px-1"
+          role="group"
+          aria-label="Filter kategori proyek"
+        >
           <button
             type="button"
-            class="rounded-full border px-3.5 py-1.5 text-sm font-semibold transition-colors"
+            class="inline-flex min-h-11 items-center rounded-full border px-4 py-2 text-sm font-semibold transition-colors"
             :class="
               kategoriAktif === 'semua'
                 ? 'border-primary bg-accent-fill text-white'
@@ -142,7 +155,7 @@ function resetFilter() {
             v-for="k in kategori"
             :key="k"
             type="button"
-            class="rounded-full border px-3.5 py-1.5 text-sm font-semibold transition-colors"
+            class="inline-flex min-h-11 items-center rounded-full border px-4 py-2 text-sm font-semibold transition-colors"
             :class="
               kategoriAktif === k
                 ? 'border-primary bg-accent-fill text-white'
@@ -154,6 +167,19 @@ function resetFilter() {
             {{ LABEL_KATEGORI[k] }}
             <span class="ml-1 text-xs opacity-80">{{ jumlah[k] }}</span>
           </button>
+        </div>
+
+        <!-- Urutan -->
+        <div class="flex items-center gap-2">
+          <label for="urut-portofolio" class="sr-only">Urutkan proyek</label>
+          <span class="material-symbols-outlined text-base text-muted" aria-hidden="true">sort</span>
+          <select
+            id="urut-portofolio"
+            v-model="urutan"
+            class="min-h-11 rounded-xl border border-border-subtle bg-surface-white px-3 text-sm font-semibold text-on-surface outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary"
+          >
+            <option v-for="u in URUTAN" :key="u.nilai" :value="u.nilai">{{ u.label }}</option>
+          </select>
         </div>
 
         <!-- Pencarian -->
@@ -169,7 +195,7 @@ function resetFilter() {
             v-model="kataKunci"
             type="search"
             placeholder="Cari proyek atau teknologi…"
-            class="w-full rounded-xl border border-border-subtle bg-surface-white py-2 pl-9 pr-3 text-sm text-on-surface outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary"
+            class="min-h-11 w-full rounded-xl border border-border-subtle bg-surface-white py-2 pl-9 pr-3 text-sm text-on-surface outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary"
           />
         </div>
       </div>

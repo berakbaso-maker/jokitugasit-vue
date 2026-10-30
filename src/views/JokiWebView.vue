@@ -3,7 +3,7 @@ import { RouterLink } from 'vue-router'
 import TopAppBar from '../components/TopAppBar.vue'
 import BottomNavBar from '../components/BottomNavBar.vue'
 import FooterBar from '../components/FooterBar.vue'
-import { waLink } from '../lib/api'
+import { waLink } from '../lib/tautan'
 
 const WA_TEXT = 'Halo jokitugasit.my.id, saya butuh bantuan project web.'
 
@@ -19,7 +19,7 @@ const stacks = ['PHP', 'Laravel', 'React', 'Next.js', 'MySQL', 'Node.js']
 <template>
   <div class="min-h-screen bg-background text-on-surface font-body-md antialiased flex flex-col">
     <TopAppBar />
-    <main class="flex-1 w-full max-w-container-max-width mx-auto px-gutter py-12 md:py-20">
+    <main id="konten-utama" tabindex="-1" class="flex-1 w-full max-w-container-max-width mx-auto px-gutter py-12 md:py-20">
       <!-- Hero -->
       <section class="text-center max-w-3xl mx-auto mb-16">
         <div class="inline-flex items-center gap-2 bg-surface-white border border-border-subtle rounded-full px-4 py-2 shadow-sm mb-5">

@@ -258,7 +258,7 @@ async function handleSubmit() {
       </div>
     </header>
 
-    <main class="flex-grow flex flex-col items-center justify-start pt-4 sm:pt-8 pb-32 sm:pb-section-gap-mobile md:pb-section-gap-desktop px-3 sm:px-gutter w-full">
+    <main id="konten-utama" tabindex="-1" class="flex-grow flex flex-col items-center justify-start pt-4 sm:pt-8 pb-32 sm:pb-section-gap-mobile md:pb-section-gap-desktop px-3 sm:px-gutter w-full">
       <div class="w-full max-w-2xl">
         <div class="text-center mb-6 sm:mb-8">
           <h1 class="font-display-hero-mobile md:font-display-hero text-2xl sm:text-display-hero-mobile md:text-display-hero text-on-background mb-2">Ceritain Aja Masalahmu</h1>

@@ -141,7 +141,7 @@ function copyCode() {
   <div class="min-h-screen bg-background text-on-surface font-body-md antialiased flex flex-col">
     <TopAppBar />
 
-    <main class="flex-1">
+    <main id="konten-utama" tabindex="-1" class="flex-1">
 
       <!-- Hero Section -->
       <section class="relative overflow-hidden bg-gradient-to-br from-hero-gradient-from via-hero-gradient-via to-hero-gradient-to text-white py-20 md:py-28 px-gutter">

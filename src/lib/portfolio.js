@@ -590,12 +590,21 @@ export const proyekUnggulan = (n = 3) => proyek.filter((p) => p.featured).slice(
 export const cariSlug = (slug) => proyek.find((p) => p.slug === slug) || null
 
 /**
- * Filter + pencarian.
+ * Filter + pencarian + pengurutan.
  * `q` dicocokkan ke judul, tagline, stack, dan kategori.
+ * `urut`: 'default' | 'terbaru' | 'terlama' | 'judul'.
+ * Mengembalikan array baru supaya urutan asli `proyek` tidak berubah.
  */
-export const filterProyek = ({ kategori = 'semua', q = '' } = {}) => {
+export const URUTAN = [
+  { nilai: 'default', label: 'Urutan bawaan' },
+  { nilai: 'terbaru', label: 'Tahun terbaru' },
+  { nilai: 'terlama', label: 'Tahun terlama' },
+  { nilai: 'judul', label: 'Judul A–Z' },
+]
+
+export const filterProyek = ({ kategori = 'semua', q = '', urut = 'default' } = {}) => {
   const kata = q.trim().toLowerCase()
-  return proyek.filter((p) => {
+  const hasil = proyek.filter((p) => {
     if (kategori !== 'semua' && p.category !== kategori) return false
     if (!kata) return true
     const kolam = [p.title, p.tagline, p.category, LABEL_KATEGORI[p.category], ...p.stack]
@@ -603,6 +612,11 @@ export const filterProyek = ({ kategori = 'semua', q = '' } = {}) => {
       .toLowerCase()
     return kolam.includes(kata)
   })
+
+  if (urut === 'terbaru') return hasil.sort((a, b) => b.year - a.year)
+  if (urut === 'terlama') return hasil.sort((a, b) => a.year - b.year)
+  if (urut === 'judul') return hasil.sort((a, b) => a.title.localeCompare(b.title, 'id'))
+  return hasil
 }
 
 /** Proyek lain di kategori sama, maksimal `n`. */

@@ -25,7 +25,7 @@ onMounted(async () => {
 
 <template>
   <div class="bg-background text-on-background antialiased min-h-screen flex flex-col items-center justify-center p-gutter">
-    <main class="w-full max-w-lg">
+    <main id="konten-utama" tabindex="-1" class="w-full max-w-lg">
       <div v-if="loading" class="bg-surface-white rounded-xl shadow-[0px_4px_20px_rgb(var(--shadow-color) / 0.08)] p-8 text-center">
         <span class="material-symbols-outlined animate-spin text-electric-blue text-4xl">progress_activity</span>
         <p class="font-body-md text-body-md text-secondary mt-4">Memuat status request...</p>

@@ -334,6 +334,93 @@
 /* ==========================================================================
    Utilitas
    ========================================================================== */
+/* Tautan lompat ke konten utama. Tersembunyi di luar layar sampai
+   menerima fokus keyboard, lalu muncul di atas header. */
+.skip-link {
+  position: fixed;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 100;
+  transform: translateY(-150%);
+  border-radius: 0.5rem;
+  /* Warna tetap (bukan token tema) supaya kontras putih selalu 5.17:1
+     di kedua tema. */
+  background: #2563eb;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #fff;
+  transition: transform 0.18s ease-out;
+}
+.skip-link:focus-visible,
+.skip-link:focus {
+  transform: translateY(0);
+  outline: 3px solid rgb(var(--on-surface));
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .skip-link {
+    transition: none;
+  }
+}
+
+/* Target sentuh minimal 44x44 px (pedoman Apple/WCAG AAA).
+   Sebelumnya tautan navigasi hanya 36 px dan tombol tema 40 px, terlalu
+   kecil untuk jari di layar HP. Diterapkan lewat CSS agar tidak perlu
+   mengubah puluhan kelas di komponen. */
+header a,
+header button {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Tombol ikon (toggle tema, tombol kirim) perlu lebar 44 juga. */
+header button[aria-label],
+main button[aria-label] {
+  min-width: 44px;
+  min-height: 44px;
+  justify-content: center;
+}
+
+/* Chip filter & tab skenario: tinggi jangan cuma dari padding teks. */
+[role="group"] > button,
+[role="group"] > a {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Tombol bulat kecil (kirim chat) dan tombol ajakan di blok tengah. */
+main a[aria-label],
+main button[aria-label],
+main a.inline-flex.rounded-full,
+main button.rounded-full {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Kartu layanan berupa tautan: beri tinggi baris nyaman. */
+main a.group {
+  min-height: 44px;
+}
+
+/* Tautan aksi berbentuk pil/baris ikon (WhatsApp, Selengkapnya). */
+main a.inline-flex,
+main a.flex.items-center.gap-2 {
+  min-height: 44px;
+  align-items: center;
+}
+
+/* Navigasi titik antar seksi di beranda. */
+nav[aria-label="Navigasi seksi beranda"] button {
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
 @layer utilities {
   /* Gradient teks halus untuk aksen judul — dibatasi, tidak dipakai di mana-mana */
   .text-gradient {

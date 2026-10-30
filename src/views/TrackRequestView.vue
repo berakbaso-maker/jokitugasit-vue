@@ -43,7 +43,7 @@ if (route.params.orderNo || route.query.order) track()
 <template>
   <div class="min-h-screen bg-background text-on-surface font-body-md antialiased flex flex-col">
     <TopAppBar />
-    <main class="flex-1 w-full max-w-container-max-width mx-auto px-gutter py-12 md:py-20">
+    <main id="konten-utama" tabindex="-1" class="flex-1 w-full max-w-container-max-width mx-auto px-gutter py-12 md:py-20">
       <section class="max-w-2xl mx-auto text-center mb-10 md:mb-14">
         <div class="inline-flex items-center gap-2 bg-surface-white border border-border-subtle rounded-full px-4 py-2 shadow-sm mb-5"><span class="material-symbols-outlined text-electric-blue text-[18px]">track_changes</span><span class="font-label-sm text-label-sm text-secondary">Request Tracker</span></div>
         <h1 class="font-headline-lg text-headline-lg md:text-display-hero-mobile text-on-surface mb-3">Cek status project kamu</h1>

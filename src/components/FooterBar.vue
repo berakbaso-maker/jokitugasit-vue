@@ -1,6 +1,6 @@
 <script setup>
 import { RouterLink } from 'vue-router'
-import { waLink } from '../lib/api'
+import { waLink } from '../lib/tautan'
 
 const WA_NUMBER = '6285166337257'
 const waTanya = waLink(WA_NUMBER, 'Halo jokitugasit.my.id, saya ingin bertanya.')
