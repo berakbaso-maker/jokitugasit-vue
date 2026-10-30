@@ -13,10 +13,10 @@
  *   4. `mockup.gradient` pakai dua warna hex; dipakai untuk ilustrasi kartu.
  *
  * Kategori (`category`) HARUS salah satu dari KATEGORI_VALID di
- * src/lib/pricing.js supaya konsisten dengan layanan yang dijual.
+ * src/lib/kategori.js supaya konsisten dengan layanan yang dijual.
  */
 
-import { KATEGORI_VALID } from './pricing'
+import { KATEGORI_VALID } from './kategori'
 
 /** Label tampilan untuk tiap kategori. */
 export const LABEL_KATEGORI = {

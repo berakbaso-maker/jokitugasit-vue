@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { useRouter, useRoute, RouterLink } from 'vue-router'
 import TopAppBar from '../components/TopAppBar.vue'
 import BottomNavBar from '../components/BottomNavBar.vue'
@@ -8,7 +8,7 @@ import {
   createRequest, uploadAttachment, validateReferralCode, resolveCampaign,
   CATEGORY_LABELS, DEADLINE_LABELS,
 } from '../lib/api'
-import { estimasiDariForm, formatRupiah, KATEGORI_VALID } from '../lib/pricing'
+import { KATEGORI_VALID } from '../lib/kategori'
 
 const router = useRouter()
 const route = useRoute()
@@ -81,13 +81,6 @@ const form = ref({
 })
 
 const file = ref(null)
-
-// Estimasi ringkas yang ikut berubah saat kategori/deadline diganti.
-// Tujuannya: user tahu kisaran biaya SEBELUM klik kirim, bukan setelah ditawar.
-const estimasi = computed(() => estimasiDariForm({
-  category: form.value.category,
-  deadline: form.value.deadline,
-}))
 
 const fileLabel = ref('ZIP, PNG, JPG maksimal 10MB')
 const submitting = ref(false)
@@ -447,24 +440,24 @@ async function handleSubmit() {
               <p v-else-if="referralStatus === 'invalid'" class="text-xs text-urgency-red mt-1.5">Kode tidak ditemukan. Periksa kembali.</p>
             </div>
 
-            <!-- Estimasi biaya (transparansi sebelum kirim) -->
+            <!-- Penegasan: tidak ada angka di muka -->
             <div class="rounded-xl border border-electric-blue/30 bg-electric-blue/5 px-4 py-3.5">
               <div class="flex items-start gap-3">
-                <span class="material-symbols-outlined text-electric-blue text-[20px] mt-0.5" aria-hidden="true">payments</span>
+                <span class="material-symbols-outlined text-electric-blue text-[20px] mt-0.5" aria-hidden="true">handshake</span>
                 <div class="flex-1 min-w-0">
-                  <p class="text-[11px] font-semibold uppercase tracking-wide text-on-surface-variant">Kisaran biaya untuk pilihanmu</p>
-                  <p class="mt-1 text-lg font-bold text-on-background leading-tight">
-                    {{ formatRupiah(estimasi.min) }} <span class="text-on-surface-variant font-normal">–</span> {{ formatRupiah(estimasi.max) }}
+                  <p class="text-[11px] font-semibold uppercase tracking-wide text-on-surface-variant">Soal biaya</p>
+                  <p class="mt-1 text-sm font-semibold text-on-background leading-snug">
+                    Nggak ada biaya di awal, nggak ada tagihan kejutan.
                   </p>
                   <p class="mt-1 text-xs text-secondary leading-relaxed">
-                    Mulai dari DP <strong>{{ formatRupiah(estimasi.dp) }}</strong>.
-                    Ini estimasi awal, bukan tagihan — harga final ditetapkan setelah engineer cek kodenya.
+                    Engineer akan cek dulu kode dan kebutuhanmu, lalu kasih tahu nominalnya lewat WhatsApp.
+                    Kamu bebas setuju atau nggak — konsultasi tetap gratis.
                   </p>
                   <RouterLink
                     to="/harga"
                     class="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-electric-blue hover:underline"
                   >
-                    Atur detail & lihat rincian
+                    Lihat cara kami menentukan harga
                     <span class="material-symbols-outlined text-[14px]" aria-hidden="true">arrow_forward</span>
                   </RouterLink>
                 </div>

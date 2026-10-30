@@ -128,7 +128,7 @@ const jaminan = [
 const faqSingkat = [
   {
     t: 'Berapa harga jasa bantu tugas IT?',
-    j: 'Mulai dari Rp10 ribu tergantung tingkat kesulitan dan deadline. Semua transparan, diskusi dulu sebelum deal, tidak ada biaya tersembunyi.',
+    j: 'Kami nggak pasang nominal di halaman ini karena tiap tugas beda tingkat kesulitannya. Ceritain dulu masalah dan budget kamu lewat WhatsApp — engineer yang tentuin, kamu yang setuju. Konsultasi gratis, tidak ada biaya tersembunyi.',
   },
   {
     t: 'Apakah bisa dikerjakan hari ini kalau deadline mepet?',
@@ -343,7 +343,7 @@ useScrollReveal('.reveal')
               Empat langkah, tanpa kejutan
             </h2>
             <p class="reveal reveal-delay-2 mt-4 text-body-md text-secondary">
-              Kamu tahu persis apa yang terjadi di setiap tahap, termasuk berapa biayanya.
+              Kamu tahu persis apa yang terjadi di setiap tahap, dan biayanya disepakati sebelum kerja dimulai.
             </p>
           </div>
 
