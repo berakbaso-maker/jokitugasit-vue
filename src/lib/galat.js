@@ -14,6 +14,8 @@ const PESAN_BISNIS = {
   DEADLINE_TIDAK_VALID: 'Pilihan deadline tidak dikenali.',
   TANGGAL_WAJIB: 'Isi tanggal deadline karena kamu memilih fleksibel.',
   GAGAL_MEMBUAT_ORDER: 'Gagal membuat nomor order. Coba lagi sebentar lagi.',
+  KODE_SUDAH_DIPAKAI: 'Kode itu sudah dipakai partner lain. Pakai kode berbeda.',
+  KODE_TIDAK_VALID: 'Format kode belum benar. Contoh yang benar: REF-BUDI.',
   AKSES_DITOLAK: 'Akses ditolak. Hubungi engineer kalau ini tidak seharusnya terjadi.',
 }
 

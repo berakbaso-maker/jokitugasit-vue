@@ -4,6 +4,7 @@ import SideNav from '../components/SideNav.vue'
 import {
   listPartners, updatePartner, ensureUniqueReferralCode, createPartner,
   listCommissions, markCommissionPaid, rotatePartnerCode, formatRupiah, CATEGORY_LABELS,
+  partnerSummary, partnerDetail, setPartnerCode,
 } from '../lib/api'
 import { downloadCsv, toCsv } from '../lib/csv'
 import { pesanGalat } from '../lib/galat'
@@ -11,7 +12,7 @@ import { pesanGalat } from '../lib/galat'
 const partners = ref([])
 const commissions = ref([])
 const loading = ref(true)
-const activeTab = ref('partners') // 'partners' | 'commissions'
+const activeTab = ref('partners') // 'partners' | 'commissions' | 'rekap'
 const actionError = ref('')
 const actionNotice = ref('')
 
@@ -34,6 +35,24 @@ const payTarget = ref(null)
 const payForm = ref({ proofUrl: '', note: '' })
 const payError = ref('')
 const paySaving = ref(false)
+
+// Rekap per partner (agregat dari database)
+const rekap = ref([])
+const rekapLoading = ref(false)
+const rekapError = ref('')
+const rekapPeriod = ref('30d')
+const rekapCari = ref('')
+
+// Drawer detail partner
+const detailTarget = ref(null)
+const detailData = ref(null)
+const detailLoading = ref(false)
+const detailError = ref('')
+
+// Kode custom
+const codeForm = ref('')
+const codeError = ref('')
+const savingCode = ref(false)
 
 // Filters
 const filterPartnerCode = ref('')
@@ -121,7 +140,7 @@ async function load() {
   }
 }
 
-onMounted(load)
+onMounted(() => { load(); loadRekap() })
 
 async function toggleStatus(partner) {
   const newStatus = partner.status === 'active' ? 'inactive' : 'active'
@@ -166,6 +185,8 @@ function openEdit(partner) {
     ewallet_info: partner.ewallet_info || '',
     notes: partner.notes || '',
   }
+  codeForm.value = partner.referral_code || ''
+  codeError.value = ''
   editError.value = ''
   showEditModal.value = true
 }
@@ -237,10 +258,141 @@ async function confirmPay() {
     Object.assign(payTarget.value, updated)
     actionNotice.value = `Komisi ${formatRupiah(updated.amount)} untuk ${partnerLabel} ditandai lunas.`
     payTarget.value = null
+    if (detailTarget.value) {
+      await openDetail(detailTarget.value)
+      await loadRekap()
+    }
   } catch (err) {
     payError.value = pesanGalat(err, 'Gagal menandai komisi lunas.')
   } finally {
     paySaving.value = false
+  }
+}
+
+/** Rekap & detail partner — agregat dihitung di database. */
+
+const rekapFiltered = computed(() => {
+  const q = rekapCari.value.trim().toLowerCase()
+  if (!q) return rekap.value
+  return rekap.value.filter(r =>
+    String(r.full_name || '').toLowerCase().includes(q) ||
+    String(r.referral_code || '').toLowerCase().includes(q) ||
+    String(r.campus || '').toLowerCase().includes(q),
+  )
+})
+
+const totalRekap = computed(() =>
+  rekap.value.reduce((acc, r) => ({
+    referrals: acc.referrals + Number(r.referrals || 0),
+    deals: acc.deals + Number(r.deals || 0),
+    pending: acc.pending + Number(r.commission_pending || 0),
+    paid: acc.paid + Number(r.commission_paid || 0),
+  }), { referrals: 0, deals: 0, pending: 0, paid: 0 }),
+)
+
+const REKAP_PERIOD = [
+  { value: '30d', label: '30 hari terakhir' },
+  { value: 'month', label: 'Bulan ini' },
+  { value: 'all', label: 'Semua waktu' },
+]
+
+const isoTanggal = (d) => {
+  const bulan = String(d.getMonth() + 1).padStart(2, '0')
+  const hari = String(d.getDate()).padStart(2, '0')
+  return `${d.getFullYear()}-${bulan}-${hari}`
+}
+
+/** Rentang tanggal lokal (bukan UTC) supaya tidak bergeser satu hari. */
+function rekapRange() {
+  if (rekapPeriod.value === 'all') return [null, null]
+  const now = new Date()
+  if (rekapPeriod.value === 'month') {
+    return [isoTanggal(new Date(now.getFullYear(), now.getMonth(), 1)), isoTanggal(now)]
+  }
+  const dari = new Date(now)
+  dari.setDate(dari.getDate() - 29)
+  return [isoTanggal(dari), isoTanggal(now)]
+}
+
+async function loadRekap() {
+  rekapLoading.value = true
+  rekapError.value = ''
+  try {
+    const [from, to] = rekapRange()
+    rekap.value = await partnerSummary(from, to)
+  } catch (err) {
+    console.error(err)
+    rekapError.value = pesanGalat(err, 'Gagal memuat rekap partner.')
+  } finally {
+    rekapLoading.value = false
+  }
+}
+
+async function openDetail(partner) {
+  detailTarget.value = partner
+  detailData.value = null
+  detailError.value = ''
+  detailLoading.value = true
+  try {
+    const [from, to] = rekapRange()
+    detailData.value = await partnerDetail(partner.id, from, to)
+  } catch (err) {
+    console.error(err)
+    detailError.value = pesanGalat(err, 'Gagal memuat detail partner.')
+  } finally {
+    detailLoading.value = false
+  }
+}
+
+function tutupDetail() {
+  detailTarget.value = null
+  detailData.value = null
+  detailError.value = ''
+}
+
+const detailOrders = computed(() => detailData.value?.orders || [])
+
+/** Buka modal pelunasan dari dalam drawer (bentuk data disamakan). */
+function bayarDariDetail(order) {
+  const p = detailData.value?.partner || detailTarget.value || {}
+  openPay({
+    ...(order.commission || {}),
+    partners: { full_name: p.full_name, referral_code: p.referral_code, ewallet_info: p.ewallet_info },
+    requests: { order_no: order.order_no, customer_name: order.customer_name, quote_amount: order.quote_amount },
+  })
+}
+
+function formatTanggal(nilai) {
+  if (!nilai) return '—'
+  const d = new Date(nilai)
+  if (Number.isNaN(d.getTime())) return '—'
+  return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
+}
+
+async function simpanKode() {
+  codeError.value = ''
+  const kode = codeForm.value.trim().toUpperCase()
+  if (!/^REF-[A-Z0-9][A-Z0-9-]{2,15}$/.test(kode)) {
+    codeError.value = 'Format kode: REF- lalu huruf/angka, contoh REF-BUDI.'
+    return
+  }
+  if (kode === (editTarget.value?.referral_code || '')) {
+    codeError.value = 'Kode belum berubah.'
+    return
+  }
+  savingCode.value = true
+  try {
+    const updated = await setPartnerCode(editTarget.value.id, kode)
+    editTarget.value.referral_code = updated.referral_code
+    codeForm.value = updated.referral_code
+    const idx = partners.value.findIndex(p => p.id === updated.id)
+    if (idx !== -1) partners.value[idx] = { ...partners.value[idx], ...updated }
+    actionNotice.value = `Kode ${updated.full_name} sekarang ${updated.referral_code}. Kode lama tidak berlaku untuk order baru; komisi order lama tetap aman.`
+    await loadRekap()
+  } catch (err) {
+    codeError.value = pesanGalat(err, 'Gagal menyimpan kode.')
+  } finally {
+    savingCode.value = false
   }
 }
 
@@ -348,6 +500,10 @@ function waLink(wa) {
         Komisi Tracker
         <span v-if="totalOutstanding > 0" class="w-2 h-2 rounded-full bg-urgency-red"></span>
       </button>
+      <button @click="activeTab = 'rekap'" :class="activeTab === 'rekap' ? 'bg-surface-white shadow text-on-surface' : 'text-on-surface-variant hover:text-on-surface'"
+        class="px-5 py-2 rounded-lg font-bold text-sm transition-all">
+        Rekap
+      </button>
     </div>
 
     <!-- Loading -->
@@ -391,6 +547,10 @@ function waLink(wa) {
               :class="p.status === 'active' ? 'bg-success-green/10 text-success-green' : 'bg-surface-container text-on-surface-variant'"
               class="text-xs font-bold px-3 py-1.5 rounded-lg">
               {{ p.status === 'active' ? 'Aktif' : 'Nonaktif' }}
+            </button>
+            <button @click="openDetail(p)"
+              class="text-xs font-bold px-3 py-1.5 rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-container-low">
+              Detail
             </button>
             <button @click="openEdit(p)"
               class="text-xs font-bold px-3 py-1.5 rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-container-low">
@@ -480,6 +640,92 @@ function waLink(wa) {
       </div>
     </div>
 
+    <!-- Rekap Tab -->
+    <div v-else-if="activeTab === 'rekap'">
+      <div class="flex flex-col sm:flex-row gap-3 mb-5">
+        <input v-model="rekapCari" type="search" placeholder="Cari nama, kode, atau kampus"
+          class="flex-1 rounded-xl border border-outline-variant bg-surface-container-low px-4 py-2.5 text-on-surface text-sm focus:outline-none focus:ring-2 focus:ring-electric-blue/40">
+        <select v-model="rekapPeriod" @change="loadRekap"
+          class="rounded-xl border border-outline-variant bg-surface-container-low px-4 py-2.5 text-on-surface text-sm focus:outline-none focus:ring-2 focus:ring-electric-blue/40">
+          <option v-for="opt in REKAP_PERIOD" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+        </select>
+        <button @click="loadRekap" :disabled="rekapLoading"
+          class="inline-flex items-center justify-center gap-2 rounded-xl border border-outline-variant px-4 py-2.5 text-sm font-bold hover:bg-surface-container-low disabled:opacity-50">
+          <span class="material-symbols-outlined text-[18px]">refresh</span>
+          Muat ulang
+        </button>
+      </div>
+
+      <div v-if="rekapError" class="mb-5 flex items-start gap-2 rounded-xl border border-urgency-red/30 bg-error-container p-4 text-on-error-container">
+        <span class="material-symbols-outlined text-[18px]">error</span>
+        <span class="text-sm">{{ rekapError }}</span>
+      </div>
+
+      <div v-if="rekapLoading" class="text-center py-16 text-on-surface-variant">
+        <span class="material-symbols-outlined text-[40px] animate-spin">progress_activity</span>
+      </div>
+
+      <div v-else-if="rekapFiltered.length === 0" class="text-center py-16 text-on-surface-variant">
+        <span class="material-symbols-outlined text-[48px] mb-3 block">insights</span>
+        <p class="font-bold">Belum ada partner yang menghasilkan referral.</p>
+        <p class="text-sm mt-1">Rekap muncul setelah ada order yang memakai kode partner pada periode ini.</p>
+      </div>
+
+      <div v-else class="rounded-xl border border-border-subtle bg-surface-white overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-surface-container-low text-left text-[11px] uppercase tracking-wide text-on-surface-variant">
+            <tr>
+              <th class="px-4 py-3 font-bold">Partner</th>
+              <th class="px-4 py-3 font-bold text-right">Referral</th>
+              <th class="px-4 py-3 font-bold text-right">Deal</th>
+              <th class="px-4 py-3 font-bold text-right">Omzet</th>
+              <th class="px-4 py-3 font-bold text-right">Komisi Pending</th>
+              <th class="px-4 py-3 font-bold text-right">Komisi Cair</th>
+              <th class="px-4 py-3 font-bold">Terakhir</th>
+              <th class="px-4 py-3"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="r in rekapFiltered" :key="r.partner_id"
+              class="border-t border-border-subtle hover:bg-surface-container-low/60 transition-colors">
+              <td class="px-4 py-3">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="font-bold text-on-surface">{{ r.full_name }}</span>
+                  <span :class="r.status === 'active' ? 'bg-success-green/10 text-success-green' : 'bg-surface-container text-on-surface-variant'"
+                    class="text-[10px] font-bold px-2 py-0.5 rounded-full">{{ r.status === 'active' ? 'Aktif' : 'Nonaktif' }}</span>
+                </div>
+                <p class="text-xs text-on-surface-variant font-mono mt-0.5">{{ r.referral_code }}<span v-if="r.campus"> · {{ r.campus }}</span></p>
+              </td>
+              <td class="px-4 py-3 text-right font-bold text-on-surface">{{ r.referrals }}</td>
+              <td class="px-4 py-3 text-right text-on-surface-variant">{{ r.deals }}</td>
+              <td class="px-4 py-3 text-right text-on-surface">{{ formatRupiah(r.gross) }}</td>
+              <td class="px-4 py-3 text-right font-bold" :class="Number(r.commission_pending) > 0 ? 'text-urgency-red' : 'text-on-surface-variant'">
+                {{ formatRupiah(r.commission_pending) }}
+              </td>
+              <td class="px-4 py-3 text-right font-bold text-success-green">{{ formatRupiah(r.commission_paid) }}</td>
+              <td class="px-4 py-3 text-on-surface-variant whitespace-nowrap">{{ formatTanggal(r.last_referral_at) }}</td>
+              <td class="px-4 py-3 text-right">
+                <button @click="openDetail({ id: r.partner_id, full_name: r.full_name, referral_code: r.referral_code })"
+                  class="text-xs font-bold px-3 py-1.5 rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-container-low">
+                  Detail
+                </button>
+              </td>
+            </tr>
+          </tbody>
+          <tfoot class="bg-surface-container-low/60 border-t border-border-subtle text-xs font-bold text-on-surface">
+            <tr>
+              <td class="px-4 py-3">Total {{ rekapFiltered.length }} partner</td>
+              <td class="px-4 py-3 text-right">{{ totalRekap.referrals }}</td>
+              <td class="px-4 py-3 text-right">{{ totalRekap.deals }}</td>
+              <td class="px-4 py-3 text-right" colspan="2"></td>
+              <td class="px-4 py-3 text-right text-electric-blue">{{ formatRupiah(totalRekap.pending) }} / {{ formatRupiah(totalRekap.paid) }}</td>
+              <td colspan="2"></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
     <!-- Add Partner Modal -->
     <div v-if="showAddModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4" @click.self="showAddModal = false">
       <div class="bg-surface-white rounded-2xl shadow-2xl p-6 w-full max-w-md">
@@ -526,16 +772,25 @@ function waLink(wa) {
             <span class="material-symbols-outlined">close</span>
           </button>
         </div>
-        <div class="flex items-center justify-between gap-2 mb-4 rounded-xl bg-surface-container-low px-3 py-2">
-          <span class="text-xs font-mono font-bold text-electric-blue">{{ editTarget?.referral_code }}</span>
-          <button
-            type="button"
-            @click="rotateCode"
-            :disabled="rotating"
-            class="text-[11px] font-bold text-urgency-red hover:underline disabled:opacity-50"
-          >
-            {{ rotating ? 'Mengganti...' : 'Ganti kode' }}
-          </button>
+        <div class="mb-4 rounded-xl bg-surface-container-low p-3">
+          <label class="text-label-sm font-label-sm text-on-surface-variant block mb-1">Kode referral</label>
+          <div class="flex gap-2">
+            <input v-model="codeForm" type="text" placeholder="REF-NAMA"
+              class="flex-1 rounded-lg border border-outline-variant bg-surface-white px-3 py-2 text-sm font-mono uppercase tracking-wide">
+            <button type="button" @click="simpanKode" :disabled="savingCode"
+              class="px-3 py-2 rounded-lg bg-accent-fill text-white text-xs font-bold disabled:opacity-60">
+              {{ savingCode ? 'Menyimpan...' : 'Simpan kode' }}
+            </button>
+            <button type="button" @click="rotateCode" :disabled="rotating"
+              class="px-3 py-2 rounded-lg border border-outline-variant text-xs font-bold text-on-surface-variant hover:bg-surface-container disabled:opacity-50">
+              {{ rotating ? '...' : 'Acak' }}
+            </button>
+          </div>
+          <p v-if="codeError" class="text-sm text-urgency-red mt-2">{{ codeError }}</p>
+          <p class="text-[11px] text-on-surface-variant mt-2">
+            Kode lama langsung tidak berlaku untuk order baru. Komisi dari order lama tetap tercatat
+            karena atribusinya disimpan terpisah.
+          </p>
         </div>
         <form @submit.prevent="saveEdit" class="space-y-4">
           <div>
@@ -604,6 +859,93 @@ function waLink(wa) {
           </div>
         </form>
       </div>
+    </div>
+    <!-- Drawer Detail Partner -->
+    <div v-if="detailTarget" class="fixed inset-0 z-50 flex justify-end bg-black/40 backdrop-blur-sm"
+      @click.self="tutupDetail()" @keydown.escape.window="tutupDetail()">
+      <aside role="dialog" aria-modal="true" :aria-label="'Detail partner ' + (detailTarget.full_name || '')"
+        class="h-full w-full max-w-lg bg-surface-white shadow-2xl flex flex-col">
+        <div class="flex items-start justify-between gap-4 p-5 border-b border-border-subtle">
+          <div>
+            <h2 class="font-bold text-on-surface text-lg">{{ detailTarget.full_name }}</h2>
+            <p class="text-xs font-mono text-electric-blue mt-1">{{ detailTarget.referral_code }}</p>
+          </div>
+          <button @click="tutupDetail()" aria-label="Tutup detail"
+            class="text-on-surface-variant hover:text-on-surface">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        <div class="p-5 overflow-y-auto flex-1 space-y-4">
+          <div v-if="detailLoading" class="text-center py-10 text-on-surface-variant">
+            <span class="material-symbols-outlined text-[32px] animate-spin">progress_activity</span>
+          </div>
+
+          <div v-else-if="detailError" class="rounded-xl border border-urgency-red/30 bg-error-container p-4 text-sm text-on-error-container">
+            {{ detailError }}
+          </div>
+
+          <template v-else>
+            <div class="grid grid-cols-2 gap-3">
+              <div class="rounded-xl border border-border-subtle p-3">
+                <p class="text-[11px] text-on-surface-variant">Order dari kode ini</p>
+                <p class="text-xl font-bold text-on-surface">{{ detailOrders.length }}</p>
+              </div>
+              <div class="rounded-xl border border-border-subtle p-3">
+                <p class="text-[11px] text-on-surface-variant">Komisi belum cair</p>
+                <p class="text-xl font-bold text-urgency-red">
+                  {{ formatRupiah(detailOrders.reduce((n, o) => n + (['PENDING', 'ELIGIBLE'].includes(o.commission?.status) ? Number(o.commission?.eligible_amount || 0) : 0), 0)) }}
+                </p>
+              </div>
+            </div>
+
+            <div v-if="detailData?.partner?.whatsapp" class="flex items-center gap-2">
+              <a :href="waLink(detailData.partner.whatsapp)" target="_blank" rel="noopener"
+                class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-lg bg-success-green/10 text-success-green">
+                <span class="material-symbols-outlined text-[16px]">chat</span>
+                Chat {{ detailData.partner.whatsapp }}
+              </a>
+              <button @click="openEdit(detailData.partner)"
+                class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-lg border border-outline-variant text-on-surface-variant">
+                <span class="material-symbols-outlined text-[16px]">edit</span>
+                Edit partner
+              </button>
+            </div>
+
+            <div v-if="detailOrders.length === 0" class="text-center py-10 text-on-surface-variant">
+              <span class="material-symbols-outlined text-[40px] mb-2 block">receipt_long</span>
+              <p class="font-bold text-sm">Belum ada order dari kode ini.</p>
+            </div>
+
+            <div v-else class="space-y-2">
+              <div v-for="o in detailOrders" :key="o.order_no"
+                class="rounded-xl border border-border-subtle p-3">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="min-w-0">
+                    <p class="font-bold text-on-surface text-sm truncate">{{ o.order_no }} — {{ o.customer_name }}</p>
+                    <p class="text-xs text-on-surface-variant mt-0.5">
+                      {{ formatTanggal(o.created_at) }} · {{ formatRupiah(o.quote_amount) }} · {{ o.status }}
+                    </p>
+                  </div>
+                  <span v-if="o.commission" :class="statusMeta(o.commission.status).class"
+                    class="text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap">
+                    {{ statusMeta(o.commission.status).label }}
+                  </span>
+                  <span v-else class="text-[10px] text-on-surface-variant">tanpa komisi</span>
+                </div>
+                <div v-if="o.commission" class="flex items-center justify-between gap-3 mt-2">
+                  <p class="text-sm font-bold text-electric-blue">{{ formatRupiah(o.commission.amount || o.commission.eligible_amount) }}</p>
+                  <button v-if="o.commission.status === 'ELIGIBLE'" @click="bayarDariDetail(o)"
+                    class="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1.5 rounded-lg bg-accent-fill text-white">
+                    <span class="material-symbols-outlined text-[14px]">payments</span>
+                    Tandai lunas
+                  </button>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </aside>
     </div>
   </SideNav>
 </template>

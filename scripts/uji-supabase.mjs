@@ -190,6 +190,7 @@ await cek('Engineer', 'get_analytics_campaigns', async () => {
 // ───────────────────────── PARTNER
 let partnerCode = null
 let partnerId = null
+let referralRequestId = null
 await cek('Partner', 'register_partner', async () => {
   const { data, error } = await anon.rpc('register_partner', {
     p_full_name: 'Uji Partner', p_whatsapp: '812' + String(Date.now()).slice(-8), p_campus: 'Kampus Uji', p_ewallet_info: '0812',
@@ -249,7 +250,58 @@ await cek('Partner', 'request dengan referral_code → atribusi', async () => {
   if (kom.error) throw kom.error
   const rows = Array.isArray(kom.data) ? kom.data : [kom.data]
   harus(rows[0] && rows[0].partner_id, 'komisi tidak terhubung ke partner')
+  referralRequestId = req.id
   return data + ' → komisi partner ' + String(rows[0].partner_id).slice(0, 8) + ' status=' + rows[0].status
+})
+
+await cek('Partner', 'partner_summary (engineer)', async () => {
+  const { data, error } = await eng.rpc('partner_summary', { p_from: null, p_to: null })
+  if (error) throw error
+  const row = data.find(r => r.partner_id === partnerId)
+  harus(row, 'partner uji tidak muncul di rekap')
+  harus(Number(row.referrals) >= 1, 'referrals = ' + row.referrals)
+  harus(Number(row.deals) >= 1, 'deals = ' + row.deals)
+  return 'ref=' + row.referrals + ' deal=' + row.deals + ' pending=' + row.commission_pending
+})
+
+await cek('Partner', 'partner_summary ditolak untuk anon', async () => {
+  const { error } = await anon.rpc('partner_summary', { p_from: null, p_to: null })
+  harus(error, 'anon bisa memanggil partner_summary')
+  harus(/permission denied|AKSES_DITOLAK/i.test(error.message), 'error tak terduga: ' + error.message)
+  return error.message.slice(0, 44)
+})
+
+await cek('Partner', 'partner_detail (order + komisi)', async () => {
+  const { data, error } = await eng.rpc('partner_detail', { p_partner_id: partnerId, p_from: null, p_to: null })
+  if (error) throw error
+  harus(data && data.partner && data.partner.referral_code === partnerCode, 'kode partner salah di detail')
+  harus(Array.isArray(data.orders) && data.orders.length >= 1, 'detail tanpa order')
+  return 'orders=' + data.orders.length + ' pertama=' + data.orders[0].order_no
+})
+
+await cek('Partner', 'set_partner_code (custom, dinormalisasi)', async () => {
+  const baru = 'REF-UJI' + String(Date.now()).slice(-4)
+  const { data, error } = await eng.rpc('set_partner_code', { p_partner_id: partnerId, p_code: baru.toLowerCase() })
+  if (error) throw error
+  const row = Array.isArray(data) ? data[0] : data
+  harus(row.referral_code === baru, 'kode tidak dinormalisasi: ' + row.referral_code)
+  partnerCode = row.referral_code
+  return row.referral_code
+})
+
+await cek('Partner', 'set_partner_code menolak duplikat', async () => {
+  const { error } = await eng.rpc('set_partner_code', { p_partner_id: partnerId, p_code: 'REF-RAHUL' })
+  harus(error, 'kode duplikat diterima')
+  return error.message.slice(0, 44)
+})
+
+await cek('Partner', 'komisi lama tetap sah setelah kode diganti', async () => {
+  const kom = await eng.rpc('recompute_commission', { p_request_id: referralRequestId })
+  if (kom.error) throw kom.error
+  const rows = Array.isArray(kom.data) ? kom.data : [kom.data]
+  harus(rows[0], 'komisi hilang')
+  harus(rows[0].status !== 'VOID', 'komisi jadi VOID setelah kode partner diganti')
+  return 'status=' + rows[0].status + ' partner=' + String(rows[0].partner_id).slice(0, 8)
 })
 
 // ───────────────────────── CRM / OUTREACH

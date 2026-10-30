@@ -269,6 +269,34 @@ export async function rotatePartnerCode(partnerId) {
   return data
 }
 
+/** Rekap performa per partner (dihitung di database). */
+export async function partnerSummary(from = null, to = null) {
+  const { data, error } = await supabase.rpc('partner_summary', { p_from: from, p_to: to })
+  if (error) throw error
+  return data || []
+}
+
+/** Order + komisi satu partner (maks 200 order terakhir). */
+export async function partnerDetail(partnerId, from = null, to = null) {
+  const { data, error } = await supabase.rpc('partner_detail', {
+    p_partner_id: partnerId,
+    p_from: from,
+    p_to: to,
+  })
+  if (error) throw error
+  return data
+}
+
+/** Kode custom. Format divalidasi UI, keunikan divalidasi database. */
+export async function setPartnerCode(partnerId, code) {
+  const { data, error } = await supabase.rpc('set_partner_code', {
+    p_partner_id: partnerId,
+    p_code: code,
+  })
+  if (error) throw error
+  return Array.isArray(data) ? data[0] : data
+}
+
 /** Pendaftaran partner publik; kode dibuat server-side. */
 export async function registerPartner({ fullName, whatsapp, campus = null, ewalletInfo = null }) {
   const { data, error } = await supabase.rpc('register_partner', {
