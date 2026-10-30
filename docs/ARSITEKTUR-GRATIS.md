@@ -86,9 +86,24 @@ boleh diawali `VITE_`.
 `api/ig-run-schedule.js` mempublikasi konten Instagram yang sudah jatuh tempo.
 Endpoint ini **tidak bisa dipanggil tanpa secret**.
 
-### Vercel Cron (utama)
+### GitHub Actions (dipakai sekarang)
 
-`vercel.json` mendaftarkan:
+Akun Vercel Hobby hanya mengizinkan cron 1x per hari, sehingga `"crons"` di
+`vercel.json` ditolak saat deploy (`Hobby accounts are limited to daily cron
+jobs`). Karena itu cron Vercel tidak dipakai dan scheduler dijalankan lewat
+GitHub Actions: `.github/workflows/ig-scheduler.yml` (tiap 15 menit).
+
+Set sekali di repo GitHub -> Settings -> Secrets and variables -> Actions:
+
+| Tipe | Nama | Isi |
+|---|---|---|
+| Secret | `CRON_SECRET` | sama dengan env `CRON_SECRET` di Vercel |
+| Variable | `APP_URL` | `https://jokitugasit.my.id` |
+
+### Vercel Cron (kalau nanti upgrade ke Pro)
+
+Kalau akun sudah Pro, boleh kembali memakai cron Vercel. Tambahkan ke
+`vercel.json`:
 
 ```json
 "crons": [{ "path": "/api/ig-run-schedule", "schedule": "*/15 * * * *" }]
@@ -104,10 +119,9 @@ Aktivasi:
 3. Redeploy frontend/API.
 4. Vercel Cron otomatis mengirim `Authorization: Bearer $CRON_SECRET`.
 
-### GitHub Actions (cadangan gratis)
+### Referensi workflow GitHub Actions
 
-Dipakai bila kuota cron Vercel habis atau ingin jadwal tiap 5 menit. Simpan
-`CRON_SECRET` (atau `IG_AUTOMATION_SECRET`) sebagai repository secret, lalu:
+Isi workflow yang dipakai (`.github/workflows/ig-scheduler.yml`):
 
 ```yaml
 name: ig-scheduler
