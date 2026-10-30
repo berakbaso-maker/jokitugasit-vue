@@ -7,6 +7,9 @@ import FooterBar from '../components/FooterBar.vue'
 import { supabase } from '../lib/supabase'
 import { waLink } from '../lib/tautan'
 import { testimoniContoh } from '../lib/testimoni-contoh'
+import { statistik } from '../lib/portfolio'
+
+const statPortofolio = statistik()
 
 const testimonials = ref(testimoniContoh)
 const loading = ref(false)
@@ -101,7 +104,7 @@ onMounted(loadTestimonials)
       <!-- Stats: hanya angka yang bisa dipertanggungjawabkan -->
       <section class="grid grid-cols-3 gap-4 max-w-2xl mx-auto mb-12">
         <div class="bg-surface-white rounded-xl border border-border-subtle p-4 text-center shadow-sm">
-          <div class="font-display-hero-mobile text-display-hero-mobile font-extrabold text-electric-blue">16</div>
+          <div class="font-display-hero-mobile text-display-hero-mobile font-extrabold text-electric-blue">{{ statPortofolio.jumlahProyek }}</div>
           <div class="text-xs text-secondary mt-1">Studi Kasus</div>
         </div>
         <div class="bg-surface-white rounded-xl border border-border-subtle p-4 text-center shadow-sm">

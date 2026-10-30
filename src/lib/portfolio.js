@@ -64,9 +64,9 @@ const GRADIEN_KATEGORI = {
 }
 
 /**
- * 16 studi kasus contoh. Sebaran kategori sengaja mengikuti layanan
- * yang dijual: web 3, mobile 2, desktop 1, database 2, ai 2, skripsi 2,
- * debug 2, design 1, tugas_kuliah 1.
+ * 29 studi kasus contoh, membentang dari 2023 sampai 2026. Sebaran
+ * kategori mengikuti layanan yang dijual: web 5, mobile 4, desktop 2,
+ * database 4, ai 4, skripsi 3, debug 3, design 2, tugas_kuliah 2.
  */
 export const proyek = [
   {
@@ -568,6 +568,411 @@ export const proyek = [
     mockup: { gradient: GRADIEN_KATEGORI.tugas_kuliah, icon: IKON_KATEGORI.tugas_kuliah },
     contoh: true,
   },
+  {
+    slug: 'marketplace-jasa-lokal',
+    title: 'Marketplace Jasa Lokal',
+    tagline: 'Pemesanan jasa rumahan dengan jadwal dan pembayaran terpadu',
+    category: 'web',
+    stack: ['Vue 3', 'Vite', 'Supabase', 'Midtrans', 'Tailwind'],
+    year: 2026,
+    duration: '10 minggu',
+    role: 'Fullstack Developer',
+    featured: true,
+    problem:
+      'Penyedia jasa rumahan seperti tukang servis dan penjahit menerima pesanan lewat pesan pribadi. Jadwal bentrok, harga tidak seragam, dan tidak ada catatan pesanan yang bisa ditelusuri saat pelanggan mengeluh.',
+    solution:
+      'Satu tempat untuk menampilkan jasa, memilih slot jadwal yang benar-benar kosong, dan membayar di muka. Slot dikunci saat pembayaran dimulai dan dilepas otomatis kalau tidak diselesaikan, jadi dua pelanggan tidak bisa memesan waktu yang sama.',
+    features: [
+      'Kalender slot dengan penguncian sementara saat checkout',
+      'Pelepasan slot otomatis kalau pembayaran kedaluwarsa',
+      'Halaman toko per penyedia jasa dengan ulasan terverifikasi',
+      'Pembayaran terpadu dan riwayat transaksi',
+      'Panel penyedia untuk mengatur harga dan ketersediaan',
+      'Pencarian berdasarkan lokasi dan jenis jasa',
+    ],
+    result: {
+      metrics: [
+        { label: 'Pesanan bentrok', value: 'tidak lagi terjadi' },
+        { label: 'Waktu konfirmasi', value: 'manual → otomatis' },
+        { label: 'Status pesanan', value: 'bisa dilacak pelanggan' },
+      ],
+    },
+    mockup: { gradient: GRADIEN_KATEGORI.web, icon: IKON_KATEGORI.web },
+    contoh: true,
+  },
+  {
+    slug: 'asisten-tanya-jawab-dokumen',
+    title: 'Asisten Tanya-Jawab Dokumen Internal',
+    tagline: 'Menjawab pertanyaan SOP dengan rujukan halaman aslinya',
+    category: 'ai',
+    stack: ['Python', 'FastAPI', 'pgvector', 'LangChain', 'Vue 3'],
+    year: 2026,
+    duration: '9 minggu',
+    role: 'AI Engineer',
+    featured: true,
+    problem:
+      'SOP dan panduan kerja tersebar di puluhan berkas PDF. Karyawan baru menghabiskan berjam-jam bertanya ke senior hanya untuk menemukan satu prosedur, dan jawaban lisan mudah berbeda antar orang.',
+    solution:
+      'Dokumen dipecah menjadi potongan kecil lalu diubah menjadi vektor dan disimpan di pgvector. Pertanyaan dicari ke potongan paling relevan, dan jawaban disusun hanya dari potongan itu dengan menyertakan berkas serta halaman asalnya. Kalau konteks tidak cukup, sistem menolak menjawab alih-alih menebak.',
+    features: [
+      'Pemecahan dokumen dengan tumpang tindih antar potongan',
+      'Pencarian gabungan vektor dan kata kunci',
+      'Setiap jawaban menyertakan rujukan berkas dan halaman',
+      'Penolakan eksplisit saat konteks tidak mencukupi',
+      'Penjadwalan ulang indeks saat dokumen diperbarui',
+      'Panel uji berisi daftar pertanyaan dan jawaban acuan',
+    ],
+    result: {
+      metrics: [
+        { label: 'Jawaban tanpa rujukan', value: 'tidak ada' },
+        { label: 'Waktu mencari SOP', value: 'menit → detik' },
+        { label: 'Perilaku saat ragu', value: 'menolak, bukan menebak' },
+      ],
+    },
+    mockup: { gradient: GRADIEN_KATEGORI.ai, icon: IKON_KATEGORI.ai },
+    contoh: true,
+  },
+  {
+    slug: 'monitoring-plts-desktop',
+    title: 'Aplikasi Monitoring Panel Surya',
+    tagline: 'Melihat panel mana yang produksinya menurun, saat itu juga',
+    category: 'desktop',
+    stack: ['Electron', 'TypeScript', 'MQTT', 'SQLite', 'Chart.js'],
+    year: 2026,
+    duration: '8 minggu',
+    role: 'Desktop Developer',
+    problem:
+      'Data inverter dicatat manual setiap pagi dengan membaca layar perangkat satu per satu. Kalau satu panel berhenti berproduksi karena kabel longgar, gangguannya baru ketahuan setelah berhari-hari.',
+    solution:
+      'Aplikasi desktop berlangganan topik MQTT dari logger, menyimpan riwayat ke database lokal, dan membandingkan produksi tiap panel dengan panel tetangganya. Penyimpangan yang menetap ditandai sebagai peringatan.',
+    features: [
+      'Grafik produksi per panel dan total harian',
+      'Perbandingan panel dengan tetangga sekitarnya',
+      'Ambang peringatan yang bisa diatur per lokasi',
+      'Riwayat tetap terbaca walau jaringan putus',
+      'Ekspor CSV untuk laporan bulanan',
+      'Mode layar penuh untuk dipasang di ruang kontrol',
+    ],
+    result: {
+      metrics: [
+        { label: 'Pencatatan harian', value: 'manual → otomatis' },
+        { label: 'Deteksi panel bermasalah', value: 'hari → jam' },
+        { label: 'Data saat offline', value: 'tetap tersimpan lokal' },
+      ],
+    },
+    mockup: { gradient: GRADIEN_KATEGORI.desktop, icon: IKON_KATEGORI.desktop },
+    contoh: true,
+  },
+  {
+    slug: 'aplikasi-bank-sampah',
+    title: 'Aplikasi Bank Sampah Warga',
+    tagline: 'Setoran sampah tercatat rapi dan saldo warga transparan',
+    category: 'mobile',
+    stack: ['Flutter', 'Supabase', 'Riverpod', 'Camera'],
+    year: 2026,
+    duration: '7 minggu',
+    role: 'Mobile Developer',
+    problem:
+      'Pencatatan setoran sampah dilakukan di buku tulis yang dipegang satu petugas. Warga tidak tahu saldonya, buku mudah hilang, dan rekap akhir bulan harus dihitung ulang dari nol.',
+    solution:
+      'Petugas menimbang dan mencatat lewat aplikasi, warga melihat saldo serta riwayat setorannya sendiri. Setiap setoran menyimpan foto timbangan sebagai bukti, dan rekap bulanan terbentuk otomatis dari data yang sama.',
+    features: [
+      'Pencatatan setoran per jenis sampah dan beratnya',
+      'Foto timbangan sebagai bukti setoran',
+      'Saldo dan riwayat yang bisa dilihat warga',
+      'Rekap bulanan otomatis per rumah',
+      'Pencarian riwayat berdasarkan tanggal',
+      'Mode hemat data untuk jaringan lambat',
+    ],
+    result: {
+      metrics: [
+        { label: 'Buku catatan manual', value: 'digantikan aplikasi' },
+        { label: 'Rekap bulanan', value: 'hitung ulang → otomatis' },
+        { label: 'Sengketa saldo', value: 'ada bukti foto timbangan' },
+      ],
+    },
+    mockup: { gradient: GRADIEN_KATEGORI.mobile, icon: IKON_KATEGORI.mobile },
+    contoh: true,
+  },
+  {
+    slug: 'optimasi-laporan-keuangan',
+    title: 'Optimasi Laporan Keuangan yang Lambat',
+    tagline: 'Dari query berjalan semenit menjadi hitungan detik',
+    category: 'debug',
+    stack: ['PostgreSQL', 'EXPLAIN ANALYZE', 'Redis', 'Laravel'],
+    year: 2026,
+    duration: '3 minggu',
+    role: 'Backend Engineer',
+    problem:
+      'Laporan bulanan memanggil satu query yang menggabungkan beberapa tabel besar tanpa indeks yang tepat. Halaman sering berputar lama, dan saat beberapa orang membukanya bersamaan, seluruh aplikasi ikut melambat.',
+    solution:
+      'Query diurai dengan EXPLAIN ANALYZE untuk melihat bagian mana yang paling mahal. Indeks ditambahkan pada kolom yang dipakai untuk menyaring dan mengurutkan, agregat berat dipindahkan ke tabel ringkasan yang diperbarui berkala, dan hasil laporan disimpan sementara.',
+    features: [
+      'Profil query dengan EXPLAIN ANALYZE',
+      'Indeks gabungan sesuai pola penyaringan',
+      'Tabel ringkasan untuk agregat bulanan',
+      'Cache hasil laporan dengan masa berlaku jelas',
+      'Pembatalan query yang berjalan terlalu lama',
+      'Pemantauan query lambat setelah perbaikan',
+    ],
+    result: {
+      metrics: [
+        { label: 'Waktu laporan', value: 'puluhan detik → di bawah 2 detik' },
+        { label: 'Beban saat ramai', value: 'tidak lagi saling mengunci' },
+        { label: 'Regresi', value: 'dijaga pemantauan query lambat' },
+      ],
+    },
+    mockup: { gradient: GRADIEN_KATEGORI.debug, icon: IKON_KATEGORI.debug },
+    contoh: true,
+  },
+  {
+    slug: 'redesign-portal-desa',
+    title: 'Perancangan Ulang Portal Informasi Desa',
+    tagline: 'Informasi publik yang terbaca di layar kecil dan sinyal lemah',
+    category: 'design',
+    stack: ['Figma', 'Design Token', 'Tailwind', 'WCAG 2.2'],
+    year: 2026,
+    duration: '5 minggu',
+    role: 'UI/UX Designer',
+    problem:
+      'Portal desa penuh tabel panjang dan teks kecil. Di ponsel hampir tidak terbaca, dan warga yang ingin melihat jadwal posyandu atau syarat surat harus menggulir jauh sambil memperbesar layar.',
+    solution:
+      'Isi portal disusun ulang berdasarkan pertanyaan yang paling sering ditanyakan warga. Navigasi dibuat sederhana, tabel diganti daftar yang bisa dibaca di layar sempit, dan seluruh warna diuji kontrasnya sebelum diserahkan ke pengembang.',
+    features: [
+      'Kartu informasi prioritas di halaman depan',
+      'Tabel panjang diubah menjadi daftar yang bisa dipindai',
+      'Ukuran sentuh minimal 44 piksel',
+      'Kontras teks diuji terhadap standar aksesibilitas',
+      'Mode gelap memakai nilai token, bukan timpaan warna',
+      'Panduan komponen untuk pengembang',
+    ],
+    result: {
+      metrics: [
+        { label: 'Keterbacaan di ponsel', value: 'tanpa perlu memperbesar' },
+        { label: 'Kontras teks', value: 'memenuhi ambang aksesibilitas' },
+        { label: 'Serah terima', value: 'disertai token dan panduan' },
+      ],
+    },
+    mockup: { gradient: GRADIEN_KATEGORI.design, icon: IKON_KATEGORI.design },
+    contoh: true,
+  },
+  {
+    slug: 'pipeline-data-akademik',
+    title: 'Pipeline Data Akademik Terjadwal',
+    tagline: 'Menyatukan data dari beberapa sistem jadi satu sumber',
+    category: 'database',
+    stack: ['Python', 'dbt', 'PostgreSQL', 'Airflow', 'Great Expectations'],
+    year: 2026,
+    duration: '8 minggu',
+    role: 'Data Engineer',
+    problem:
+      'Data mahasiswa, nilai, dan kehadiran tinggal di tiga sistem berbeda dengan format tanggal dan kode yang tidak seragam. Setiap kali pimpinan minta rekap, staf harus menggabungkannya manual di spreadsheet.',
+    solution:
+      'Data ditarik terjadwal, dibersihkan dan diseragamkan lewat model transformasi berlapis, lalu digabung menjadi satu tabel fakta. Setiap tahap punya pemeriksaan kualitas data yang menghentikan proses kalau ada yang aneh, supaya angka salah tidak menyebar diam-diam.',
+    features: [
+      'Penarikan terjadwal dari tiga sumber berbeda',
+      'Penyeragaman format tanggal dan kode program studi',
+      'Pemeriksaan kualitas data di setiap tahap',
+      'Proses berhenti dan memberi peringatan bila data menyimpang',
+      'Tabel fakta tunggal untuk pelaporan',
+      'Riwayat perubahan data untuk penelusuran',
+    ],
+    result: {
+      metrics: [
+        { label: 'Penggabungan manual', value: 'digantikan pipeline' },
+        { label: 'Data menyimpang', value: 'tertahan di tahap pemeriksaan' },
+        { label: 'Sumber angka', value: 'satu tabel fakta' },
+      ],
+    },
+    mockup: { gradient: GRADIEN_KATEGORI.database, icon: IKON_KATEGORI.database },
+    contoh: true,
+  },
+  {
+    slug: 'sistem-pengaduan-warga',
+    title: 'Sistem Pengaduan Warga',
+    tagline: 'Laporan masuk, ditindaklanjuti, dan bisa dipantau pelapornya',
+    category: 'web',
+    stack: ['Vue 3', 'Supabase', 'PostGIS', 'Tailwind'],
+    year: 2025,
+    duration: '6 minggu',
+    role: 'Fullstack Developer',
+    problem:
+      'Pengaduan warga masuk lewat banyak saluran tanpa nomor tiket. Laporan yang sama dikirim berulang kali, dan pelapor tidak pernah tahu apakah laporannya sudah ditangani.',
+    solution:
+      'Setiap laporan mendapat nomor tiket dan titik lokasi. Petugas memperbarui status, dan pelapor bisa memeriksa perkembangan laporannya dengan nomor tiket tanpa perlu membuat akun.',
+    features: [
+      'Nomor tiket untuk setiap laporan',
+      'Penandaan lokasi kejadian pada peta',
+      'Pengelompokan laporan serupa di area berdekatan',
+      'Pembaruan status yang terlihat oleh pelapor',
+      'Pencarian status cukup dengan nomor tiket',
+      'Rekap laporan per wilayah dan kategori',
+    ],
+    result: {
+      metrics: [
+        { label: 'Laporan ganda', value: 'dikelompokkan, bukan diduplikasi' },
+        { label: 'Pelapor memeriksa status', value: 'mandiri lewat nomor tiket' },
+        { label: 'Penelusuran', value: 'setiap perubahan status tercatat' },
+      ],
+    },
+    mockup: { gradient: GRADIEN_KATEGORI.web, icon: IKON_KATEGORI.web },
+    contoh: true,
+  },
+  {
+    slug: 'presensi-wajah-karyawan',
+    title: 'Presensi Wajah untuk Karyawan Pabrik',
+    tagline: 'Absensi tanpa kartu, tetap akurat saat wajah memakai pelindung',
+    category: 'ai',
+    stack: ['Python', 'ONNX Runtime', 'OpenCV', 'FastAPI', 'PostgreSQL'],
+    year: 2025,
+    duration: '10 minggu',
+    role: 'Machine Learning Engineer',
+    problem:
+      'Karyawan memakai masker dan pelindung kepala, sehingga mesin presensi berbasis kartu sering dipinjamkan dan absensi berbasis wajah biasa gagal mengenali. Antrean di pintu masuk jadi panjang setiap pergantian shift.',
+    solution:
+      'Model pengenalan wajah dijalankan lokal di perangkat pintu masuk agar tidak bergantung jaringan, dengan ambang kemiripan yang dikalibrasi ulang memakai foto karyawan bermasker. Wajah yang ragu dikenali diarahkan ke verifikasi kedua, bukan langsung ditolak.',
+    features: [
+      'Pengenalan berjalan lokal di perangkat pintu masuk',
+      'Kalibrasi memakai foto karyawan bermasker',
+      'Verifikasi kedua saat tingkat kemiripan meragukan',
+      'Pencatatan waktu dari jam server, bukan perangkat',
+      'Antrean lokal saat jaringan terputus',
+      'Laporan kehadiran per shift dan per bagian',
+    ],
+    result: {
+      metrics: [
+        { label: 'Ketergantungan jaringan', value: 'tidak ada saat presensi' },
+        { label: 'Kasus ragu', value: 'diverifikasi ulang, bukan ditolak' },
+        { label: 'Antrean shift', value: 'berkurang karena pengenalan lokal' },
+      ],
+    },
+    mockup: { gradient: GRADIEN_KATEGORI.ai, icon: IKON_KATEGORI.ai },
+    contoh: true,
+  },
+  {
+    slug: 'aplikasi-kurir-harian',
+    title: 'Aplikasi Kurir Harian',
+    tagline: 'Rute, bukti kirim, dan setoran tunai dalam satu alur',
+    category: 'mobile',
+    stack: ['Kotlin', 'Jetpack Compose', 'Room', 'Google Maps SDK'],
+    year: 2025,
+    duration: '6 minggu',
+    role: 'Mobile Developer',
+    problem:
+      'Kurir harian mengatur rutenya sendiri di kertas, bukti pengiriman berupa foto di galeri ponsel, dan uang setoran dicatat terpisah. Rekonsiliasi akhir hari sering tidak cocok dan sulit ditelusuri.',
+    solution:
+      'Aplikasi menyusun urutan antar berdasarkan jarak, meminta bukti foto dan tanda tangan di lokasi, lalu menutup hari dengan rekap uang yang harus disetor. Data tersimpan lokal lebih dulu sehingga tetap jalan di area tanpa sinyal.',
+    features: [
+      'Urutan antar berdasarkan jarak tempuh',
+      'Bukti foto dan tanda tangan di lokasi tujuan',
+      'Pencatatan penerimaan tunai per antar',
+      'Rekap setoran akhir hari yang harus cocok',
+      'Penyimpanan lokal saat sinyal hilang',
+      'Navigasi langsung ke alamat tujuan',
+    ],
+    result: {
+      metrics: [
+        { label: 'Rekonsiliasi setoran', value: 'cocok otomatis di akhir hari' },
+        { label: 'Bukti pengiriman', value: 'melekat pada tiap pesanan' },
+        { label: 'Area tanpa sinyal', value: 'tetap bisa mencatat' },
+      ],
+    },
+    mockup: { gradient: GRADIEN_KATEGORI.mobile, icon: IKON_KATEGORI.mobile },
+    contoh: true,
+  },
+  {
+    slug: 'layanan-notifikasi-terpusat',
+    title: 'Layanan Notifikasi Terpusat',
+    tagline: 'Satu pintu kirim untuk email, WhatsApp, dan notifikasi aplikasi',
+    category: 'database',
+    stack: ['Node.js', 'PostgreSQL', 'Redis', 'BullMQ', 'Docker'],
+    year: 2025,
+    duration: '7 minggu',
+    role: 'Backend Engineer',
+    problem:
+      'Setiap fitur mengirim notifikasi dengan caranya sendiri. Kredensial tersebar di banyak tempat, pengiriman ulang tidak terkendali, dan saat penyedia sedang gangguan, pesan hilang tanpa jejak.',
+    solution:
+      'Semua pengiriman lewat satu layanan dengan antrean. Setiap pesan punya status yang jelas, percobaan ulang memakai jeda yang makin panjang, dan pesan yang tetap gagal masuk ke daftar periksa manual alih-alih hilang.',
+    features: [
+      'Satu antarmuka untuk email, WhatsApp, dan push',
+      'Antrean dengan percobaan ulang berjeda',
+      'Status pesan yang bisa dilacak per penerima',
+      'Pencegahan pengiriman ganda dengan kunci idempoten',
+      'Daftar pesan gagal untuk ditangani manual',
+      'Kredensial tersimpan di satu tempat',
+    ],
+    result: {
+      metrics: [
+        { label: 'Pesan hilang diam-diam', value: 'tidak ada, semua berstatus' },
+        { label: 'Kiriman ganda', value: 'dicegah kunci idempoten' },
+        { label: 'Kredensial', value: 'terpusat di satu layanan' },
+      ],
+    },
+    mockup: { gradient: GRADIEN_KATEGORI.database, icon: IKON_KATEGORI.database },
+    contoh: true,
+  },
+  {
+    slug: 'skripsi-analisis-emosi-teks',
+    title: 'Analisis Emosi Ulasan Produk',
+    tagline: 'Membandingkan model klasik dan transformer pada teks berbahasa Indonesia',
+    category: 'skripsi',
+    stack: ['Python', 'scikit-learn', 'PyTorch', 'IndoBERT', 'Pandas'],
+    year: 2025,
+    duration: '14 minggu',
+    role: 'Peneliti',
+    problem:
+      'Ulasan produk berbahasa Indonesia bercampur bahasa gaul, singkatan, dan salah tulis. Model yang dilatih pada teks formal turun tajam ketepatannya saat diuji pada ulasan seperti ini.',
+    solution:
+      'Data dibersihkan bertahap dengan normalisasi kamus singkatan, lalu tiga pendekatan dibandingkan memakai pembagian data yang sama dan metrik yang sama. Kesalahan model dianalisis per kelas agar penurunan performa bisa dijelaskan, bukan hanya dilaporkan.',
+    features: [
+      'Normalisasi singkatan dan bahasa gaul',
+      'Perbandingan model klasik dan transformer',
+      'Pembagian data dan metrik yang seragam',
+      'Analisis kesalahan per kelas emosi',
+      'Pembahasan keterbatasan dan bias data',
+      'Naskah dan kode siap diperiksa ulang',
+    ],
+    result: {
+      metrics: [
+        { label: 'Perbandingan model', value: 'kondisi uji disamakan' },
+        { label: 'Analisis kesalahan', value: 'dibahas per kelas' },
+        { label: 'Keterbatasan', value: 'ditulis terbuka' },
+      ],
+    },
+    mockup: { gradient: GRADIEN_KATEGORI.skripsi, icon: IKON_KATEGORI.skripsi },
+    contoh: true,
+  },
+  {
+    slug: 'tugas-besar-basis-data',
+    title: 'Perancangan Basis Data Perpustakaan',
+    tagline: 'Dari skema kertas menjadi basis data ternormalisasi dengan uji query',
+    category: 'tugas_kuliah',
+    stack: ['PostgreSQL', 'ERD', 'SQL', 'dbdiagram'],
+    year: 2025,
+    duration: '4 minggu',
+    role: 'Mahasiswa',
+    problem:
+      'Tugas meminta perancangan basis data perpustakaan, tetapi studi kasus di soal masih berupa daftar kolom yang saling tumpang tindih sehingga sulit menentukan kunci dan relasi antar tabel.',
+    solution:
+      'Kebutuhan dipetakan dulu menjadi entitas dan aturan bisnis, lalu skema dinormalisasi bertahap sampai bentuk ketiga. Setiap tabel diuji dengan query nyata seperti peminjaman terlambat dan ketersediaan buku.',
+    features: [
+      'Diagram relasi entitas lengkap dengan kardinalitas',
+      'Normalisasi sampai bentuk ketiga disertai alasannya',
+      'Batas dan kunci asing pada setiap relasi',
+      'Query uji untuk peminjaman dan keterlambatan',
+      'Data contoh untuk membuktikan query berjalan',
+      'Catatan asumsi dan keputusan perancangan',
+    ],
+    result: {
+      metrics: [
+        { label: 'Normalisasi', value: 'sampai bentuk ketiga' },
+        { label: 'Query uji', value: 'dijalankan pada data contoh' },
+        { label: 'Asumsi', value: 'ditulis dan dijelaskan' },
+      ],
+    },
+    mockup: { gradient: GRADIEN_KATEGORI.tugas_kuliah, icon: IKON_KATEGORI.tugas_kuliah },
+    contoh: true,
+  },
 ]
 
 /** Semua kategori yang benar-benar dipakai (untuk chip filter). */
@@ -583,8 +988,16 @@ export const hitungPerKategori = () => {
   return map
 }
 
-/** Proyek unggulan, maksimal `n`. */
-export const proyekUnggulan = (n = 3) => proyek.filter((p) => p.featured).slice(0, n)
+/**
+ * Proyek unggulan, maksimal `n`.
+ * Diurutkan dari tahun terbaru supaya blok unggulan tidak terus menampilkan
+ * proyek lama hanya karena posisinya lebih awal di array.
+ */
+export const proyekUnggulan = (n = 3) =>
+  proyek
+    .filter((p) => p.featured)
+    .sort((a, b) => b.year - a.year)
+    .slice(0, n)
 
 /** Cari proyek berdasarkan slug. */
 export const cariSlug = (slug) => proyek.find((p) => p.slug === slug) || null
@@ -623,7 +1036,11 @@ export const filterProyek = ({ kategori = 'semua', q = '', urut = 'default' } = 
 export const proyekTerkait = (slug, n = 3) => {
   const ini = cariSlug(slug)
   if (!ini) return []
-  return proyek.filter((p) => p.slug !== slug && p.category === ini.category).slice(0, n)
+  // Tahun terbaru lebih dulu, supaya proyek terkait tidak selalu yang paling lama.
+  return proyek
+    .filter((p) => p.slug !== slug && p.category === ini.category)
+    .sort((a, b) => b.year - a.year)
+    .slice(0, n)
 }
 
 /** Statistik agregat untuk hero. */

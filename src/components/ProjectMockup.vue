@@ -7,7 +7,7 @@
  *
  * Bentuknya BERBEDA per jenis proyek (lihat prop `bentuk`): proyek mobile
  * tampil sebagai bingkai HP, debug sebagai terminal error, database sebagai
- * skema tabel, dan seterusnya. Tujuannya supaya grid 16 kartu tidak terasa
+ * skema tabel, dan seterusnya. Tujuannya supaya grid kartu tidak terasa
  * seperti satu template yang diulang -- masalah nyata pada versi pertama
  * yang memakai satu bentuk jendela aplikasi untuk semua kategori.
  *
