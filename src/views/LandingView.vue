@@ -168,30 +168,86 @@ const referralPoin = [
 // testimoni dan bukan klaim angka. Tujuannya memberi gambaran konkret tentang
 // "bantuan seperti apa" yang didapat pengunjung, tanpa foto stok.
 // ---------------------------------------------------------------------------
-const percakapan = [
-  { dari: 'klien', waktu: '19.41', isi: 'Tugas struktur data saya error terus di bagian sorting. Deadline besok malam.' },
-  { dari: 'kita', waktu: '19.42', isi: 'Boleh kirim file dan pesan error-nya? Saya cek dulu akar masalahnya.' },
-  { dari: 'klien', waktu: '19.44', isi: 'Sudah saya kirim ya.' },
-  { dari: 'kita', waktu: '19.47', isi: 'Ketemu. Index-nya lewat batas array. Saya perbaiki, lalu saya jelaskan baris per baris.' },
+const daftarSkenario = [
+  {
+    kunci: 'skripsi',
+    label: 'Skripsi',
+    ikon: 'school',
+    pesan: [
+      { dari: 'klien', waktu: '09.12', isi: 'Bab 4 saya ditolak pembimbing. Katanya analisisnya cuma deskriptif, belum ada uji.' },
+      { dari: 'kita', waktu: '09.14', isi: 'Boleh kirim file Bab 3 dan 4-nya? Saya perlu lihat variabel dan rumusan masalahnya dulu.' },
+      { dari: 'klien', waktu: '09.20', isi: 'Sudah saya kirim, pakai SPSS tapi belum tau uji apa.' },
+      { dari: 'kita', waktu: '09.34', isi: 'Variabelmu 2 bebas 1 terikat, jadi arahnya regresi berganda. Saya susun ulang tabelnya plus uji asumsi klasik, lalu saya tuliskan cara membaca hasilnya.' },
+    ],
+  },
+  {
+    kunci: 'project',
+    label: 'Project Web',
+    ikon: 'code',
+    pesan: [
+      { dari: 'klien', waktu: '13.05', isi: 'Saya butuh sistem kasir untuk toko. Sudah punya desain di Figma, tapi belum ada yang ngerjain.' },
+      { dari: 'kita', waktu: '13.08', isi: 'Boleh lihat desainnya? Sekalian saya tanya: perlu multi-user dengan hak akses berbeda, atau satu kasir saja?' },
+      { dari: 'klien', waktu: '13.15', isi: 'Multi-user. Pemilik toko bisa lihat laporan, kasir cuma bisa transaksi.' },
+      { dari: 'kita', waktu: '13.22', isi: 'Berarti perlu peran dan pembatasan data di level database, bukan cuma disembunyikan di tampilan. Saya kirim rincian modul dan alurnya dulu untuk kamu setujui.' },
+    ],
+  },
+  {
+    kunci: 'debug',
+    label: 'Perbaiki Error',
+    ikon: 'bug_report',
+    pesan: [
+      { dari: 'klien', waktu: '21.02', isi: 'API saya kadang balas 500 tapi cuma di server produksi. Di lokal aman terus.' },
+      { dari: 'kita', waktu: '21.05', isi: 'Kalau hanya di produksi, biasanya beda konfigurasi atau data. Ada log error dan versi Node yang dipakai di sana?' },
+      { dari: 'klien', waktu: '21.11', isi: 'Ini log-nya. Versi Node beda, lokal 20 produksi 18.' },
+      { dari: 'kita', waktu: '21.26', isi: 'Ketemu. Ada fungsi yang butuh Node 20, di 18 diam-diam gagal. Saya samakan versinya dan tambahkan pemeriksaan saat start supaya tidak terulang.' },
+    ],
+  },
+  {
+    kunci: 'tugas',
+    label: 'Tugas Kuliah',
+    ikon: 'terminal',
+    pesan: [
+      { dari: 'klien', waktu: '23.40', isi: 'Tugas basis data disuruh bikin query laporan penjualan per kategori, tapi hasilnya dobel semua.' },
+      { dari: 'kita', waktu: '23.42', isi: 'Dobel biasanya karena JOIN ke tabel detail bikin baris berlipat. Boleh kirim query dan struktur tabelnya?' },
+      { dari: 'klien', waktu: '23.45', isi: 'Ini query-nya, saya join tiga tabel.' },
+      { dari: 'kita', waktu: '23.58', isi: 'Benar. Hitung totalnya dipisah pakai subquery dulu, baru di-join, supaya tidak berlipat. Saya perbaiki query-nya dan saya jelaskan kenapa hasilnya dobel.' },
+    ],
+  },
 ]
+
+const skenarioAktif = ref(daftarSkenario[0].kunci)
+const percakapan = computed(
+  () => daftarSkenario.find((s) => s.kunci === skenarioAktif.value).pesan,
+)
 
 const tampil = ref(0)          // berapa pesan yang sudah muncul
 const sedangKetik = ref(false) // indikator "..." sebelum balasan kita
 let timer = null
 
+const hentikan = () => {
+  if (timer) {
+    clearTimeout(timer)
+    timer = null
+  }
+  sedangKetik.value = false
+}
+
 const mulaiPercakapan = () => {
+  hentikan()
+  tampil.value = 0
+
   const kurangi = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
   if (kurangi) {
-    tampil.value = percakapan.length
+    tampil.value = percakapan.value.length
     return
   }
 
   const langkah = (i) => {
-    if (i >= percakapan.length) {
+    if (i >= percakapan.value.length) {
       sedangKetik.value = false
       return
     }
-    const pesan = percakapan[i]
+    const pesan = percakapan.value[i]
     // Balasan kita didahului indikator mengetik sebentar.
     if (pesan.dari === 'kita') {
       sedangKetik.value = true
@@ -207,6 +263,16 @@ const mulaiPercakapan = () => {
   }
 
   timer = setTimeout(() => langkah(0), 700)
+}
+
+// Berganti skenario berarti memutar ulang percakapan dari awal.
+const pilihSkenario = (kunci) => {
+  if (kunci === skenarioAktif.value) {
+    mulaiPercakapan()
+    return
+  }
+  skenarioAktif.value = kunci
+  mulaiPercakapan()
 }
 
 // ---------------------------------------------------------------------------
@@ -235,7 +301,7 @@ useTilt('.tilt')
 useProgresGulir('.timeline-rail')
 
 onMounted(mulaiPercakapan)
-onBeforeUnmount(() => clearTimeout(timer))
+onBeforeUnmount(hentikan)
 </script>
 
 <template>
@@ -344,6 +410,33 @@ onBeforeUnmount(() => clearTimeout(timer))
                     aria-hidden="true"
                     >more_vert</span
                   >
+                </div>
+
+                <!-- Pemilih skenario. Pengunjung bisa melihat bentuk bantuan
+                     untuk kasus yang paling dekat dengan situasinya. -->
+                <div
+                  class="flex gap-1.5 overflow-x-auto border-b border-border-subtle px-3 py-2"
+                  role="group"
+                  aria-label="Pilih contoh kasus"
+                >
+                  <button
+                    v-for="s in daftarSkenario"
+                    :key="s.kunci"
+                    type="button"
+                    class="inline-flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-bold transition"
+                    :class="
+                      s.kunci === skenarioAktif
+                        ? 'border-accent-fill bg-accent-fill text-white'
+                        : 'border-border-subtle bg-surface-white text-secondary hover:border-primary hover:text-primary'
+                    "
+                    :aria-pressed="s.kunci === skenarioAktif"
+                    @click="pilihSkenario(s.kunci)"
+                  >
+                    <span class="material-symbols-outlined text-[13px] leading-none" aria-hidden="true">{{
+                      s.ikon
+                    }}</span>
+                    {{ s.label }}
+                  </button>
                 </div>
 
                 <!-- Riwayat pesan. Latar dibuat seperti wallpaper chat. -->
