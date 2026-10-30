@@ -20,6 +20,7 @@ const kolomInformasi = [
   { label: 'Cara Kerja', to: '/cara-kerja' },
   { label: 'Estimasi Harga', to: '/harga' },
   { label: 'Tanya Jawab', to: '/tanya-jawab' },
+  { label: 'Portofolio', to: '/portofolio' },
   { label: 'Blog & Tips', to: '/blog' },
   { label: 'Tentang Kami', to: '/tentang' },
 ]

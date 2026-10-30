@@ -48,6 +48,7 @@ const layanan = [
 // di-spread ke sini dan akan menghasilkan dua link Beranda.
 const tautanMobile = [
   { label: 'Beranda', to: '/' },
+  { label: 'Portofolio', to: '/portofolio' },
   { label: 'Layanan', to: '/layanan' },
   ...tautan,
   { label: 'Testimoni', to: '/testimoni' },
@@ -154,6 +155,20 @@ onBeforeUnmount(() => {
           :aria-current="aktif('/') ? 'page' : undefined"
         >
           Beranda
+        </RouterLink>
+
+        <!-- Portofolio: halaman publik, tampil di desktop & drawer. -->
+        <RouterLink
+          to="/portofolio"
+          class="rounded-lg px-3 py-2 text-sm font-semibold transition-colors duration-200"
+          :class="
+            aktif('/portofolio')
+              ? 'bg-surface-container text-primary'
+              : 'text-secondary hover:bg-surface-container-low hover:text-on-surface'
+          "
+          :aria-current="aktif('/portofolio') ? 'page' : undefined"
+        >
+          Portofolio
         </RouterLink>
 
         <!-- Dropdown Layanan -->

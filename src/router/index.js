@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { crmEnabled, outreachEnabled, campaignsEnabled, referralEnabled, inboundEnabled } from '../lib/features'
+import { cariSlug } from '../lib/portfolio'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -109,6 +110,16 @@ const router = createRouter({
       path: '/testimoni',
       name: 'testimonials',
       component: () => import('../views/TestimonialsView.vue'),
+    },
+    {
+      path: '/portofolio',
+      name: 'portfolio',
+      component: () => import('../views/PortfolioView.vue'),
+    },
+    {
+      path: '/portofolio/:slug',
+      name: 'portfolio-detail',
+      component: () => import('../views/PortfolioDetailView.vue'),
     },
     {
       path: '/blog',
@@ -334,6 +345,7 @@ router.afterEach((to) => {
     'joki-debug': 'Jasa Debug & Benerin Error Kode - jokitugasit.my.id',
     'pricing': 'Harga Jasa Bantu Tugas IT - Mulai Rp20rb - jokitugasit.my.id',
     'testimonials': 'Testimoni Jasa Bantu Tugas IT - jokitugasit.my.id',
+    'portfolio': 'Portofolio Proyek Engineer - jokitugasit.my.id',
     'blog': 'Blog Tips Ngoding & Bantuan Tugas IT - jokitugasit.my.id',
     'blog-post': 'Artikel - jokitugasit.my.id',
     'request-submit': 'Kirim Project - jokitugasit.my.id',
@@ -354,7 +366,12 @@ router.afterEach((to) => {
     partner: 'Program Partner Referral - jokitugasit.my.id',
     'request-track': 'Cek Status Order - jokitugasit.my.id',
   }
-  const title = titles[to.name] || 'jokitugasit.my.id - Jasa Bantu Tugas IT'
+  // Halaman detail portofolio memakai judul proyeknya sendiri.
+  const proyekDetail = to.name === 'portfolio-detail' ? cariSlug(String(to.params.slug || '')) : null
+  const title =
+    (proyekDetail && `${proyekDetail.title} - Portofolio jokitugasit.my.id`) ||
+    titles[to.name] ||
+    'jokitugasit.my.id - Jasa Bantu Tugas IT'
   document.title = title
   const url = 'https://jokitugasit.my.id' + to.path
   setMetaTag('property', 'og:title', title)
@@ -372,6 +389,8 @@ router.afterEach((to) => {
 
   // Per-page meta description
   const descriptions = {
+    'portfolio': 'Portofolio studi kasus proyek engineer: web, mobile, desktop, database, AI, debug, skripsi. Lihat masalah, pendekatan, dan hasil tiap proyek.',
+    'portfolio-detail': 'Studi kasus proyek: masalah awal, pendekatan teknis, dan hasil terukur.',
     landing: 'Jasa bantu tugas IT dan coding untuk mahasiswa: web, aplikasi mobile, database, debug error, skripsi, dan tugas kuliah. Mulai Rp20rb, konsultasi gratis, tanpa daftar.',
     services: 'Layanan jasa bantu tugas IT lengkap: bikin website, aplikasi mobile & desktop, database & API, data science, debug error, skripsi, dan desain UI/UX.',
     'how-it-works': 'Cara kerja jokitugasit.my.id: kirim tugas, konsultasi gratis via WhatsApp, nego harga, deal, dan beres. Proses transparan dengan nomor tiket.',
@@ -407,6 +426,8 @@ router.afterEach((to) => {
     faq: [{ name: 'Tanya Jawab', path: '/tanya-jawab' }],
     pricing: [{ name: 'Harga', path: '/harga' }],
     testimonials: [{ name: 'Testimoni', path: '/testimoni' }],
+    portfolio: [{ name: 'Portofolio', path: '/portofolio' }],
+    'portfolio-detail': [{ name: 'Portofolio', path: '/portofolio' }, { name: 'Studi kasus', path: to.path }],
     blog: [{ name: 'Blog', path: '/blog' }],
     'blog-post': [{ name: 'Blog', path: '/blog' }, { name: 'Artikel', path: to.path }],
     'joki-tugas-kuliah': [{ name: 'Layanan', path: '/layanan' }, { name: 'Joki Tugas Kuliah IT', path: '/joki-tugas-kuliah-it' }],
