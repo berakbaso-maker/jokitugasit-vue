@@ -122,9 +122,6 @@ const tahun = new Date().getFullYear()
         class="flex flex-col gap-3 border-t border-border-subtle py-6 text-xs text-secondary sm:flex-row sm:items-center sm:justify-between"
       >
         <p>© {{ tahun }} jokitugasit.my.id — Bantuan teknis yang bisa dipertanggungjawabkan.</p>
-        <p class="text-secondary">
-          Dibangun dengan Vue.js dan Supabase.
-        </p>
       </div>
     </div>
   </footer>
