@@ -8,11 +8,11 @@ import { supabase } from '../lib/supabase'
 import { waLink } from '../lib/tautan'
 import { testimoniContoh } from '../lib/testimoni-contoh'
 
-const testimonials = ref([])
-const loading = ref(true)
+const testimonials = ref(testimoniContoh)
+const loading = ref(false)
 const errorMsg = ref('')
 // true bila yang tampil adalah data contoh (tabel masih kosong / gagal dimuat)
-const pakaiContoh = ref(false)
+const pakaiContoh = ref(true)
 
 // Form submit testimoni
 const form = ref({ name: '', role: '', rating: 5, message: '', project_type: '' })
@@ -21,21 +21,30 @@ const submitMsg = ref('')
 
 const RATINGS = [5, 4, 3, 2, 1]
 
+// Data contoh dipakai sebagai tampilan awal supaya halaman tidak pernah kosong
+// dan bintang langsung terlihat. Begitu Supabase menjawab, isinya diganti data
+// asli. Kalau jaringan bermasalah, supabase-js bisa mencoba ulang sampai ~12
+// detik — karena itu hasilnya dibatasi waktu dan tidak pernah menahan tampilan.
+const BATAS_MS = 4000
+
+function ambilTestimoni() {
+  return new Promise((resolve) => {
+    const t = setTimeout(() => resolve({ data: null, error: new Error('timeout') }), BATAS_MS)
+    supabase
+      .from('testimonials')
+      .select('*')
+      .eq('is_published', true)
+      .order('created_at', { ascending: false })
+      .then((hasil) => { clearTimeout(t); resolve(hasil) })
+      .catch((e) => { clearTimeout(t); resolve({ data: null, error: e }) })
+  })
+}
+
 async function loadTestimonials() {
-  loading.value = true
-  const { data, error } = await supabase
-    .from('testimonials')
-    .select('*')
-    .eq('is_published', true)
-    .order('created_at', { ascending: false })
-  if (error) {
-    // Tabel belum ada atau jaringan gagal: pakai data contoh supaya
-    // halaman tidak kosong saat pengembangan.
-    testimonials.value = testimoniContoh
-    pakaiContoh.value = true
-  } else if (!data || data.length === 0) {
-    // Tabel ada tapi belum ada testimoni terbit.
-    testimonials.value = testimoniContoh
+  const { data, error } = await ambilTestimoni()
+  if (error || !data || data.length === 0) {
+    // Tabel belum ada, jaringan gagal, atau belum ada testimoni terbit:
+    // biarkan data contoh yang tampil.
     pakaiContoh.value = true
   } else {
     testimonials.value = data
