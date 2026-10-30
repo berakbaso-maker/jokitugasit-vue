@@ -11,10 +11,30 @@ import { onMounted, onBeforeUnmount } from 'vue'
  *    semua elemen langsung ditandai terlihat tanpa animasi.
  * 3. Bersih-bersih: observer di-disconnect saat unmount agar tidak bocor.
  *
+ * 4. Mengembalikan `pindaiUlang()`. Elemen yang dibuat SETELAH mount (misalnya
+ *    kartu hasil filter) tidak akan pernah diamati observer awal dan akan
+ *    tertinggal transparan. Panggil fungsi ini setiap kali daftar berubah.
+ *
  * @param {string} selector - selector elemen yang akan di-reveal
+ * @returns {{ pindaiUlang: () => void }}
  */
 export function useScrollReveal(selector = '.reveal') {
   let observer = null
+
+  /**
+   * Amati elemen yang belum pernah terlihat. Elemen yang sudah `is-visible`
+   * dilewati supaya animasinya tidak diputar ulang.
+   */
+  const pindaiUlang = () => {
+    if (!observer) {
+      // Mode tanpa animasi: pastikan semuanya terlihat.
+      document.querySelectorAll(selector).forEach((el) => el.classList.add('is-visible'))
+      return
+    }
+    document.querySelectorAll(selector).forEach((el) => {
+      if (!el.classList.contains('is-visible')) observer.observe(el)
+    })
+  }
 
   const tampilkanSemua = () => {
     document.querySelectorAll(selector).forEach((el) => {
@@ -58,4 +78,6 @@ export function useScrollReveal(selector = '.reveal') {
     observer = null
     document.documentElement.classList.remove('js-reveal')
   })
+
+  return { pindaiUlang }
 }

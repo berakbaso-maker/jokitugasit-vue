@@ -357,6 +357,142 @@
     mask-image: linear-gradient(to bottom, #000 40%, transparent 100%);
   }
 
+  /* ------------------------------------------------------------------------
+     Aurora: dua bidang cahaya yang bergerak sangat lambat di latar hero.
+     Memakai token aksen yang sama dengan .text-gradient agar tetap sewarna
+     di kedua tema. Sengaja pelan (18-26s) supaya tidak mengganggu membaca.
+     ------------------------------------------------------------------------ */
+  .aurora {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(72px);
+    opacity: 0.5;
+    will-change: transform;
+  }
+
+  .dark .aurora {
+    opacity: 0.28;
+  }
+
+  .aurora-a {
+    background: radial-gradient(circle, rgb(var(--accent-gradient-a) / 0.85), transparent 70%);
+    animation: aurora-drift-a 22s ease-in-out infinite alternate;
+  }
+
+  .aurora-b {
+    background: radial-gradient(circle, rgb(var(--accent-gradient-b) / 0.85), transparent 70%);
+    animation: aurora-drift-b 26s ease-in-out infinite alternate;
+  }
+
+  @keyframes aurora-drift-a {
+    from { transform: translate3d(-6%, -4%, 0) scale(1); }
+    to   { transform: translate3d(8%, 6%, 0) scale(1.15); }
+  }
+
+  @keyframes aurora-drift-b {
+    from { transform: translate3d(6%, 8%, 0) scale(1.1); }
+    to   { transform: translate3d(-8%, -6%, 0) scale(0.95); }
+  }
+
+  /* ------------------------------------------------------------------------
+     Kartu tilt 3D. Rotasi diberikan lewat CSS variable yang diisi JS, jadi
+     tidak ada style inline yang menimpa transform Tailwind. Tanpa JS,
+     variabel bernilai 0deg -> kartu tampil datar seperti biasa.
+     ------------------------------------------------------------------------ */
+  .tilt {
+    transform:
+      perspective(900px)
+      rotateX(var(--tilt-x, 0deg))
+      rotateY(var(--tilt-y, 0deg))
+      translateY(var(--tilt-lift, 0px));
+    transition: transform 320ms cubic-bezier(0.16, 1, 0.3, 1);
+    transform-style: preserve-3d;
+  }
+
+  .tilt:focus-within {
+    --tilt-lift: -4px;
+  }
+
+  /* Sorot lembut mengikuti kursor. Hanya muncul saat pointer di atas kartu. */
+  .tilt-glow {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 260ms ease;
+    background: radial-gradient(
+      340px circle at var(--glow-x, 50%) var(--glow-y, 50%),
+      rgb(var(--accent-gradient-a) / 0.14),
+      transparent 62%
+    );
+  }
+
+  .tilt:hover .tilt-glow,
+  .tilt:focus-within .tilt-glow {
+    opacity: 1;
+  }
+
+  /* ------------------------------------------------------------------------
+     Kilau yang menyapu tombol saat disorot. Satu kali jalan, tidak berulang.
+     ------------------------------------------------------------------------ */
+  .shine {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  .shine::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(
+      110deg,
+      transparent 32%,
+      rgb(255 255 255 / 0.28) 48%,
+      transparent 64%
+    );
+    transform: translateX(-130%);
+    transition: transform 700ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .shine:hover::after {
+    transform: translateX(130%);
+  }
+
+  /* ------------------------------------------------------------------------
+     Garis penghubung timeline. Skala-Y diisi lewat --progres (0..1) dari JS.
+     ------------------------------------------------------------------------ */
+  .timeline-rail {
+    transform-origin: top;
+    transform: scaleY(var(--progres, 0));
+    transition: transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Pesan chat masuk dengan sedikit naik. Satu arah, tidak berulang. */
+  .chat-masuk {
+    animation: chat-masuk 340ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  @keyframes chat-masuk {
+    from { opacity: 0; transform: translateY(8px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* Kedip halus untuk indikator "sedang mengetik" di demo percakapan. */
+  .ketik span {
+    animation: ketik-pudar 1.2s ease-in-out infinite;
+  }
+
+  .ketik span:nth-child(2) { animation-delay: 0.18s; }
+  .ketik span:nth-child(3) { animation-delay: 0.36s; }
+
+  @keyframes ketik-pudar {
+    0%, 60%, 100% { opacity: 0.25; transform: translateY(0); }
+    30%           { opacity: 1;    transform: translateY(-2px); }
+  }
+
   .hide-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -403,6 +539,25 @@
   .btn-primary:hover,
   .btn-secondary:hover,
   .card-interactive:hover {
+    transform: none !important;
+  }
+
+  /* Aurora, tilt, dan kilau dimatikan total. Bukan dipercepat — dimatikan,
+     karena gerak latar yang terus-menerus bisa memicu ketidaknyamanan. */
+  .aurora,
+  .tilt,
+  .shine::after,
+  .chat-masuk,
+  .ketik span {
+    animation: none !important;
+    transform: none !important;
+  }
+
+  .tilt-glow {
+    display: none !important;
+  }
+
+  .timeline-rail {
     transform: none !important;
   }
 }

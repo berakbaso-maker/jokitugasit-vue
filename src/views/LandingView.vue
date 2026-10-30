@@ -1,10 +1,12 @@
 <script setup>
+import { ref, computed, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import { RouterLink } from 'vue-router'
 import TopAppBar from '../components/TopAppBar.vue'
 import BottomNavBar from '../components/BottomNavBar.vue'
 import FooterBar from '../components/FooterBar.vue'
 import { waLink } from '../lib/api'
 import { useScrollReveal } from '../composables/useScrollReveal'
+import { useTilt, useProgresGulir } from '../composables/useInteraksi'
 
 // Nomor WhatsApp resmi — sama dengan yang dipakai BottomNavBar.
 const WA_NUMBER = '6285166337257'
@@ -22,6 +24,7 @@ const layanan = [
   {
     icon: 'terminal',
     judul: 'Joki Tugas Kuliah IT',
+    grup: 'Tugas & Skripsi',
     masalah: 'Deadline pemrograman mepet dan konsepnya belum kepahaman.',
     hasil: 'Kode jalan + penjelasan baris per baris, jadi kamu tetap bisa menjelaskan saat ditanya.',
     to: '/joki-tugas-kuliah-it',
@@ -30,6 +33,7 @@ const layanan = [
   {
     icon: 'school',
     judul: 'Bimbingan Skripsi IT',
+    grup: 'Tugas & Skripsi',
     masalah: 'Bingung menyusun metode, implementasi, atau revisi dari dosen pembimbing.',
     hasil: 'Pendampingan terarah per bab, dari perancangan sampai siap sidang.',
     to: '/joki-skripsi-it',
@@ -38,6 +42,7 @@ const layanan = [
   {
     icon: 'bug_report',
     judul: 'Debug & Perbaikan Error',
+    grup: 'Perbaiki & Review',
     masalah: 'Error yang sudah berhari-hari dicari tapi tetap tidak ketemu akarnya.',
     hasil: 'Diagnosis akar masalah, perbaikan, dan catatan agar tidak terulang.',
     to: '/joki-debug-error',
@@ -46,6 +51,7 @@ const layanan = [
   {
     icon: 'code',
     judul: 'Project Web & Aplikasi',
+    grup: 'Bangun Sistem',
     masalah: 'Butuh sistem yang benar-benar jadi, bukan sekadar tampilan.',
     hasil: 'Pengembangan web, mobile, desktop, hingga database dan API.',
     to: '/joki-project-web',
@@ -54,6 +60,7 @@ const layanan = [
   {
     icon: 'rate_review',
     judul: 'Code Review & Mentoring',
+    grup: 'Perbaiki & Review',
     masalah: 'Kode sudah jalan, tapi kualitas dan strukturnya bikin ragu.',
     hasil: 'Review terstruktur plus arahan perbaikan yang bisa langsung diterapkan.',
     to: '/layanan',
@@ -62,6 +69,7 @@ const layanan = [
   {
     icon: 'palette',
     judul: 'Desain UI/UX',
+    grup: 'Desain',
     masalah: 'Aplikasi berfungsi, tapi terasa berantakan dan sulit dipakai.',
     hasil: 'Perbaikan alur, hirarki visual, dan konsistensi antarmuka.',
     to: '/joki-desain-ui-ux',
@@ -152,7 +160,82 @@ const referralPoin = [
   'Cocok untuk mahasiswa yang ingin penghasilan tambahan tanpa modal.',
 ]
 
-useScrollReveal('.reveal')
+// ---------------------------------------------------------------------------
+// Demo percakapan di hero.
+//
+// Semua isi di sini adalah contoh alur yang benar-benar terjadi di layanan
+// (kirim detail -> tinjau -> estimasi), disusun ulang jadi bentuk chat. Bukan
+// testimoni dan bukan klaim angka. Tujuannya memberi gambaran konkret tentang
+// "bantuan seperti apa" yang didapat pengunjung, tanpa foto stok.
+// ---------------------------------------------------------------------------
+const percakapan = [
+  { dari: 'klien', isi: 'Tugas struktur data saya error terus di bagian sorting. Deadline besok malam.' },
+  { dari: 'kita', isi: 'Boleh kirim file dan pesan error-nya? Saya cek dulu akar masalahnya.' },
+  { dari: 'klien', isi: 'Sudah saya kirim ya.' },
+  { dari: 'kita', isi: 'Ketemu. Index-nya lewat batas array. Saya perbaiki, lalu saya jelaskan baris per baris.' },
+]
+
+const tampil = ref(0)          // berapa pesan yang sudah muncul
+const sedangKetik = ref(false) // indikator "..." sebelum balasan kita
+let timer = null
+
+const mulaiPercakapan = () => {
+  const kurangi = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+  if (kurangi) {
+    tampil.value = percakapan.length
+    return
+  }
+
+  const langkah = (i) => {
+    if (i >= percakapan.length) {
+      sedangKetik.value = false
+      return
+    }
+    const pesan = percakapan[i]
+    // Balasan kita didahului indikator mengetik sebentar.
+    if (pesan.dari === 'kita') {
+      sedangKetik.value = true
+      timer = setTimeout(() => {
+        sedangKetik.value = false
+        tampil.value = i + 1
+        timer = setTimeout(() => langkah(i + 1), 900)
+      }, 1200)
+    } else {
+      tampil.value = i + 1
+      timer = setTimeout(() => langkah(i + 1), 900)
+    }
+  }
+
+  timer = setTimeout(() => langkah(0), 700)
+}
+
+// ---------------------------------------------------------------------------
+// Filter layanan. "Semua" adalah keadaan awal supaya tidak ada kartu yang
+// tersembunyi sebelum pengunjung memilih.
+// ---------------------------------------------------------------------------
+const grupAktif = ref('Semua')
+const daftarGrup = computed(() => ['Semua', ...new Set(layanan.map((l) => l.grup))])
+// Setelah filter berganti, DOM baru selesai diperbarui pada tick berikutnya.
+// Observer reveal harus memindai ulang saat itu, kalau tidak kartu hasil
+// filter akan tertinggal transparan selamanya.
+const pilihGrup = async (grup) => {
+  grupAktif.value = grup
+  await nextTick()
+  pindaiUlang()
+}
+
+const layananTampil = computed(() =>
+  grupAktif.value === 'Semua'
+    ? layanan
+    : layanan.filter((l) => l.grup === grupAktif.value),
+)
+
+const { pindaiUlang } = useScrollReveal('.reveal')
+useTilt('.tilt')
+useProgresGulir('.timeline-rail')
+
+onMounted(mulaiPercakapan)
+onBeforeUnmount(() => clearTimeout(timer))
 </script>
 
 <template>
@@ -162,8 +245,16 @@ useScrollReveal('.reveal')
     <main>
       <!-- ================= HERO ================= -->
       <section class="relative overflow-hidden border-b border-border-subtle">
-        <!-- Latar grid halus, memudar ke bawah. Dekoratif, aria-hidden. -->
+        <!-- Latar: grid halus + dua bidang cahaya yang bergerak lambat.
+             Seluruhnya dekoratif dan diabaikan pembaca layar. -->
         <div class="pointer-events-none absolute inset-0 bg-grid mask-fade-b" aria-hidden="true"></div>
+        <div
+          class="pointer-events-none absolute inset-0 overflow-hidden"
+          aria-hidden="true"
+        >
+          <span class="aurora aurora-a -left-24 -top-32 h-[26rem] w-[26rem]"></span>
+          <span class="aurora aurora-b -right-20 top-10 h-[22rem] w-[22rem]"></span>
+        </div>
 
         <div class="relative mx-auto max-w-container-max-width px-gutter py-16 md:py-24">
           <div class="grid items-start gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
@@ -217,57 +308,97 @@ useScrollReveal('.reveal')
               </ul>
             </div>
 
-            <!-- Kolom kanan: kartu ringkas layanan. Tanpa foto stok/AI. -->
-            <div class="reveal reveal-delay-2">
-              <div class="card p-6 md:p-7">
-                <div class="flex items-start justify-between gap-4">
-                  <div>
-                    <p class="text-label-bold font-label-bold uppercase tracking-widest text-secondary">
-                      Mulai dari sini
-                    </p>
-                    <h2 class="mt-2 text-headline-md font-headline-md text-on-surface">
-                      Apa yang bisa kami bantu?
-                    </h2>
-                  </div>
+            <!-- Kolom kanan: demo percakapan. Menggambarkan bentuk bantuan
+                 secara konkret, tanpa foto stok dan tanpa testimoni karangan. -->
+            <div class="reveal reveal-delay-2 relative">
+              <div
+                class="tilt relative overflow-hidden rounded-2xl border border-border-subtle bg-surface-white p-1 shadow-card-hover"
+              >
+                <div class="tilt-glow" aria-hidden="true"></div>
+
+                <!-- Kepala jendela percakapan -->
+                <div class="flex items-center gap-3 rounded-xl bg-surface-container-low px-4 py-3">
                   <span
-                    class="material-symbols-outlined rounded-xl bg-surface-container p-2.5 text-primary"
+                    class="material-symbols-outlined rounded-lg bg-accent-fill p-1.5 text-lg text-white"
                     aria-hidden="true"
-                    >support_agent</span
+                    >forum</span
                   >
+                  <div class="min-w-0 flex-1">
+                    <p class="truncate text-sm font-bold text-on-surface">Contoh percakapan</p>
+                    <p class="flex items-center gap-1.5 text-[11px] text-secondary">
+                      <span class="inline-block h-1.5 w-1.5 rounded-full bg-success-fill"></span>
+                      engineer online
+                    </p>
+                  </div>
+                  <span class="text-[11px] font-bold uppercase tracking-wide text-muted">Demo</span>
                 </div>
 
-                <ul class="mt-6 space-y-1">
-                  <li v-for="item in layanan.slice(0, 4)" :key="item.judul">
-                    <RouterLink
-                      :to="item.to"
-                      class="group flex items-center gap-3 rounded-lg px-3 py-3 transition-colors hover:bg-surface-container"
+                <!-- Isi percakapan -->
+                <div class="space-y-2.5 px-4 py-4" aria-live="polite">
+                  <template v-for="(pesan, i) in percakapan" :key="i">
+                    <div
+                      v-if="i < tampil"
+                      class="flex chat-masuk"
+                      :class="pesan.dari === 'kita' ? 'justify-end' : 'justify-start'"
                     >
-                      <span
-                        class="material-symbols-outlined shrink-0 rounded-lg bg-surface-container p-2 text-lg text-primary transition-colors group-hover:bg-accent-fill group-hover:text-on-primary"
-                        aria-hidden="true"
-                        >{{ item.icon }}</span
+                      <p
+                        class="max-w-[85%] rounded-2xl px-3.5 py-2.5 text-[13px] leading-relaxed"
+                        :class="
+                          pesan.dari === 'kita'
+                            ? 'rounded-br-md bg-accent-fill text-white'
+                            : 'rounded-bl-md bg-surface-container text-on-surface'
+                        "
                       >
-                      <span class="min-w-0 flex-1">
-                        <span class="block truncate text-sm font-bold text-on-surface">{{ item.judul }}</span>
-                        <span class="block truncate text-xs text-secondary">{{ item.masalah }}</span>
-                      </span>
-                      <span
-                        class="material-symbols-outlined shrink-0 text-lg text-secondary transition-transform group-hover:translate-x-0.5 group-hover:text-primary"
-                        aria-hidden="true"
-                        >arrow_forward</span
-                      >
-                    </RouterLink>
-                  </li>
-                </ul>
+                        {{ pesan.isi }}
+                      </p>
+                    </div>
+                  </template>
 
-                <RouterLink
-                  to="/layanan"
-                  class="mt-4 flex items-center justify-center gap-2 rounded-lg border border-border-subtle py-2.5 text-sm font-bold text-primary transition-colors hover:bg-surface-container"
-                >
-                  Lihat semua layanan
-                  <span class="material-symbols-outlined text-base" aria-hidden="true">arrow_forward</span>
-                </RouterLink>
+                  <!-- Indikator mengetik -->
+                  <div v-if="sedangKetik" class="flex justify-end">
+                    <span
+                      class="ketik flex items-center gap-1 rounded-2xl rounded-br-md bg-surface-container px-3.5 py-3"
+                      aria-label="Sedang mengetik"
+                    >
+                      <span class="h-1.5 w-1.5 rounded-full bg-secondary"></span>
+                      <span class="h-1.5 w-1.5 rounded-full bg-secondary"></span>
+                      <span class="h-1.5 w-1.5 rounded-full bg-secondary"></span>
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Kaki: jembatan ke CTA nyata -->
+                <div class="border-t border-border-subtle px-4 py-3">
+                  <RouterLink
+                    to="/request"
+                    class="group flex items-center justify-between gap-2 text-sm font-bold text-primary"
+                  >
+                    Ceritakan kondisimu
+                    <span
+                      class="material-symbols-outlined text-base transition-transform duration-200 group-hover:translate-x-0.5"
+                      aria-hidden="true"
+                      >arrow_forward</span
+                    >
+                  </RouterLink>
+                </div>
               </div>
+
+              <!-- Tautan cepat ke layanan, di luar jendela chat -->
+              <ul class="mt-4 grid grid-cols-2 gap-2">
+                <li v-for="item in layanan.slice(0, 4)" :key="item.judul">
+                  <RouterLink
+                    :to="item.to"
+                    class="flex items-center gap-2 rounded-lg border border-border-subtle bg-surface-white px-3 py-2 text-xs font-bold text-on-surface transition-colors hover:border-outline-variant hover:bg-surface-container"
+                  >
+                    <span
+                      class="material-symbols-outlined text-base text-primary"
+                      aria-hidden="true"
+                      >{{ item.icon }}</span
+                    >
+                    <span class="truncate">{{ item.judul }}</span>
+                  </RouterLink>
+                </li>
+              </ul>
             </div>
           </div>
         </div>
@@ -286,14 +417,36 @@ useScrollReveal('.reveal')
           </p>
         </div>
 
-        <div class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <!-- Filter. Tombol, bukan dropdown, supaya semua pilihan terlihat
+             sekaligus dan bisa dicapai dengan Tab. -->
+        <div class="reveal reveal-delay-2 mt-8 flex flex-wrap gap-2" role="group" aria-label="Saring layanan">
+          <button
+            v-for="grup in daftarGrup"
+            :key="grup"
+            type="button"
+            class="rounded-full border px-3.5 py-1.5 text-sm font-bold transition-colors duration-150"
+            :class="
+              grupAktif === grup
+                ? 'border-transparent bg-accent-fill text-white'
+                : 'border-border-subtle bg-surface-white text-secondary hover:border-outline-variant hover:text-on-surface'
+            "
+            :aria-pressed="grupAktif === grup"
+            @click="pilihGrup(grup)"
+          >
+            {{ grup }}
+          </button>
+        </div>
+
+        <div class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           <RouterLink
-            v-for="(item, i) in layanan"
+            v-for="(item, i) in layananTampil"
             :key="item.judul"
             :to="item.to"
-            class="card-interactive reveal group flex flex-col p-6"
+            class="card-interactive tilt reveal group relative flex flex-col p-6"
             :class="[`reveal-delay-${(i % 3) + 1}`]"
           >
+            <span class="tilt-glow" aria-hidden="true"></span>
+
             <div class="flex items-start justify-between gap-3">
               <span
                 class="material-symbols-outlined rounded-xl bg-surface-container p-3 text-primary transition-colors duration-200 group-hover:bg-accent-fill group-hover:text-on-primary"
@@ -347,7 +500,18 @@ useScrollReveal('.reveal')
             </p>
           </div>
 
-          <ol class="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+          <!-- Garis penghubung antar langkah. Tumbuh mengikuti gulir, jadi
+               mata dibawa maju mengikuti urutan. Disembunyikan di layar
+               sempit karena grid-nya jadi satu kolom. -->
+          <div class="relative mt-10" data-timeline>
+            <div
+              class="pointer-events-none absolute inset-x-6 top-[44px] hidden h-px bg-border-subtle lg:block"
+              aria-hidden="true"
+            >
+              <div class="timeline-rail h-px w-full bg-accent-fill"></div>
+            </div>
+
+          <ol class="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
             <li
               v-for="(step, i) in alur"
               :key="step.nomor"
@@ -368,6 +532,7 @@ useScrollReveal('.reveal')
               <p class="mt-2 text-sm leading-relaxed text-secondary">{{ step.isi }}</p>
             </li>
           </ol>
+          </div>
         </div>
       </section>
 
