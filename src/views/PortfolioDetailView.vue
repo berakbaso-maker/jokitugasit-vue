@@ -104,6 +104,7 @@ const label = computed(() =>
           :gradient="proyek.mockup.gradient"
           :icon="proyek.mockup.icon"
           variant="wide"
+          :bentuk="proyek.category"
         />
       </div>
 

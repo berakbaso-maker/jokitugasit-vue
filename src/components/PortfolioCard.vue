@@ -34,6 +34,7 @@ const sisaStack = computed(() => Math.max(0, props.proyek.stack.length - 3))
         :gradient="proyek.mockup.gradient"
         :icon="proyek.mockup.icon"
         :variant="variant === 'wide' ? 'wide' : 'card'"
+        :bentuk="proyek.category"
       />
     </div>
 
