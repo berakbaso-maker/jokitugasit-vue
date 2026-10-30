@@ -6,10 +6,13 @@ import BottomNavBar from '../components/BottomNavBar.vue'
 import FooterBar from '../components/FooterBar.vue'
 import { supabase } from '../lib/supabase'
 import { waLink } from '../lib/tautan'
+import { testimoniContoh } from '../lib/testimoni-contoh'
 
 const testimonials = ref([])
 const loading = ref(true)
 const errorMsg = ref('')
+// true bila yang tampil adalah data contoh (tabel masih kosong / gagal dimuat)
+const pakaiContoh = ref(false)
 
 // Form submit testimoni
 const form = ref({ name: '', role: '', rating: 5, message: '', project_type: '' })
@@ -26,9 +29,17 @@ async function loadTestimonials() {
     .eq('is_published', true)
     .order('created_at', { ascending: false })
   if (error) {
-    errorMsg.value = 'Gagal memuat testimoni'
+    // Tabel belum ada atau jaringan gagal: pakai data contoh supaya
+    // halaman tidak kosong saat pengembangan.
+    testimonials.value = testimoniContoh
+    pakaiContoh.value = true
+  } else if (!data || data.length === 0) {
+    // Tabel ada tapi belum ada testimoni terbit.
+    testimonials.value = testimoniContoh
+    pakaiContoh.value = true
   } else {
-    testimonials.value = data || []
+    testimonials.value = data
+    pakaiContoh.value = false
   }
   loading.value = false
 }
@@ -78,21 +89,25 @@ onMounted(loadTestimonials)
         <p class="font-body-lg text-body-lg text-on-surface-variant max-w-xl mx-auto">Cerita nyata dari mahasiswa yang mentok tugas IT, lalu dibantu sampai kelar.</p>
       </section>
 
-      <!-- Stats -->
+      <!-- Stats: hanya angka yang bisa dipertanggungjawabkan -->
       <section class="grid grid-cols-3 gap-4 max-w-2xl mx-auto mb-12">
         <div class="bg-surface-white rounded-xl border border-border-subtle p-4 text-center shadow-sm">
-          <div class="font-display-hero-mobile text-display-hero-mobile font-extrabold text-electric-blue">1k+</div>
-          <div class="text-xs text-secondary mt-1">Project Beres</div>
+          <div class="font-display-hero-mobile text-display-hero-mobile font-extrabold text-electric-blue">16</div>
+          <div class="text-xs text-secondary mt-1">Studi Kasus</div>
         </div>
         <div class="bg-surface-white rounded-xl border border-border-subtle p-4 text-center shadow-sm">
-          <div class="font-display-hero-mobile text-display-hero-mobile font-extrabold text-electric-blue">4.9/5</div>
-          <div class="text-xs text-secondary mt-1">Rating Rata-rata</div>
+          <div class="font-display-hero-mobile text-display-hero-mobile font-extrabold text-electric-blue">{{ testimonials.length }}</div>
+          <div class="text-xs text-secondary mt-1">Cerita Tampil</div>
         </div>
         <div class="bg-surface-white rounded-xl border border-border-subtle p-4 text-center shadow-sm">
-          <div class="font-display-hero-mobile text-display-hero-mobile font-extrabold text-electric-blue">24/7</div>
-          <div class="text-xs text-secondary mt-1">Support</div>
+          <div class="font-display-hero-mobile text-display-hero-mobile font-extrabold text-electric-blue">Manual</div>
+          <div class="text-xs text-secondary mt-1">Review Sebelum Terbit</div>
         </div>
       </section>
+
+      <p v-if="pakaiContoh" class="max-w-2xl mx-auto mb-6 rounded-lg border border-border-subtle bg-surface-container-low px-4 py-3 text-xs text-secondary text-center">
+        Menampilkan contoh testimoni. Data asli akan muncul setelah ada kiriman yang lolos review.
+      </p>
 
       <!-- List Testimoni -->
       <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-14">

@@ -51,6 +51,7 @@ run "migration-hardening"             "$ROOT/migration-hardening.sql"
 run "migration-consent-guard"         "$ROOT/migration-consent-guard.sql"
 run "migration-campaigns"             "$ROOT/migration-campaigns.sql"
 run "migration-internal-platform"     "$ROOT/migration-internal-platform.sql"
+run "migration-testimonials"         "$ROOT/migration-testimonials.sql"
 run "05_grants (supabase default)"     "$DIR/05_grants.sql"
 
 echo "tests"
@@ -68,6 +69,7 @@ run "99_hardening.sql"                 "$DIR/99_hardening.sql"
 run "100_consent.sql"                  "$DIR/100_consent.sql"
 run "110_campaigns.sql"                "$DIR/110_campaigns.sql"
 run "120_internal_platform.sql"        "$DIR/120_internal_platform.sql"
+run "130_testimonials.sql"           "$DIR/130_testimonials.sql"
 
 echo
 echo "${c_green}semua migration + test lulus${c_reset}"
