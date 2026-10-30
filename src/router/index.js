@@ -223,11 +223,19 @@ const router = createRouter({
 
     // Modul yang belum diimplementasikan di ronde ini: arahkan ke modul
     // terdekat yang sudah berfungsi, jangan tampilkan halaman palsu.
-    {
-      path: '/__ui-preview',
-      name: 'ui-preview',
-      component: () => import('../views/__UiPreview.vue'),
-    },
+
+    // Galeri komponen untuk verifikasi visual. HANYA saat dev: di build
+    // produksi route ini tidak terdaftar dan file-nya tidak ikut di-bundle.
+    // Jangan tambahkan meta auth di sini -- tujuannya memang mati di prod.
+    ...(import.meta.env.DEV
+      ? [
+          {
+            path: '/__ui-preview',
+            name: 'ui-preview',
+            component: () => import('../views/__UiPreview.vue'),
+          },
+        ]
+      : []),
     {
       path: '/admin',
       redirect: '/admin/overview',
