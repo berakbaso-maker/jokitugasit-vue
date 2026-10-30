@@ -144,7 +144,7 @@ function copyCode() {
     <main class="flex-1">
 
       <!-- Hero Section -->
-      <section class="relative overflow-hidden bg-gradient-to-br from-electric-blue via-primary to-tertiary text-white py-20 md:py-28 px-gutter">
+      <section class="relative overflow-hidden bg-gradient-to-br from-hero-gradient-from via-hero-gradient-via to-hero-gradient-to text-white py-20 md:py-28 px-gutter">
         <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle at 20% 50%, #fff 0.5px, transparent 0.5px), radial-gradient(circle at 80% 20%, #fff 0.5px, transparent 0.5px); background-size: 40px 40px;"></div>
         <div class="relative max-w-container-max-width mx-auto text-center">
           <div class="inline-flex items-center gap-2 bg-white/15 border border-white/25 rounded-full px-4 py-1.5 mb-6 backdrop-blur-sm">
@@ -153,14 +153,14 @@ function copyCode() {
           </div>
           <h1 class="font-bold text-3xl md:text-5xl leading-tight mb-5">
             Hasilkan Uang dari<br>
-            <span class="text-tertiary-fixed">Teman yang Mentok Ngoding</span>
+            <span class="text-white">Teman yang Mentok Ngoding</span>
           </h1>
           <p class="text-white/80 text-body-lg font-body-lg max-w-2xl mx-auto mb-8">
             Rekomendasikan jasa bantuan IT ke teman-temanmu yang lagi deadline,
             dan dapat <strong class="text-white">komisi 10%</strong> setiap kali deal — tanpa modal, tanpa keahlian ngoding.
           </p>
           <div class="flex flex-col sm:flex-row gap-3 justify-center">
-            <a href="#daftar" class="inline-flex items-center justify-center gap-2 bg-white text-electric-blue font-label-bold text-label-bold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all">
+            <a href="#daftar" class="inline-flex items-center justify-center gap-2 bg-white text-accent-fill font-label-bold text-label-bold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all">
               <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1">how_to_reg</span>
               Daftar Sekarang — Gratis
             </a>
@@ -219,7 +219,7 @@ function copyCode() {
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div v-for="b in benefits" :key="b.title" class="flex gap-4 bg-surface-white rounded-2xl p-6 border border-border-subtle hover:border-electric-blue/30 hover:shadow-md transition-all group">
-              <div class="w-12 h-12 rounded-xl bg-primary-fixed/40 flex items-center justify-center flex-shrink-0 group-hover:bg-electric-blue group-hover:text-white transition-colors">
+              <div class="w-12 h-12 rounded-xl bg-primary-fixed/40 flex items-center justify-center flex-shrink-0 group-hover:bg-accent-fill group-hover:text-white transition-colors">
                 <span class="material-symbols-outlined text-electric-blue group-hover:text-white transition-colors" style="font-variation-settings: 'FILL' 1">{{ b.icon }}</span>
               </div>
               <div>
@@ -248,8 +248,8 @@ function copyCode() {
               </ul>
               <div class="text-electric-blue font-bold text-sm">Komisi = Rp150rb/bulan</div>
             </div>
-            <div class="bg-electric-blue rounded-2xl p-6 border border-electric-blue text-white text-center relative ring-2 ring-electric-blue/30">
-              <span class="absolute -top-3 left-1/2 -translate-x-1/2 bg-success-green text-white text-[10px] font-bold uppercase px-3 py-1 rounded-full">Paling Realistis</span>
+            <div class="bg-accent-fill rounded-2xl p-6 border border-electric-blue text-white text-center relative ring-2 ring-electric-blue/30">
+              <span class="absolute -top-3 left-1/2 -translate-x-1/2 bg-success-fill text-white text-[10px] font-bold uppercase px-3 py-1 rounded-full">Paling Realistis</span>
               <div class="text-3xl font-bold mb-1">Rp500rb+</div>
               <div class="text-[12px] text-white/70 mb-4">TARGET BULANAN</div>
               <ul class="text-left space-y-2 text-sm text-white/80 mb-5">
@@ -280,14 +280,14 @@ function copyCode() {
               <button
                 @click="activeActionTab = 'register'"
                 class="px-5 py-2.5 rounded-lg text-xs sm:text-sm font-bold transition-all"
-                :class="activeActionTab === 'register' ? 'bg-surface-white text-electric-blue shadow-xs' : 'text-secondary hover:text-on-surface'"
+                :class="activeActionTab === 'register' ? 'bg-surface-container-lowest text-primary shadow-xs' : 'text-secondary hover:text-on-surface'"
               >
                 Daftar Partner Baru
               </button>
               <button
                 @click="activeActionTab = 'check'"
                 class="px-5 py-2.5 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center gap-1.5"
-                :class="activeActionTab === 'check' ? 'bg-surface-white text-electric-blue shadow-xs' : 'text-secondary hover:text-on-surface'"
+                :class="activeActionTab === 'check' ? 'bg-surface-container-lowest text-primary shadow-xs' : 'text-secondary hover:text-on-surface'"
               >
                 <span class="material-symbols-outlined text-[16px]">account_balance_wallet</span>
                 Cek Komisi Saya
@@ -312,7 +312,7 @@ function copyCode() {
               <button
                 type="submit"
                 :disabled="checkLoading"
-                class="bg-electric-blue text-white px-5 py-3 rounded-xl font-bold text-sm hover:bg-primary transition-all disabled:opacity-60 flex items-center gap-1.5 shrink-0"
+                class="bg-accent-fill text-white px-5 py-3 rounded-xl font-bold text-sm hover:bg-accent-fill transition-all disabled:opacity-60 flex items-center gap-1.5 shrink-0"
               >
                 <span v-if="checkLoading" class="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
                 <span v-else class="material-symbols-outlined text-[18px]">search</span>
@@ -395,7 +395,7 @@ function copyCode() {
                       </span>
                       <span
                         v-else-if="c.status === 'ELIGIBLE'"
-                        class="inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-yellow-500/10 text-yellow-600"
+                        class="inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700"
                       >
                         Menunggu Transfer (1x24 Jam)
                       </span>
@@ -447,7 +447,7 @@ function copyCode() {
             <div class="bg-gradient-to-r from-electric-blue/5 to-primary-fixed/20 border-2 border-electric-blue/30 rounded-2xl p-6 mb-6">
               <div class="text-label-sm font-label-sm text-on-surface-variant mb-2">KODE REFERRAL KAMU</div>
               <div class="text-3xl font-bold text-electric-blue tracking-widest mb-3">{{ generatedCode }}</div>
-              <button @click="copyCode" class="inline-flex items-center gap-1.5 bg-electric-blue text-white text-sm font-bold px-4 py-2 rounded-lg hover:bg-primary transition-colors">
+              <button @click="copyCode" class="inline-flex items-center gap-1.5 bg-accent-fill text-white text-sm font-bold px-4 py-2 rounded-lg hover:bg-accent-fill transition-colors">
                 <span class="material-symbols-outlined text-[16px]">content_copy</span>
                 Salin Kode
               </button>
@@ -505,7 +505,7 @@ function copyCode() {
               <p v-if="errorMsg" class="text-sm text-urgency-red bg-error-container/30 rounded-lg px-4 py-2.5">{{ errorMsg }}</p>
 
               <button type="submit" :disabled="submitting"
-                class="w-full flex items-center justify-center gap-2 bg-electric-blue text-white font-label-bold text-label-bold px-7 py-4 rounded-xl shadow-md hover:bg-primary hover:shadow-lg transition-all disabled:opacity-60 disabled:cursor-not-allowed">
+                class="w-full flex items-center justify-center gap-2 bg-accent-fill text-white font-label-bold text-label-bold px-7 py-4 rounded-xl shadow-md hover:bg-accent-fill hover:shadow-lg transition-all disabled:opacity-60 disabled:cursor-not-allowed">
                 <span v-if="submitting" class="material-symbols-outlined animate-spin text-[20px]">progress_activity</span>
                 <span v-else class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1">how_to_reg</span>
                 {{ submitting ? 'Mendaftarkan...' : 'Daftar Jadi Partner Sekarang' }}

@@ -160,7 +160,7 @@ onMounted(load)
           Akun angkatan/jurusan sebagai <strong>sumber</strong> prospek. Catat izin admin sebelum membagikan apa pun.
         </p>
       </div>
-      <button @click="openAdd" class="inline-flex items-center gap-2 bg-electric-blue text-white font-label-bold px-4 py-2.5 rounded-xl hover:bg-primary transition-colors shadow-sm">
+      <button @click="openAdd" class="inline-flex items-center gap-2 bg-accent-fill text-white font-label-bold px-4 py-2.5 rounded-xl hover:bg-accent-fill transition-colors shadow-sm">
         <span class="material-symbols-outlined text-[20px]">add</span>
         Tambah Akun
       </button>
@@ -238,7 +238,7 @@ onMounted(load)
             <button
               v-if="a.relationship_status === 'NEW'"
               @click="setStatus(a, 'CONTACTED')"
-              class="text-xs font-bold px-3 py-1.5 rounded-lg bg-electric-blue text-white hover:bg-primary"
+              class="text-xs font-bold px-3 py-1.5 rounded-lg bg-accent-fill text-white hover:bg-accent-fill"
             >
               Tandai Dihubungi
             </button>
@@ -326,7 +326,7 @@ onMounted(load)
           <p v-if="formError" class="text-sm text-urgency-red">{{ formError }}</p>
           <div class="flex gap-3 pt-2">
             <button type="button" @click="showForm = false" class="flex-1 px-4 py-2.5 rounded-xl border border-outline-variant font-bold text-sm">Batal</button>
-            <button type="submit" :disabled="savingForm" class="flex-1 px-4 py-2.5 rounded-xl bg-electric-blue text-white font-bold text-sm disabled:opacity-60">
+            <button type="submit" :disabled="savingForm" class="flex-1 px-4 py-2.5 rounded-xl bg-accent-fill text-white font-bold text-sm disabled:opacity-60">
               {{ savingForm ? 'Menyimpan...' : (editingId ? 'Simpan Perubahan' : 'Simpan') }}
             </button>
           </div>

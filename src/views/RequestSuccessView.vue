@@ -26,24 +26,24 @@ onMounted(async () => {
 <template>
   <div class="bg-background text-on-background antialiased min-h-screen flex flex-col items-center justify-center p-gutter">
     <main class="w-full max-w-lg">
-      <div v-if="loading" class="bg-surface-white rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] p-8 text-center">
+      <div v-if="loading" class="bg-surface-white rounded-xl shadow-[0px_4px_20px_rgb(var(--shadow-color) / 0.08)] p-8 text-center">
         <span class="material-symbols-outlined animate-spin text-electric-blue text-4xl">progress_activity</span>
         <p class="font-body-md text-body-md text-secondary mt-4">Memuat status request...</p>
       </div>
 
-      <div v-else-if="errorMsg" class="bg-surface-white rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] p-8 text-center">
+      <div v-else-if="errorMsg" class="bg-surface-white rounded-xl shadow-[0px_4px_20px_rgb(var(--shadow-color) / 0.08)] p-8 text-center">
         <span class="material-symbols-outlined text-urgency-red text-5xl">error</span>
         <h1 class="font-headline-lg text-headline-lg text-on-surface mb-2 mt-4">Request tidak ditemukan</h1>
         <p class="font-body-md text-body-md text-secondary mb-6">{{ errorMsg }}</p>
         <button
-          class="w-full h-[48px] bg-electric-blue hover:bg-primary text-white font-label-bold text-label-bold rounded-lg active:scale-[0.98] transition-transform shadow-md"
+          class="w-full h-[48px] bg-accent-fill hover:bg-accent-fill text-white font-label-bold text-label-bold rounded-lg active:scale-[0.98] transition-transform shadow-md"
           @click="router.push('/request')"
         >
           Kirim Request Baru
         </button>
       </div>
 
-      <div v-else-if="request" class="bg-surface-white rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] p-8 text-center transition-all duration-300 hover:shadow-lg hover:border-electric-blue border border-transparent">
+      <div v-else-if="request" class="bg-surface-white rounded-xl shadow-[0px_4px_20px_rgb(var(--shadow-color) / 0.08)] p-8 text-center transition-all duration-300 hover:shadow-lg hover:border-electric-blue border border-transparent">
         <div class="inline-flex items-center justify-center w-20 h-20 bg-success-green/10 rounded-full mb-6">
           <span class="material-symbols-outlined text-[40px] text-success-green" style="font-variation-settings: 'FILL' 1">check_circle</span>
         </div>
@@ -68,7 +68,7 @@ onMounted(async () => {
             <div class="flex justify-between">
               <span class="font-body-md text-body-md text-secondary text-sm">Status</span>
               <div class="flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-electric-blue animate-pulse"></span>
+                <span class="w-2 h-2 rounded-full bg-accent-fill animate-pulse"></span>
                 <span class="font-body-md text-body-md text-electric-blue font-semibold text-sm">{{ STATUS_LABELS[request.status] || request.status }}</span>
               </div>
             </div>

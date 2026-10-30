@@ -211,7 +211,7 @@ function downloadTemplate() {
           Import CSV
           <input ref="fileInput" type="file" accept=".csv,text/csv" class="hidden" @change="onFile" />
         </label>
-        <button class="inline-flex items-center gap-2 bg-primary text-white font-label-bold px-4 py-2.5 rounded-xl hover:bg-primary-container transition-colors" @click="openCreate">
+        <button class="inline-flex items-center gap-2 bg-accent-fill text-white font-label-bold px-4 py-2.5 rounded-xl hover:bg-primary-container transition-colors" @click="openCreate">
           <span class="material-symbols-outlined text-[18px]">add</span>
           Tambah kampus
         </button>
@@ -363,7 +363,7 @@ function downloadTemplate() {
       <template #footer>
         <div class="flex justify-end gap-2">
           <button class="px-4 py-2.5 rounded-xl border border-border-subtle font-label-bold hover:bg-surface-container-low" @click="showModal = false">Batal</button>
-          <button class="px-4 py-2.5 rounded-xl bg-primary text-white font-label-bold hover:bg-primary-container disabled:opacity-50" :disabled="saving" @click="save">
+          <button class="px-4 py-2.5 rounded-xl bg-accent-fill text-white font-label-bold hover:bg-primary-container disabled:opacity-50" :disabled="saving" @click="save">
             {{ saving ? 'Menyimpan…' : 'Simpan' }}
           </button>
         </div>

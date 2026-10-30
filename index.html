@@ -2,6 +2,24 @@
 <html lang="id">
   <head>
     <meta charset="UTF-8">
+    <!-- Anti-FOUC: jalankan SEGERA, sebelum CSS dimuat, supaya tidak ada
+         kedip putih saat refresh di mode gelap. Logika urutan keputusan harus
+         identik dengan src/lib/tema.js (localStorage -> sistem -> terang). -->
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('jokitugasit-tema');
+          if (t !== 'light' && t !== 'dark') {
+            t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          }
+          var r = document.documentElement;
+          r.classList.toggle('dark', t === 'dark');
+          r.style.colorScheme = t;
+          var m = document.querySelector('meta[name="theme-color"]');
+          if (m) m.setAttribute('content', t === 'dark' ? '#0F172A' : '#2563EB');
+        } catch (e) {}
+      })();
+    </script>
     <link rel="icon" href="/favicon.ico" sizes="32x32">
     <link rel="icon" type="image/png" href="/favicon.png">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">

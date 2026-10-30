@@ -79,7 +79,7 @@ onMounted(() => {
         <h2 class="font-headline-md text-headline-md font-bold mb-2">Pertanyaanmu nggak ada di sini?</h2>
         <p class="text-body-md text-body-md text-secondary mb-6">Chat aja langsung, kami jawab secepatnya.</p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <a :href="waLink('6285166337257', WA_TEXT)" target="_blank" rel="noopener" class="bg-electric-blue text-white font-label-bold text-label-bold px-7 py-3.5 rounded-xl hover:bg-primary transition-colors shadow-md">Chat WhatsApp</a>
+          <a :href="waLink('6285166337257', WA_TEXT)" target="_blank" rel="noopener" class="bg-accent-fill text-white font-label-bold text-label-bold px-7 py-3.5 rounded-xl hover:bg-accent-fill transition-colors shadow-md">Chat WhatsApp</a>
           <RouterLink to="/request" class="bg-surface-white border-2 border-electric-blue text-electric-blue font-label-bold text-label-bold px-7 py-3.5 rounded-xl hover:bg-primary-fixed/20 transition-colors">Kirim Request</RouterLink>
         </div>
       </section>

@@ -228,15 +228,15 @@ const isOverdue = (p) => p.due_date && !['CLOSED', 'CANCELLED', 'DELIVERED'].inc
       <template #actions>
         <div class="inline-flex rounded-xl border border-border-subtle overflow-hidden bg-surface-white">
           <button class="px-3 py-2 text-[13px] font-semibold inline-flex items-center gap-1.5"
-                  :class="view === 'kanban' ? 'bg-primary text-white' : 'text-secondary'" @click="view = 'kanban'">
+                  :class="view === 'kanban' ? 'bg-accent-fill text-white' : 'text-secondary'" @click="view = 'kanban'">
             <span class="material-symbols-outlined text-[16px]">view_kanban</span> Kanban
           </button>
           <button class="px-3 py-2 text-[13px] font-semibold inline-flex items-center gap-1.5"
-                  :class="view === 'table' ? 'bg-primary text-white' : 'text-secondary'" @click="view = 'table'">
+                  :class="view === 'table' ? 'bg-accent-fill text-white' : 'text-secondary'" @click="view = 'table'">
             <span class="material-symbols-outlined text-[16px]">table_rows</span> Tabel
           </button>
         </div>
-        <button class="inline-flex items-center gap-2 bg-primary text-white font-label-bold px-4 py-2.5 rounded-xl hover:bg-primary-container transition-colors" @click="openCreate">
+        <button class="inline-flex items-center gap-2 bg-accent-fill text-white font-label-bold px-4 py-2.5 rounded-xl hover:bg-primary-container transition-colors" @click="openCreate">
           <span class="material-symbols-outlined text-[18px]">add</span>
           Proyek baru
         </button>
@@ -277,7 +277,7 @@ const isOverdue = (p) => p.due_date && !['CLOSED', 'CANCELLED', 'DELIVERED'].inc
         <template #cell-progress_pct="{ row }">
           <div class="flex items-center gap-2 justify-end">
             <div class="w-16 h-1.5 bg-surface-container rounded-full overflow-hidden">
-              <div class="h-full bg-primary rounded-full" :style="{ width: (row.progress_pct || 0) + '%' }" />
+              <div class="h-full bg-accent-fill rounded-full" :style="{ width: (row.progress_pct || 0) + '%' }" />
             </div>
             <span class="text-[12px] tabular-nums">{{ row.progress_pct || 0 }}%</span>
           </div>
@@ -340,7 +340,7 @@ const isOverdue = (p) => p.due_date && !['CLOSED', 'CANCELLED', 'DELIVERED'].inc
       <template #footer>
         <div class="flex justify-end gap-2">
           <button class="px-4 py-2.5 rounded-xl border border-border-subtle font-label-bold hover:bg-surface-container-low" @click="showForm = false">Batal</button>
-          <button class="px-4 py-2.5 rounded-xl bg-primary text-white font-label-bold hover:bg-primary-container disabled:opacity-50" :disabled="saving" @click="save">
+          <button class="px-4 py-2.5 rounded-xl bg-accent-fill text-white font-label-bold hover:bg-primary-container disabled:opacity-50" :disabled="saving" @click="save">
             {{ saving ? 'Menyimpan…' : 'Simpan' }}
           </button>
         </div>
@@ -360,7 +360,7 @@ const isOverdue = (p) => p.due_date && !['CLOSED', 'CANCELLED', 'DELIVERED'].inc
             <span>Progres</span><span class="tabular-nums font-semibold">{{ active.progress_pct || 0 }}%</span>
           </div>
           <div class="h-2 bg-surface-container rounded-full overflow-hidden mb-2">
-            <div class="h-full bg-primary rounded-full transition-all" :style="{ width: (active.progress_pct || 0) + '%' }" />
+            <div class="h-full bg-accent-fill rounded-full transition-all" :style="{ width: (active.progress_pct || 0) + '%' }" />
           </div>
           <input type="range" min="0" max="100" step="5" :value="active.progress_pct || 0"
                  class="w-full accent-primary" @change="setProgress($event.target.value)" />
@@ -380,7 +380,7 @@ const isOverdue = (p) => p.due_date && !['CLOSED', 'CANCELLED', 'DELIVERED'].inc
         <ul v-else class="space-y-1.5 mb-3">
           <li v-for="t in tasks" :key="t.id" class="flex items-center gap-2.5 group">
             <button class="w-4 h-4 rounded border-2 grid place-items-center shrink-0 transition-colors"
-                    :class="t.status === 'DONE' ? 'bg-primary border-primary' : 'border-outline-variant hover:border-primary'"
+                    :class="t.status === 'DONE' ? 'bg-accent-fill border-primary' : 'border-outline-variant hover:border-primary'"
                     @click="toggleTask(t)">
               <span v-if="t.status === 'DONE'" class="material-symbols-outlined text-[11px] text-white">check</span>
             </button>
@@ -393,7 +393,7 @@ const isOverdue = (p) => p.due_date && !['CLOSED', 'CANCELLED', 'DELIVERED'].inc
         </ul>
         <div class="flex gap-2">
           <input v-model="newTask" placeholder="Task baru…" class="flex-1 border border-border-subtle rounded-xl px-3 py-2 text-[13px]" @keyup.enter="addTask" />
-          <button class="px-3 py-2 rounded-xl bg-primary text-white text-[13px] font-semibold disabled:opacity-40" :disabled="!newTask.trim()" @click="addTask">Tambah</button>
+          <button class="px-3 py-2 rounded-xl bg-accent-fill text-white text-[13px] font-semibold disabled:opacity-40" :disabled="!newTask.trim()" @click="addTask">Tambah</button>
         </div>
       </template>
 

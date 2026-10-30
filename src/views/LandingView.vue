@@ -170,7 +170,7 @@ useScrollReveal('.reveal')
             <!-- Kolom kiri: pesan utama -->
             <div>
               <p class="eyebrow reveal">
-                <span class="inline-block h-1.5 w-1.5 rounded-full bg-primary"></span>
+                <span class="inline-block h-1.5 w-1.5 rounded-full bg-accent-fill"></span>
                 Bantuan teknis yang bisa dipertanggungjawabkan
               </p>
 
@@ -243,7 +243,7 @@ useScrollReveal('.reveal')
                       class="group flex items-center gap-3 rounded-lg px-3 py-3 transition-colors hover:bg-surface-container"
                     >
                       <span
-                        class="material-symbols-outlined shrink-0 rounded-lg bg-surface-container p-2 text-lg text-primary transition-colors group-hover:bg-primary group-hover:text-on-primary"
+                        class="material-symbols-outlined shrink-0 rounded-lg bg-surface-container p-2 text-lg text-primary transition-colors group-hover:bg-accent-fill group-hover:text-on-primary"
                         aria-hidden="true"
                         >{{ item.icon }}</span
                       >
@@ -296,7 +296,7 @@ useScrollReveal('.reveal')
           >
             <div class="flex items-start justify-between gap-3">
               <span
-                class="material-symbols-outlined rounded-xl bg-surface-container p-3 text-primary transition-colors duration-200 group-hover:bg-primary group-hover:text-on-primary"
+                class="material-symbols-outlined rounded-xl bg-surface-container p-3 text-primary transition-colors duration-200 group-hover:bg-accent-fill group-hover:text-on-primary"
                 aria-hidden="true"
                 >{{ item.icon }}</span
               >
@@ -360,7 +360,7 @@ useScrollReveal('.reveal')
                   aria-hidden="true"
                   >{{ step.icon }}</span
                 >
-                <span class="text-2xl font-extrabold tabular-nums text-surface-container-high" aria-hidden="true">
+                <span class="text-2xl font-extrabold tabular-nums text-muted" aria-hidden="true">
                   {{ step.nomor }}
                 </span>
               </div>
@@ -642,14 +642,14 @@ useScrollReveal('.reveal')
             <h2 class="text-[28px] font-extrabold tracking-tight text-inverse-on-surface md:text-[36px]">
               Ceritakan kebutuhanmu, kami bantu petakan langkahnya
             </h2>
-            <p class="mt-4 text-body-md text-slate-300">
+            <p class="mt-4 text-body-md text-inverse-on-surface/80">
               Tanpa kewajiban lanjut. Mulai dari konsultasi singkat untuk tahu apa
               yang sebenarnya dibutuhkan.
             </p>
             <div class="mt-8 flex flex-col gap-3 sm:flex-row">
               <RouterLink
                 to="/request"
-                class="btn inline-flex items-center justify-center gap-2 rounded-lg bg-surface-white px-6 py-3 font-bold text-inverse-surface transition-all duration-200 hover:-translate-y-0.5 hover:bg-surface-container"
+                class="btn inline-flex items-center justify-center gap-2 rounded-lg bg-inverse-on-surface px-6 py-3 font-bold text-inverse-surface transition-all duration-200 hover:-translate-y-0.5 hover:bg-inverse-on-surface/85"
               >
                 <span class="material-symbols-outlined text-xl" aria-hidden="true">edit_note</span>
                 Kirim detail project

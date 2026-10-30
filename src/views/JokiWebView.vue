@@ -8,7 +8,7 @@ import { waLink } from '../lib/api'
 const WA_TEXT = 'Halo jokitugasit.my.id, saya butuh bantuan project web.'
 
 const problems = [
-  { icon: 'route', title: 'Error 404 / Route Rusak', desc: 'Udah bener nulis route di Laravel tapi tetep not found? Kita benerin hitungan menit.', color: 'bg-error-container text-urgency-red' },
+  { icon: 'route', title: 'Error 404 / Route Rusak', desc: 'Udah bener nulis route di Laravel tapi tetep not found? Kita benerin hitungan menit.', color: 'bg-error-container text-error' },
   { icon: 'security', title: 'Auth & Middleware Bikin Mumet', desc: 'Login, register, session management sering banget jadi blocker. Kita setup standard industri.', color: 'bg-primary-fixed/40 text-electric-blue' },
   { icon: 'table_view', title: 'CRUD Ngga Jalan Semestinya', desc: 'Data ngga masuk ke database? Atau tampilannya aneh? Paket lengkap CRUD + validasi rapih.', color: 'bg-tertiary-fixed/40 text-tertiary' },
 ]
@@ -34,7 +34,7 @@ const stacks = ['PHP', 'Laravel', 'React', 'Next.js', 'MySQL', 'Node.js']
           Dari error 404, auth yang ribet, sampai CRUD yang ngga kelar-kelar. Serahin tugas PHP, Laravel, React, atau Next.js ke kami.
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <RouterLink to="/request" class="bg-electric-blue text-white font-label-bold text-label-bold px-8 py-4 rounded-xl hover:bg-primary transition-colors shadow-lg flex items-center justify-center gap-2">
+          <RouterLink to="/request" class="bg-accent-fill text-white font-label-bold text-label-bold px-8 py-4 rounded-xl hover:bg-accent-fill transition-colors shadow-lg flex items-center justify-center gap-2">
             <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">rocket_launch</span>
             Cek Project Gratis
           </RouterLink>
@@ -64,12 +64,12 @@ const stacks = ['PHP', 'Laravel', 'React', 'Next.js', 'MySQL', 'Node.js']
       </section>
 
       <!-- CTA -->
-      <section class="bg-electric-blue rounded-2xl p-8 md:p-12 text-center text-white relative overflow-hidden">
+      <section class="bg-accent-fill rounded-2xl p-8 md:p-12 text-center text-white relative overflow-hidden">
         <div class="absolute inset-0 bg-primary opacity-20 -z-10"></div>
         <h2 class="font-headline-lg text-headline-lg font-bold mb-3">Kirim Requirement Web</h2>
-        <p class="text-body-md text-body-md text-on-primary-container opacity-90 max-w-lg mx-auto mb-7">Ceritakan fitur dan stack-nya, kami cek dulu gratis dan kasih estimasi.</p>
+        <p class="text-body-md text-on-primary opacity-90 max-w-lg mx-auto mb-7">Ceritakan fitur dan stack-nya, kami cek dulu gratis dan kasih estimasi.</p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <RouterLink to="/request" class="bg-white text-electric-blue font-label-bold text-label-bold px-7 py-3.5 rounded-xl hover:bg-surface-container-lowest transition-colors shadow-md">Kirim Requirement</RouterLink>
+          <RouterLink to="/request" class="bg-white text-accent-fill font-label-bold text-label-bold px-7 py-3.5 rounded-xl hover:bg-surface-container-lowest transition-colors shadow-md">Kirim Requirement</RouterLink>
           <a :href="waLink('6285166337257', WA_TEXT)" target="_blank" rel="noopener" class="border-2 border-white text-white font-label-bold text-label-bold px-7 py-3.5 rounded-xl hover:bg-white/10 transition-colors">Chat WhatsApp</a>
         </div>
       </section>

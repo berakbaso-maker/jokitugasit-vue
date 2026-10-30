@@ -128,7 +128,7 @@ function resetFilter() {
             class="rounded-full border px-3.5 py-1.5 text-sm font-semibold transition-colors"
             :class="
               kategoriAktif === 'semua'
-                ? 'border-primary bg-primary text-white'
+                ? 'border-primary bg-accent-fill text-white'
                 : 'border-border-subtle bg-surface-white text-secondary hover:border-primary hover:text-primary'
             "
             :aria-pressed="kategoriAktif === 'semua'"
@@ -145,7 +145,7 @@ function resetFilter() {
             class="rounded-full border px-3.5 py-1.5 text-sm font-semibold transition-colors"
             :class="
               kategoriAktif === k
-                ? 'border-primary bg-primary text-white'
+                ? 'border-primary bg-accent-fill text-white'
                 : 'border-border-subtle bg-surface-white text-secondary hover:border-primary hover:text-primary'
             "
             :aria-pressed="kategoriAktif === k"
@@ -228,7 +228,7 @@ function resetFilter() {
       <div class="mt-5 flex flex-wrap justify-center gap-3">
         <RouterLink
           to="/request"
-          class="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-primary-container"
+          class="inline-flex items-center gap-2 rounded-xl bg-accent-fill px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-primary-container"
         >
           Ajukan tugas
           <span class="material-symbols-outlined text-base" aria-hidden="true">arrow_forward</span>

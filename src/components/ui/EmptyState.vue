@@ -27,7 +27,7 @@ const toneCls = (t) => ({
     <p v-if="description" class="text-[13px] text-muted mt-2 max-w-md mx-auto whitespace-pre-line">{{ description }}</p>
     <button
       v-if="actionLabel"
-      class="mt-5 inline-flex items-center gap-2 bg-primary text-white font-label-bold px-4 py-2.5 rounded-xl hover:bg-primary-container transition-colors"
+      class="mt-5 inline-flex items-center gap-2 bg-accent-fill text-white font-label-bold px-4 py-2.5 rounded-xl hover:bg-primary-container transition-colors"
       @click="$emit('action')"
     >
       {{ actionLabel }}

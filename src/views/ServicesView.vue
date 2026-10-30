@@ -29,12 +29,12 @@ const services = [
     tags: ['MySQL', 'PostgreSQL', 'Supabase', 'Node.js'],
   },
   {
-    icon: 'analytics', title: 'Data Science & AI', color: 'bg-error-container text-urgency-red', link: '/joki-data-science-ai',
+    icon: 'analytics', title: 'Data Science & AI', color: 'bg-error-container text-error', link: '/joki-data-science-ai',
     desc: 'Analisis data, machine learning models, scraping, dan implementasi algoritma AI untuk tugas kuliah atau riset.',
     tags: ['Python', 'Pandas', 'Scikit-learn', 'ML'],
   },
   {
-    icon: 'bug_report', title: 'Selamatkan Kode Error', color: 'bg-error-container text-urgency-red', popular: true, link: '/joki-debug-error',
+    icon: 'bug_report', title: 'Selamatkan Kode Error', color: 'bg-error-container text-error', popular: true, link: '/joki-debug-error',
     desc: 'Kode ChatGPT atau codingan sendiri yang error dan bikin pusing? Kami cari akar masalahnya, perbaiki, sampai benar-benar jalan.',
     tags: ['Debug', 'Refactor', 'Fix Error'],
   },
@@ -74,7 +74,7 @@ const services = [
       <!-- Grid Layanan -->
       <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-14">
         <RouterLink v-for="s in services" :key="s.title" :to="s.link || '/request'"
-          class="group bg-surface-white border border-border-subtle rounded-2xl p-6 shadow-[0px_4px_20px_rgba(15,23,42,0.04)] hover:shadow-[0px_8px_30px_rgba(15,23,42,0.08)] hover:border-electric-blue transition-all duration-300 flex flex-col h-full relative overflow-hidden">
+          class="group bg-surface-white border border-border-subtle rounded-2xl p-6 shadow-[0px_4px_20px_rgb(var(--shadow-color) / 0.04)] hover:shadow-[0px_8px_30px_rgb(var(--shadow-color) / 0.08)] hover:border-electric-blue transition-all duration-300 flex flex-col h-full relative overflow-hidden">
           <div class="absolute top-0 right-0 w-32 h-32 bg-electric-blue/5 rounded-bl-full -z-10 transition-transform group-hover:scale-110"></div>
           <div class="flex justify-between items-start mb-5">
             <span class="w-12 h-12 rounded-xl flex items-center justify-center" :class="s.color">
@@ -92,13 +92,13 @@ const services = [
       </section>
 
       <!-- CTA -->
-      <section class="bg-electric-blue rounded-2xl p-8 md:p-12 text-center text-white relative overflow-hidden">
+      <section class="bg-accent-fill rounded-2xl p-8 md:p-12 text-center text-white relative overflow-hidden">
         <div class="absolute inset-0 bg-primary opacity-20 -z-10"></div>
         <span class="material-symbols-outlined text-5xl mb-4" style="font-variation-settings: 'FILL' 1">help</span>
         <h2 class="font-headline-lg text-headline-lg font-bold mb-2">Bingung Mulai dari Mana?</h2>
-        <p class="text-body-md text-body-md text-on-primary-container opacity-90 max-w-lg mx-auto mb-7">Nggak perlu jago menjelaskan teknis. Ceritakan masalahnya, kami bantu cari solusinya.</p>
+        <p class="text-body-md text-on-primary opacity-90 max-w-lg mx-auto mb-7">Nggak perlu jago menjelaskan teknis. Ceritakan masalahnya, kami bantu cari solusinya.</p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <RouterLink to="/request" class="bg-white text-electric-blue font-label-bold text-label-bold px-7 py-3.5 rounded-xl hover:bg-surface-container-lowest transition-colors shadow-md">Konsultasi Gratis</RouterLink>
+          <RouterLink to="/request" class="bg-white text-accent-fill font-label-bold text-label-bold px-7 py-3.5 rounded-xl hover:bg-surface-container-lowest transition-colors shadow-md">Konsultasi Gratis</RouterLink>
           <a :href="waLink('6285166337257', WA_TEXT)" target="_blank" rel="noopener" class="border-2 border-white text-white font-label-bold text-label-bold px-7 py-3.5 rounded-xl hover:bg-white/10 transition-colors">Chat WhatsApp</a>
         </div>
       </section>

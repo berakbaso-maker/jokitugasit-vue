@@ -39,11 +39,11 @@ const post = computed(() => getPost(route.params.slug))
             </section>
           </div>
 
-          <div class="bg-electric-blue rounded-2xl p-7 md:p-9 text-center text-white mt-12">
+          <div class="bg-accent-fill rounded-2xl p-7 md:p-9 text-center text-white mt-12">
             <h2 class="font-headline-lg text-headline-lg font-bold mb-3">Masih Mentok? Ceritain Aja</h2>
             <p class="text-body-md text-body-md opacity-90 max-w-md mx-auto mb-6">Konsultasi gratis sama engineer. Kita cek dulu, bahas solusinya, baru kamu putuskan.</p>
             <div class="flex flex-col sm:flex-row gap-3 justify-center">
-              <RouterLink to="/request" class="bg-white text-electric-blue font-label-bold text-label-bold px-6 py-3 rounded-xl shadow-md">Cek Project Gratis</RouterLink>
+              <RouterLink to="/request" class="bg-white text-accent-fill font-label-bold text-label-bold px-6 py-3 rounded-xl shadow-md">Cek Project Gratis</RouterLink>
               <a :href="waLink('6285166337257', 'Halo, saya baca artikel blog dan mau konsultasi tugas IT.')" target="_blank" rel="noopener" class="border-2 border-white text-white font-label-bold text-label-bold px-6 py-3 rounded-xl hover:bg-white/10">Chat WhatsApp</a>
             </div>
           </div>

@@ -23,7 +23,7 @@ const whatsapp = computed(() => auth.profile?.whatsapp || 'Belum diatur')
     </div>
 
     <!-- Profile Card (full width) -->
-    <section class="bg-surface-white rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] p-6 md:p-8 mb-6 w-full">
+    <section class="bg-surface-white rounded-xl shadow-[0px_4px_20px_rgb(var(--shadow-color) / 0.08)] p-6 md:p-8 mb-6 w-full">
       <div class="flex flex-col sm:flex-row items-start sm:items-center gap-5 border-b border-border-subtle pb-6">
         <div class="w-16 h-16 rounded-full bg-primary-container text-white flex items-center justify-center text-2xl font-bold shrink-0">{{ initial }}</div>
         <div class="min-w-0">
@@ -62,7 +62,7 @@ const whatsapp = computed(() => auth.profile?.whatsapp || 'Belum diatur')
     </section>
 
     <!-- Quick Actions (full width) -->
-    <section class="bg-surface-white rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] p-6 md:p-8 w-full">
+    <section class="bg-surface-white rounded-xl shadow-[0px_4px_20px_rgb(var(--shadow-color) / 0.08)] p-6 md:p-8 w-full">
       <h2 class="text-body-lg font-body-lg font-bold text-on-surface mb-1">Aksi Cepat</h2>
       <p class="text-secondary text-sm mb-5">Akses cepat ke area kerja kamu.</p>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

@@ -66,7 +66,7 @@ const commissionStatusText = computed(() => {
   return COMMISSION_LABELS[commission.value.status] || commission.value.status
 })
 
-const ROW_CLICKABLE_CLASS = 'bg-surface-white rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] p-6 hover:border hover:border-electric-blue hover:shadow-lg transition-all duration-200 border border-transparent'
+const ROW_CLICKABLE_CLASS = 'bg-surface-white rounded-xl shadow-[0px_4px_20px_rgb(var(--shadow-color) / 0.08)] p-6 hover:border hover:border-electric-blue hover:shadow-lg transition-all duration-200 border border-transparent'
 
 async function load() {
   loading.value = true
@@ -491,7 +491,7 @@ const typeColor = (c) => {
 
         <!-- Right Column: Action Panel -->
         <div class="space-y-6">
-          <section class="bg-surface-white rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] p-6 sticky top-24" :class="request.deadline === 'hari_ini' ? 'border-l-4 border-l-urgency-red' : ''">
+          <section class="bg-surface-white rounded-xl shadow-[0px_4px_20px_rgb(var(--shadow-color) / 0.08)] p-6 sticky top-24" :class="request.deadline === 'hari_ini' ? 'border-l-4 border-l-urgency-red' : ''">
             <h2 class="text-headline-md font-headline-md mb-6 border-b border-border-subtle pb-4">Actions</h2>
 
             <div class="mb-6 bg-surface-container-low p-4 rounded-lg">
@@ -558,7 +558,7 @@ const typeColor = (c) => {
             <div v-if="savedMsg" class="mb-4 text-success-green font-label-bold text-sm">{{ savedMsg }}</div>
 
             <button
-              class="w-full bg-electric-blue hover:bg-primary text-white font-label-bold text-label-bold py-3 rounded-xl active:scale-95 transition-all shadow-md disabled:opacity-60 mb-3"
+              class="w-full bg-accent-fill hover:bg-accent-fill text-white font-label-bold text-label-bold py-3 rounded-xl active:scale-95 transition-all shadow-md disabled:opacity-60 mb-3"
               :disabled="saving"
               @click="save"
             >
@@ -584,7 +584,7 @@ const typeColor = (c) => {
                 Chat WhatsApp
               </a>
               <div class="grid grid-cols-2 gap-3 pt-4 border-t border-border-subtle">
-                <button class="bg-electric-blue hover:bg-primary text-white font-label-bold text-label-bold py-3 rounded-xl active:scale-95 transition-all text-center" @click="setStatus('working')">Mark as Working</button>
+                <button class="bg-accent-fill hover:bg-accent-fill text-white font-label-bold text-label-bold py-3 rounded-xl active:scale-95 transition-all text-center" @click="setStatus('working')">Mark as Working</button>
                 <button class="bg-success-green hover:bg-green-600 text-white font-label-bold text-label-bold py-3 rounded-xl active:scale-95 transition-all text-center flex items-center justify-center gap-1" @click="setStatus('done')">
                   <span class="material-symbols-outlined text-sm">done_all</span> Done
                 </button>
@@ -599,7 +599,7 @@ const typeColor = (c) => {
           </section>
 
           <!-- Pembayaran & Komisi -->
-          <section ref="paymentsSection" class="bg-surface-white rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] p-6">
+          <section ref="paymentsSection" class="bg-surface-white rounded-xl shadow-[0px_4px_20px_rgb(var(--shadow-color) / 0.08)] p-6">
             <div class="flex items-center justify-between border-b border-border-subtle pb-4 mb-4">
               <h2 class="text-headline-md font-headline-md flex items-center gap-2">
                 <span class="material-symbols-outlined text-electric-blue">payments</span>
@@ -681,7 +681,7 @@ const typeColor = (c) => {
                 <input v-model="payForm.note" class="w-full rounded-lg border border-border-subtle p-2 text-sm" placeholder="Catatan (opsional)" />
 
                 <button
-                  class="w-full bg-electric-blue hover:bg-primary text-white font-label-bold text-sm py-2.5 rounded-lg transition-colors disabled:opacity-60"
+                  class="w-full bg-accent-fill hover:bg-accent-fill text-white font-label-bold text-sm py-2.5 rounded-lg transition-colors disabled:opacity-60"
                   :disabled="paySaving"
                   @click="addPayment"
                 >

@@ -200,7 +200,7 @@ onMounted(load)
           Salin pesan, buka profil, kirim manual dari aplikasi Instagram. Tidak ada pengiriman otomatis.
         </p>
       </div>
-      <RouterLink to="/ops/prospects" class="inline-flex items-center gap-2 bg-electric-blue text-white font-label-bold px-5 py-2.5 rounded-xl hover:bg-primary transition-colors shadow-sm">
+      <RouterLink to="/ops/prospects" class="inline-flex items-center gap-2 bg-accent-fill text-white font-label-bold px-5 py-2.5 rounded-xl hover:bg-accent-fill transition-colors shadow-sm">
         <span class="material-symbols-outlined text-[20px]">person_add</span>
         Kelola Prospek
       </RouterLink>
@@ -382,7 +382,7 @@ onMounted(load)
           <div class="grid grid-cols-2 gap-2 mt-4">
             <button
               @click="copyMessage"
-              class="inline-flex items-center justify-center gap-1.5 rounded-lg bg-electric-blue text-white font-bold text-sm py-2.5 hover:bg-primary transition-colors"
+              class="inline-flex items-center justify-center gap-1.5 rounded-lg bg-accent-fill text-white font-bold text-sm py-2.5 hover:bg-accent-fill transition-colors"
             >
               <span class="material-symbols-outlined text-[18px]">content_copy</span>
               {{ copied ? 'Tersalin!' : 'Salin Pesan' }}

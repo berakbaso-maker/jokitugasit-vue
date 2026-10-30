@@ -157,7 +157,7 @@ onMounted(() => load())
           :key="t.id"
           @click="selectTemplate(t.id)"
           class="w-full text-left px-3 py-2.5 rounded-lg text-sm transition-colors"
-          :class="activeId === t.id ? 'bg-electric-blue text-white font-bold' : 'hover:bg-surface-container text-on-surface'"
+          :class="activeId === t.id ? 'bg-accent-fill text-white font-bold' : 'hover:bg-surface-container text-on-surface'"
         >
           <span class="block truncate">{{ t.name }}</span>
           <span class="block text-[11px] mt-0.5" :class="activeId === t.id ? 'text-white/70' : 'text-on-surface-variant'">
@@ -215,7 +215,7 @@ onMounted(() => load())
           </div>
 
           <div class="flex gap-2 pt-1">
-            <button @click="save" :disabled="saving" class="bg-electric-blue text-white font-bold text-sm px-5 py-2.5 rounded-xl hover:bg-primary disabled:opacity-60">
+            <button @click="save" :disabled="saving" class="bg-accent-fill text-white font-bold text-sm px-5 py-2.5 rounded-xl hover:bg-accent-fill disabled:opacity-60">
               {{ saving ? 'Menyimpan...' : 'Simpan' }}
             </button>
             <button @click="duplicate" :disabled="saving" class="border border-outline-variant font-bold text-sm px-5 py-2.5 rounded-xl hover:bg-surface-container-low disabled:opacity-60">

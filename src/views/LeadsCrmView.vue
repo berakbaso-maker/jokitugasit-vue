@@ -201,15 +201,15 @@ function relTime(iso) {
       <template #actions>
         <div class="inline-flex rounded-xl border border-border-subtle overflow-hidden bg-surface-white">
           <button class="px-3 py-2 text-[13px] font-semibold inline-flex items-center gap-1.5"
-                  :class="view === 'kanban' ? 'bg-primary text-white' : 'text-secondary'" @click="view = 'kanban'">
+                  :class="view === 'kanban' ? 'bg-accent-fill text-white' : 'text-secondary'" @click="view = 'kanban'">
             <span class="material-symbols-outlined text-[16px]">view_kanban</span> Kanban
           </button>
           <button class="px-3 py-2 text-[13px] font-semibold inline-flex items-center gap-1.5"
-                  :class="view === 'table' ? 'bg-primary text-white' : 'text-secondary'" @click="view = 'table'">
+                  :class="view === 'table' ? 'bg-accent-fill text-white' : 'text-secondary'" @click="view = 'table'">
             <span class="material-symbols-outlined text-[16px]">table_rows</span> Tabel
           </button>
         </div>
-        <button class="inline-flex items-center gap-2 bg-primary text-white font-label-bold px-4 py-2.5 rounded-xl hover:bg-primary-container transition-colors" @click="openCreate">
+        <button class="inline-flex items-center gap-2 bg-accent-fill text-white font-label-bold px-4 py-2.5 rounded-xl hover:bg-primary-container transition-colors" @click="openCreate">
           <span class="material-symbols-outlined text-[18px]">person_add</span>
           Lead baru
         </button>
@@ -338,7 +338,7 @@ function relTime(iso) {
       <template #footer>
         <div class="flex justify-end gap-2">
           <button class="px-4 py-2.5 rounded-xl border border-border-subtle font-label-bold hover:bg-surface-container-low" @click="showForm = false">Batal</button>
-          <button class="px-4 py-2.5 rounded-xl bg-primary text-white font-label-bold hover:bg-primary-container disabled:opacity-50" :disabled="saving" @click="save">
+          <button class="px-4 py-2.5 rounded-xl bg-accent-fill text-white font-label-bold hover:bg-primary-container disabled:opacity-50" :disabled="saving" @click="save">
             {{ saving ? 'Menyimpan…' : (duplicate ? 'Simpan tetap' : 'Simpan') }}
           </button>
         </div>
@@ -381,7 +381,7 @@ function relTime(iso) {
         <div v-if="activityLoading" class="text-[13px] text-muted py-3">Memuat riwayat…</div>
         <ul v-else-if="activities.length" class="space-y-2.5 mb-4">
           <li v-for="a in activities" :key="a.id" class="flex gap-2.5">
-            <span class="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
+            <span class="w-1.5 h-1.5 rounded-full bg-accent-fill mt-2 shrink-0" />
             <div class="min-w-0">
               <p class="text-[13px]">
                 <template v-if="a.kind === 'STAGE_CHANGE'">
@@ -401,7 +401,7 @@ function relTime(iso) {
             class="flex-1 border border-border-subtle rounded-xl px-3 py-2 text-[13px]"
             @keyup.enter="saveNote"
           />
-          <button class="px-3 py-2 rounded-xl bg-primary text-white text-[13px] font-semibold disabled:opacity-40"
+          <button class="px-3 py-2 rounded-xl bg-accent-fill text-white text-[13px] font-semibold disabled:opacity-40"
                   :disabled="!noteText.trim()" @click="saveNote">Kirim</button>
         </div>
       </template>

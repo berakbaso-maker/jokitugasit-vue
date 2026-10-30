@@ -39,14 +39,14 @@ async function handleLogin() {
   <div class="bg-background text-on-background font-body-md antialiased min-h-screen flex flex-col items-center justify-center p-gutter">
     <div class="w-full max-w-md">
       <div class="text-center mb-8">
-        <div class="inline-flex items-center justify-center w-16 h-16 bg-electric-blue rounded-2xl shadow-lg mb-4">
-          <span class="material-symbols-outlined text-surface-white text-3xl" style="font-variation-settings: 'FILL' 1">terminal</span>
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-accent-fill rounded-2xl shadow-lg mb-4">
+          <span class="material-symbols-outlined text-on-primary text-3xl" style="font-variation-settings: 'FILL' 1">terminal</span>
         </div>
         <h1 class="font-headline-lg text-headline-lg text-on-surface mb-1">Login Engineer</h1>
         <p class="font-body-md text-body-md text-secondary">Masuk untuk akses dasbor, permintaan, dan pendapatan.</p>
       </div>
 
-      <div class="bg-surface-white rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] p-6 md:p-8">
+      <div class="bg-surface-white rounded-xl shadow-[0px_4px_20px_rgb(var(--shadow-color) / 0.08)] p-6 md:p-8">
         <form class="space-y-5" @submit.prevent="handleLogin">
           <div>
             <label class="block font-label-bold text-label-bold text-on-background mb-2" for="email">Username / Email</label>
@@ -87,7 +87,7 @@ async function handleLogin() {
           </div>
 
           <button
-            class="w-full bg-electric-blue text-surface-white font-label-bold text-label-bold py-4 rounded-xl flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 transition-all shadow-md min-h-[44px] disabled:opacity-60"
+            class="w-full bg-accent-fill text-on-primary font-label-bold text-label-bold py-4 rounded-xl flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 transition-all shadow-md min-h-[44px] disabled:opacity-60"
             type="submit"
             :disabled="loading"
           >

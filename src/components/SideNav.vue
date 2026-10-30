@@ -113,7 +113,7 @@ async function handleKeluar() {
           </div>
         </div>
         <button
-          class="w-full bg-electric-blue text-on-primary font-label-bold text-label-bold py-3 rounded-lg shadow-sm hover:bg-primary transition-colors"
+          class="w-full bg-accent-fill text-on-primary font-label-bold text-label-bold py-3 rounded-lg shadow-sm hover:bg-accent-fill transition-colors"
           @click="router.push('/request')"
         >
           Kirim Project

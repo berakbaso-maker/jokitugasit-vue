@@ -62,7 +62,7 @@ const iconTone = () => ({
 
 <template>
   <div
-    class="bg-surface-white p-5 rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)]
+    class="bg-surface-white p-5 rounded-xl shadow-[0px_4px_20px_rgb(var(--shadow-color) / 0.08)]
            border border-transparent hover:border-electric-blue hover:shadow-lg
            transition-all duration-200 flex flex-col h-[136px] overflow-hidden"
   >

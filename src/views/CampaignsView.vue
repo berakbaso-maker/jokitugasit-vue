@@ -257,7 +257,7 @@ onMounted(load)
           <span class="material-symbols-outlined text-[18px]">download</span>
           Ekspor
         </button>
-        <button @click="openCreate" class="inline-flex items-center gap-2 bg-electric-blue text-white font-label-bold px-4 py-2.5 rounded-xl hover:bg-primary transition-colors shadow-sm">
+        <button @click="openCreate" class="inline-flex items-center gap-2 bg-accent-fill text-white font-label-bold px-4 py-2.5 rounded-xl hover:bg-accent-fill transition-colors shadow-sm">
           <span class="material-symbols-outlined text-[20px]">add</span>
           Buat Campaign
         </button>
@@ -348,7 +348,7 @@ onMounted(load)
         </p>
 
         <div class="flex flex-wrap gap-2">
-          <button @click="copyLink(c)" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-electric-blue text-white hover:bg-primary">
+          <button @click="copyLink(c)" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-accent-fill text-white hover:bg-accent-fill">
             Salin Link
           </button>
           <button @click="openTargets(c)" class="text-xs font-bold px-3 py-1.5 rounded-lg border border-outline-variant hover:bg-surface-container-low">
@@ -432,7 +432,7 @@ onMounted(load)
           <p v-if="formError" class="text-sm text-urgency-red">{{ formError }}</p>
           <div class="flex gap-3 pt-1">
             <button type="button" @click="showCreate = false" class="flex-1 px-4 py-2.5 rounded-xl border border-outline-variant font-bold text-sm">Batal</button>
-            <button type="submit" :disabled="saving" class="flex-1 px-4 py-2.5 rounded-xl bg-electric-blue text-white font-bold text-sm disabled:opacity-60">
+            <button type="submit" :disabled="saving" class="flex-1 px-4 py-2.5 rounded-xl bg-accent-fill text-white font-bold text-sm disabled:opacity-60">
               {{ saving ? 'Menyimpan...' : 'Simpan' }}
             </button>
           </div>
@@ -456,7 +456,7 @@ onMounted(load)
             <option value="">Pilih akun target…</option>
             <option v-for="a in targetAccounts" :key="a.id" :value="a.id">@{{ a.ig_username }} — {{ a.campus || 'tanpa kampus' }}</option>
           </select>
-          <button @click="addTarget" :disabled="!targetForm.target_account_id" class="px-4 py-2.5 rounded-xl bg-electric-blue text-white font-bold text-sm disabled:opacity-50">Tambah</button>
+          <button @click="addTarget" :disabled="!targetForm.target_account_id" class="px-4 py-2.5 rounded-xl bg-accent-fill text-white font-bold text-sm disabled:opacity-50">Tambah</button>
         </div>
 
         <div v-if="targetsLoading" class="text-center py-6 text-sm text-on-surface-variant">Memuat…</div>

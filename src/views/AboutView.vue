@@ -48,7 +48,7 @@ const techStacks = ['Laravel', 'Flutter', 'Python', 'Node.js', 'React', 'Vue.js'
           </div>
         </div>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <RouterLink to="/request" class="bg-electric-blue text-white font-label-bold text-label-bold px-7 py-3.5 rounded-xl shadow-md hover:bg-primary transition-colors flex items-center justify-center gap-2">
+          <RouterLink to="/request" class="bg-accent-fill text-white font-label-bold text-label-bold px-7 py-3.5 rounded-xl shadow-md hover:bg-accent-fill transition-colors flex items-center justify-center gap-2">
             <span class="material-symbols-outlined">send</span>
             Kirim Project
           </RouterLink>
@@ -82,7 +82,7 @@ const techStacks = ['Laravel', 'Flutter', 'Python', 'Node.js', 'React', 'Vue.js'
       </section>
 
       <!-- Visi & Misi -->
-      <section class="bg-electric-blue rounded-2xl p-8 md:p-12 text-center text-white relative overflow-hidden mb-0">
+      <section class="bg-accent-fill rounded-2xl p-8 md:p-12 text-center text-white relative overflow-hidden mb-0">
         <div class="absolute inset-0 bg-primary opacity-20 -z-10"></div>
         <span class="material-symbols-outlined text-4xl mb-3" style="font-variation-settings: 'FILL' 1">psychology</span>
         <h2 class="font-headline-lg text-headline-lg font-bold mb-3">Visi & Misi</h2>

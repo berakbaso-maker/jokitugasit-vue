@@ -19,73 +19,89 @@ export default {
       // dekorasi/ikon non-teks saja.
       // ---------------------------------------------------------------------
       colors: {
+        // ------------------------------------------------------------------
+        // Token semantik -> CSS variable.
+        // Nilai terang tinggal di :root, nilai gelap di .dark (src/assets/main.css).
+        // 3.160+ pemakaian kelas di seluruh view TIDAK perlu disentuh: cukup
+        // nilai variabelnya yang berubah saat <html class="dark">.
+        // ------------------------------------------------------------------
         // Kanvas & permukaan
-        'background': '#FFFFFF',
-        'surface': '#FFFFFF',
-        'surface-white': '#FFFFFF',
-        'surface-bright': '#FFFFFF',
-        'surface-container-lowest': '#FFFFFF',
-        'surface-container-low': '#F8FAFC',
-        'surface-container': '#F1F5F9',
-        'surface-container-high': '#E2E8F0',
-        'surface-container-highest': '#CBD5E1',
-        'surface-variant': '#E2E8F0',
-        'surface-dim': '#E2E8F0',
+        'background': 'rgb(var(--background) / <alpha-value>)',
+        'surface': 'rgb(var(--surface) / <alpha-value>)',
+        'surface-white': 'rgb(var(--surface-white) / <alpha-value>)',
+        'surface-bright': 'rgb(var(--surface-bright) / <alpha-value>)',
+        'surface-container-lowest': 'rgb(var(--surface-container-lowest) / <alpha-value>)',
+        'surface-container-low': 'rgb(var(--surface-container-low) / <alpha-value>)',
+        'surface-container': 'rgb(var(--surface-container) / <alpha-value>)',
+        'surface-container-high': 'rgb(var(--surface-container-high) / <alpha-value>)',
+        'surface-container-highest': 'rgb(var(--surface-container-highest) / <alpha-value>)',
+        'surface-variant': 'rgb(var(--surface-variant) / <alpha-value>)',
+        'surface-dim': 'rgb(var(--surface-dim) / <alpha-value>)',
 
         // Teks
-        'on-background': '#0F172A',
-        'on-surface': '#0F172A',
-        'on-surface-variant': '#475569',
-        'secondary': '#52627A',
-        'muted': '#64748B',
-        'outline': '#94A3B8',
-        'outline-variant': '#CBD5E1',
-        'border-subtle': '#E2E8F0',
+        'on-background': 'rgb(var(--on-background) / <alpha-value>)',
+        'on-surface': 'rgb(var(--on-surface) / <alpha-value>)',
+        'on-surface-variant': 'rgb(var(--on-surface-variant) / <alpha-value>)',
+        'secondary': 'rgb(var(--secondary) / <alpha-value>)',
+        'muted': 'rgb(var(--muted) / <alpha-value>)',
+        'outline': 'rgb(var(--outline) / <alpha-value>)',
+        'outline-variant': 'rgb(var(--outline-variant) / <alpha-value>)',
+        'border-subtle': 'rgb(var(--border-subtle) / <alpha-value>)',
 
-        // Aksen utama
-        'primary': '#2563EB',
+        // Aksen peran-TEKS: menerang di mode gelap agar lolos AA.
+        'primary': 'rgb(var(--primary) / <alpha-value>)',
+        'electric-blue': 'rgb(var(--electric-blue) / <alpha-value>)',
+        'primary-fixed': 'rgb(var(--primary-fixed) / <alpha-value>)',
+        'primary-fixed-dim': 'rgb(var(--primary-fixed-dim) / <alpha-value>)',
+        'on-primary-fixed': 'rgb(var(--on-primary-fixed) / <alpha-value>)',
+        'on-primary-fixed-variant': 'rgb(var(--on-primary-fixed-variant) / <alpha-value>)',
+        'surface-tint': 'rgb(var(--surface-tint) / <alpha-value>)',
+        'inverse-primary': 'rgb(var(--inverse-primary) / <alpha-value>)',
+
+        // Aksen peran-ISI: statis. Teks putih di atasnya wajib tetap terbaca,
+        // jadi nilai ini TIDAK boleh ikut menerang di mode gelap.
+        'accent-fill': '#2563EB',
+        'accent-fill-hover': '#1D4ED8',
+        // Gradien hero gelap. SENGAJA statis: blok ini selalu berteks putih,
+        // jadi tidak boleh ikut menerang di mode gelap.
+        'hero-gradient-from': '#2563EB',
+        'hero-gradient-via': '#2563EB',
+        'hero-gradient-to': '#1E293B',
         'primary-container': '#1D4ED8',
-        'electric-blue': '#2563EB',
         'on-primary': '#FFFFFF',
         'on-primary-container': '#DBEAFE',
-        'primary-fixed': '#DBEAFE',
-        'primary-fixed-dim': '#BFDBFE',
-        'on-primary-fixed': '#1E3A8A',
-        'on-primary-fixed-variant': '#1D4ED8',
-        'surface-tint': '#2563EB',
-        'inverse-primary': '#93C5FD',
 
         // Aksen sekunder (netral editorial)
-        'secondary-container': '#E2E8F0',
+        'secondary-container': 'rgb(var(--secondary-container) / <alpha-value>)',
         'on-secondary': '#FFFFFF',
-        'on-secondary-container': '#475569',
-        'secondary-fixed': '#E2E8F0',
-        'secondary-fixed-dim': '#CBD5E1',
-        'on-secondary-fixed': '#0F172A',
-        'on-secondary-fixed-variant': '#334155',
+        'on-secondary-container': 'rgb(var(--on-secondary-container) / <alpha-value>)',
+        'secondary-fixed': 'rgb(var(--secondary-fixed) / <alpha-value>)',
+        'secondary-fixed-dim': 'rgb(var(--secondary-fixed-dim) / <alpha-value>)',
+        'on-secondary-fixed': 'rgb(var(--on-secondary-fixed) / <alpha-value>)',
+        'on-secondary-fixed-variant': 'rgb(var(--on-secondary-fixed-variant) / <alpha-value>)',
 
-        // Aksen tersier (slate gelap untuk blok editorial)
-        'tertiary': '#1E293B',
-        'tertiary-container': '#334155',
+        // Aksen tersier (blok editorial)
+        'tertiary': 'rgb(var(--tertiary) / <alpha-value>)',
+        'tertiary-container': 'rgb(var(--tertiary-container) / <alpha-value>)',
         'on-tertiary': '#FFFFFF',
-        'on-tertiary-container': '#DBEAFE',
-        'tertiary-fixed': '#DBEAFE',
-        'tertiary-fixed-dim': '#93C5FD',
-        'on-tertiary-fixed': '#0F172A',
-        'on-tertiary-fixed-variant': '#1E40AF',
+        'on-tertiary-container': 'rgb(var(--on-tertiary-container) / <alpha-value>)',
+        'tertiary-fixed': 'rgb(var(--tertiary-fixed) / <alpha-value>)',
+        'tertiary-fixed-dim': 'rgb(var(--tertiary-fixed-dim) / <alpha-value>)',
+        'on-tertiary-fixed': 'rgb(var(--on-tertiary-fixed) / <alpha-value>)',
+        'on-tertiary-fixed-variant': 'rgb(var(--on-tertiary-fixed-variant) / <alpha-value>)',
 
-        // Status. Digelapkan dari versi lama agar lolos AA saat dipakai
-        // sebagai teks di atas latar terang.
-        'error': '#B91C1C',
-        'error-container': '#FEE2E2',
+        // Status
+        'error': 'rgb(var(--error) / <alpha-value>)',
+        'error-container': 'rgb(var(--error-container) / <alpha-value>)',
         'on-error': '#FFFFFF',
-        'on-error-container': '#7F1D1D',
-        'success-green': '#15803D',
-        'urgency-red': '#DC2626',
+        'on-error-container': 'rgb(var(--on-error-container) / <alpha-value>)',
+        'success-green': 'rgb(var(--success-green) / <alpha-value>)',
+        'success-fill': '#15803D',
+        'urgency-red': 'rgb(var(--urgency-red) / <alpha-value>)',
 
-        // Permukaan gelap (blok CTA invers)
-        'inverse-surface': '#0F172A',
-        'inverse-on-surface': '#F8FAFC',
+        // Permukaan gelap (blok CTA invers) - BERBALIK di mode gelap
+        'inverse-surface': 'rgb(var(--inverse-surface) / <alpha-value>)',
+        'inverse-on-surface': 'rgb(var(--inverse-on-surface) / <alpha-value>)',
       },
       borderRadius: {
         DEFAULT: '0.25rem',
@@ -124,11 +140,11 @@ export default {
         'display-hero-mobile': ['32px', { lineHeight: '1.2', fontWeight: '800' }],
       },
       boxShadow: {
-        // Bayangan tipis berlapis: kartu terasa "mengambang" tanpa norak.
-        'card': '0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06)',
-        'card-hover': '0 4px 12px rgba(15, 23, 42, 0.06), 0 12px 32px -8px rgba(15, 23, 42, 0.10)',
-        'header': '0 1px 0 rgba(15, 23, 42, 0.06)',
-        'cta': '0 8px 24px -6px rgba(37, 99, 235, 0.35)',
+        // Warna bayangan ikut tema supaya tidak jadi abu-abu mati di latar gelap.
+        'card': '0 1px 2px rgb(var(--shadow-color) / 0.04), 0 1px 3px rgb(var(--shadow-color) / 0.06)',
+        'card-hover': '0 4px 12px rgb(var(--shadow-color) / 0.06), 0 12px 32px -8px rgb(var(--shadow-color) / 0.10)',
+        'header': '0 1px 0 rgb(var(--shadow-color) / 0.06)',
+        'cta': '0 8px 24px -6px rgb(var(--cta-shadow-color) / 0.35)',
       },
       transitionTimingFunction: {
         'out-expo': 'cubic-bezier(0.16, 1, 0.3, 1)',

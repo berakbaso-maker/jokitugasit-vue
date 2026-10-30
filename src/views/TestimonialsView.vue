@@ -71,7 +71,7 @@ onMounted(loadTestimonials)
       <!-- Header -->
       <section class="text-center max-w-2xl mx-auto mb-12">
         <div class="inline-flex items-center gap-2 bg-surface-white border border-border-subtle rounded-full px-4 py-1.5 shadow-sm mb-4">
-          <span class="material-symbols-outlined text-amber-500 text-[18px]">star</span>
+          <span class="material-symbols-outlined text-amber-600 text-[18px]">star</span>
           <span class="font-label-sm text-label-sm text-secondary">Testimoni Mahasiswa</span>
         </div>
         <h1 class="font-display-hero-mobile md:font-display-hero text-display-hero-mobile md:text-display-hero font-bold text-on-surface mb-4">Kata Mereka yang Sudah Beres</h1>
@@ -97,7 +97,7 @@ onMounted(loadTestimonials)
       <!-- List Testimoni -->
       <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-14">
         <div v-for="t in testimonials" :key="t.id" class="bg-surface-white rounded-2xl p-6 border border-border-subtle shadow-sm hover:shadow-md hover:border-electric-blue transition-all flex flex-col">
-          <div class="text-amber-500 text-lg mb-3 tracking-wider">{{ stars(t.rating) }}</div>
+          <div class="text-amber-600 text-lg mb-3 tracking-wider">{{ stars(t.rating) }}</div>
           <p class="text-sm text-on-surface-variant leading-6 mb-4 flex-grow italic">"{{ t.message }}"</p>
           <div class="border-t border-border-subtle pt-3">
             <div class="font-label-bold text-label-bold text-on-surface">{{ t.name }}</div>
@@ -129,7 +129,7 @@ onMounted(loadTestimonials)
             <label class="block font-label-bold text-label-bold text-on-background mb-1.5">Rating</label>
             <div class="flex gap-1">
               <button v-for="r in RATINGS" :key="r" type="button" @click="form.rating = r"
-                class="text-2xl transition-colors" :class="r <= form.rating ? 'text-amber-500' : 'text-border-subtle'">★</button>
+                class="text-2xl transition-colors" :class="r <= form.rating ? 'text-amber-600' : 'text-border-subtle'">★</button>
             </div>
           </div>
           <div>
@@ -151,7 +151,7 @@ onMounted(loadTestimonials)
           </div>
 
           <button type="submit" :disabled="submitting"
-            class="w-full bg-electric-blue text-white font-label-bold text-label-bold py-3.5 rounded-xl hover:bg-primary transition-colors shadow-md disabled:opacity-60">
+            class="w-full bg-accent-fill text-white font-label-bold text-label-bold py-3.5 rounded-xl hover:bg-accent-fill transition-colors shadow-md disabled:opacity-60">
             {{ submitting ? 'Mengirim...' : 'Kirim Testimoni' }}
           </button>
         </form>
@@ -162,7 +162,7 @@ onMounted(loadTestimonials)
         <h2 class="font-headline-lg text-headline-lg font-bold text-on-surface mb-3">Mau Rasain Sendiri?</h2>
         <p class="text-secondary mb-6">Konsultasi gratis, cek project gratis. Ceritain aja masalahmu.</p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <RouterLink to="/request" class="bg-electric-blue text-white font-label-bold text-label-bold px-7 py-3.5 rounded-xl shadow-md">Kirim Project</RouterLink>
+          <RouterLink to="/request" class="bg-accent-fill text-white font-label-bold text-label-bold px-7 py-3.5 rounded-xl shadow-md">Kirim Project</RouterLink>
           <a :href="waLink('6285166337257', 'Halo, saya lihat testimoni dan mau konsultasi tugas IT.')" target="_blank" rel="noopener" class="bg-surface-white border-2 border-electric-blue text-electric-blue font-label-bold text-label-bold px-7 py-3.5 rounded-xl">Chat WhatsApp</a>
         </div>
       </section>

@@ -71,7 +71,7 @@ function submitBudget() {
         <p class="font-body-lg text-body-lg text-on-surface-variant max-w-xl mx-auto mb-7">
           Kami sengaja nggak pasang angka di sini. Tiap tugas beda tingkat kesulitannya, dan kami nggak mau kamu kaget di akhir. Ceritain dulu masalah dan budget kamu — engineer yang nentuin, kamu yang setuju.
         </p>
-        <a href="#budget" class="inline-flex items-center gap-2 bg-electric-blue text-white font-label-bold text-label-bold px-7 py-3.5 rounded-xl shadow-md hover:bg-primary transition-colors">
+        <a href="#budget" class="inline-flex items-center gap-2 bg-accent-fill text-white font-label-bold text-label-bold px-7 py-3.5 rounded-xl shadow-md hover:bg-accent-fill transition-colors">
           <span class="material-symbols-outlined">chat</span>
           Ceritain Budget Kamu
         </a>
@@ -105,7 +105,7 @@ function submitBudget() {
               class="w-full rounded-xl border border-border-subtle bg-surface-container-lowest px-4 py-3 text-body-md focus:border-electric-blue focus:ring-1 focus:ring-electric-blue outline-none resize-none"></textarea>
           </div>
           <div v-if="budgetMsg" class="bg-error-container text-on-error-container rounded-lg px-4 py-3 font-body-md text-body-md">{{ budgetMsg }}</div>
-          <button type="submit" class="w-full bg-electric-blue text-white font-label-bold text-label-bold py-3.5 rounded-xl hover:bg-primary transition-colors shadow-md">
+          <button type="submit" class="w-full bg-accent-fill text-white font-label-bold text-label-bold py-3.5 rounded-xl hover:bg-accent-fill transition-colors shadow-md">
             Chat Engineer, Gratis
           </button>
           <p class="text-center text-xs text-secondary">Langsung ke WhatsApp. Nggak ada biaya konsultasi, nggak ada paksaan lanjut.</p>
@@ -123,8 +123,8 @@ function submitBudget() {
         <div v-for="pkg in packages" :key="pkg.name"
           class="relative bg-surface-white rounded-2xl p-6 border shadow-sm flex flex-col transition-all hover:shadow-md"
           :class="pkg.popular ? 'border-electric-blue ring-2 ring-electric-blue/15' : 'border-border-subtle'">
-          <span v-if="pkg.popular" class="absolute -top-3 left-1/2 -translate-x-1/2 bg-electric-blue text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full whitespace-nowrap">Paling Laku</span>
-          <span class="w-11 h-11 rounded-xl flex items-center justify-center mb-4" :class="pkg.popular ? 'bg-electric-blue text-white' : 'bg-primary-fixed/40 text-electric-blue'">
+          <span v-if="pkg.popular" class="absolute -top-3 left-1/2 -translate-x-1/2 bg-accent-fill text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full whitespace-nowrap">Paling Laku</span>
+          <span class="w-11 h-11 rounded-xl flex items-center justify-center mb-4" :class="pkg.popular ? 'bg-accent-fill text-white' : 'bg-primary-fixed/40 text-electric-blue'">
             <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">{{ pkg.icon }}</span>
           </span>
           <h2 class="font-headline-md text-headline-md font-bold text-on-surface mb-1">{{ pkg.name }}</h2>
@@ -145,7 +145,7 @@ function submitBudget() {
           </ul>
           <a :href="waLink('6285166337257', `Halo, saya mau paket ${pkg.name}. ${pkg.desc}`)" target="_blank" rel="noopener"
             class="mt-auto w-full text-center py-3 rounded-xl font-label-bold text-label-bold transition-colors"
-            :class="pkg.popular ? 'bg-electric-blue text-white hover:bg-primary' : 'border-2 border-electric-blue text-electric-blue hover:bg-primary-fixed/20'">
+            :class="pkg.popular ? 'bg-accent-fill text-white hover:bg-accent-fill' : 'border-2 border-electric-blue text-electric-blue hover:bg-primary-fixed/20'">
             Tanya Paket Ini
           </a>
         </div>

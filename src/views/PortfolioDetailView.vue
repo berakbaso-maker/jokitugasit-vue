@@ -192,7 +192,7 @@ const label = computed(() =>
             <p class="text-sm text-secondary">Butuh sesuatu yang mirip dengan proyek ini?</p>
             <RouterLink
               to="/request"
-              class="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-primary-container"
+              class="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-accent-fill px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-primary-container"
             >
               Ajukan tugas
               <span class="material-symbols-outlined text-base" aria-hidden="true">arrow_forward</span>

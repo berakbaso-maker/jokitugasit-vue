@@ -168,7 +168,7 @@ const statusClass = (s) => {
 
     <!-- Stats Overview -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-      <div class="bg-surface-white p-5 rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] border border-transparent hover:border-electric-blue hover:shadow-lg transition-all duration-200">
+      <div class="bg-surface-white p-5 rounded-xl shadow-[0px_4px_20px_rgb(var(--shadow-color) / 0.08)] border border-transparent hover:border-electric-blue hover:shadow-lg transition-all duration-200">
         <div class="flex items-center justify-between mb-3">
           <span class="text-secondary text-label-sm font-label-sm uppercase tracking-wide">Request Baru</span>
           <span class="w-9 h-9 rounded-lg bg-primary-fixed/40 text-electric-blue flex items-center justify-center">
@@ -177,7 +177,7 @@ const statusClass = (s) => {
         </div>
         <div class="text-display-hero-mobile font-headline-md font-extrabold text-on-surface leading-none">{{ stats.new }}</div>
       </div>
-      <div class="bg-surface-white p-5 rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] border border-transparent hover:border-electric-blue hover:shadow-lg transition-all duration-200">
+      <div class="bg-surface-white p-5 rounded-xl shadow-[0px_4px_20px_rgb(var(--shadow-color) / 0.08)] border border-transparent hover:border-electric-blue hover:shadow-lg transition-all duration-200">
         <div class="flex items-center justify-between mb-3">
           <span class="text-secondary text-label-sm font-label-sm uppercase tracking-wide">Perlu Review</span>
           <span class="w-9 h-9 rounded-lg bg-tertiary-fixed/40 text-tertiary flex items-center justify-center">
@@ -186,7 +186,7 @@ const statusClass = (s) => {
         </div>
         <div class="text-display-hero-mobile font-headline-md font-extrabold text-on-surface leading-none">{{ stats.review }}</div>
       </div>
-      <div class="bg-surface-white p-5 rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] border border-transparent hover:border-electric-blue hover:shadow-lg transition-all duration-200">
+      <div class="bg-surface-white p-5 rounded-xl shadow-[0px_4px_20px_rgb(var(--shadow-color) / 0.08)] border border-transparent hover:border-electric-blue hover:shadow-lg transition-all duration-200">
         <div class="flex items-center justify-between mb-3">
           <span class="text-secondary text-label-sm font-label-sm uppercase tracking-wide">Dikerjakan</span>
           <span class="w-9 h-9 rounded-lg bg-primary-container/30 text-primary flex items-center justify-center">
@@ -195,7 +195,7 @@ const statusClass = (s) => {
         </div>
         <div class="text-display-hero-mobile font-headline-md font-extrabold text-on-surface leading-none">{{ stats.working }}</div>
       </div>
-      <div class="bg-error-container p-5 rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] border border-transparent hover:border-urgency-red hover:shadow-lg transition-all duration-200">
+      <div class="bg-error-container p-5 rounded-xl shadow-[0px_4px_20px_rgb(var(--shadow-color) / 0.08)] border border-transparent hover:border-urgency-red hover:shadow-lg transition-all duration-200">
         <div class="flex items-center justify-between mb-3">
           <span class="text-on-error-container text-label-sm font-label-sm uppercase tracking-wide">Deadline Hari Ini</span>
           <span class="w-9 h-9 rounded-lg bg-white/30 text-on-error-container flex items-center justify-center">
@@ -236,7 +236,7 @@ const statusClass = (s) => {
 
     <!-- Funnel & Uang -->
     <div v-if="analytics" class="grid lg:grid-cols-2 gap-4 mb-8">
-      <div class="bg-surface-white p-5 rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)]">
+      <div class="bg-surface-white p-5 rounded-xl shadow-[0px_4px_20px_rgb(var(--shadow-color) / 0.08)]">
         <h3 class="text-body-lg font-bold mb-1">Funnel Outreach</h3>
         <p class="text-label-sm text-secondary mb-4">Dari catatan kontak yang benar-benar tersimpan.</p>
         <div class="space-y-3">
@@ -247,7 +247,7 @@ const statusClass = (s) => {
             </div>
             <div class="h-2 rounded-full bg-surface-container overflow-hidden">
               <div
-                class="h-full rounded-full bg-electric-blue"
+                class="h-full rounded-full bg-accent-fill"
                 :style="{ width: `${funnel[0]?.count ? Math.min(100, (step.count / funnel[0].count) * 100) : 0}%` }"
               ></div>
             </div>
@@ -272,7 +272,7 @@ const statusClass = (s) => {
         </p>
       </div>
 
-      <div class="bg-surface-white p-5 rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)]">
+      <div class="bg-surface-white p-5 rounded-xl shadow-[0px_4px_20px_rgb(var(--shadow-color) / 0.08)]">
         <h3 class="text-body-lg font-bold mb-1">Uang</h3>
         <p class="text-label-sm text-secondary mb-4">Pembayaran terkonfirmasi dan komisi dari tabel.</p>
         <dl class="space-y-3 text-sm">
@@ -286,7 +286,7 @@ const statusClass = (s) => {
           </div>
           <div class="flex justify-between">
             <dt class="text-secondary">Komisi siap dibayar</dt>
-            <dd class="font-bold text-amber-600">{{ formatRupiah(analytics.commission_unpaid) }}</dd>
+            <dd class="font-bold text-amber-700">{{ formatRupiah(analytics.commission_unpaid) }}</dd>
           </div>
           <div class="flex justify-between border-t border-border-subtle pt-3">
             <dt class="font-bold">Sebelum biaya lain</dt>
@@ -311,7 +311,7 @@ const statusClass = (s) => {
       </div>
 
       <!-- Sumber klien -->
-      <div class="bg-surface-white p-5 rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] lg:col-span-2">
+      <div class="bg-surface-white p-5 rounded-xl shadow-[0px_4px_20px_rgb(var(--shadow-color) / 0.08)] lg:col-span-2">
         <div class="flex items-baseline justify-between mb-1">
           <h3 class="text-body-lg font-bold">Sumber Klien</h3>
           <span class="text-[11px] text-secondary uppercase tracking-wide">{{ periodLabel }}</span>
@@ -330,7 +330,7 @@ const statusClass = (s) => {
             </div>
             <div class="h-2 rounded-full bg-surface-container overflow-hidden">
               <div
-                class="h-full rounded-full bg-electric-blue"
+                class="h-full rounded-full bg-accent-fill"
                 :style="{ width: maxSourceProjects ? `${(Number(row.projects) / maxSourceProjects) * 100}%` : '0%' }"
               ></div>
             </div>
@@ -339,7 +339,7 @@ const statusClass = (s) => {
       </div>
 
       <!-- Kampanye -->
-      <div v-if="campaignsEnabled && campaignRows.length" class="bg-surface-white p-5 rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] lg:col-span-2">
+      <div v-if="campaignsEnabled && campaignRows.length" class="bg-surface-white p-5 rounded-xl shadow-[0px_4px_20px_rgb(var(--shadow-color) / 0.08)] lg:col-span-2">
         <div class="flex items-baseline justify-between mb-1">
           <h3 class="text-body-lg font-bold">Kampanye</h3>
           <RouterLink to="/ops/campaigns" class="text-[11px] text-electric-blue hover:underline">Kelola →</RouterLink>
@@ -382,7 +382,7 @@ const statusClass = (s) => {
     </div>
 
     <!-- Active Queue -->
-    <div class="bg-surface-white rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] overflow-hidden">
+    <div class="bg-surface-white rounded-xl shadow-[0px_4px_20px_rgb(var(--shadow-color) / 0.08)] overflow-hidden">
       <div class="px-6 py-5 border-b border-border-subtle flex justify-between items-center">
         <div>
           <h3 class="text-body-lg font-body-lg font-bold text-on-surface">Antrian Request</h3>
@@ -410,7 +410,7 @@ const statusClass = (s) => {
         <p class="text-body-md font-body-md text-secondary mb-6">Request customer akan muncul di sini begitu masuk.</p>
         <button
           @click="router.push('/request')"
-          class="inline-flex items-center gap-2 bg-electric-blue text-white font-label-bold text-label-bold px-5 py-3 rounded-lg hover:bg-primary transition-colors"
+          class="inline-flex items-center gap-2 bg-accent-fill text-white font-label-bold text-label-bold px-5 py-3 rounded-lg hover:bg-accent-fill transition-colors"
         >
           <span class="material-symbols-outlined text-[18px]">add_circle</span>
           Buat Request Contoh

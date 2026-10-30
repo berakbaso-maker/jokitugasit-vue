@@ -136,7 +136,7 @@ function exportCsv() {
           <span class="material-symbols-outlined text-[18px]">download</span>
           Export CSV
         </button>
-        <button class="inline-flex items-center gap-2 bg-primary text-white font-label-bold px-4 py-2.5 rounded-xl hover:bg-primary-container transition-colors" @click="load">
+        <button class="inline-flex items-center gap-2 bg-accent-fill text-white font-label-bold px-4 py-2.5 rounded-xl hover:bg-primary-container transition-colors" @click="load">
           <span class="material-symbols-outlined text-[18px]">refresh</span>
           Muat ulang
         </button>
@@ -156,12 +156,12 @@ function exportCsv() {
     <template v-else>
       <div class="inline-flex rounded-xl border border-border-subtle overflow-hidden bg-surface-white mb-5">
         <button class="px-4 py-2.5 text-[13px] font-semibold"
-                :class="tab === 'payments' ? 'bg-primary text-white' : 'text-secondary hover:bg-surface-container-low'"
+                :class="tab === 'payments' ? 'bg-accent-fill text-white' : 'text-secondary hover:bg-surface-container-low'"
                 @click="tab = 'payments'">
           Pembayaran ({{ payments.length }})
         </button>
         <button class="px-4 py-2.5 text-[13px] font-semibold"
-                :class="tab === 'commissions' ? 'bg-primary text-white' : 'text-secondary hover:bg-surface-container-low'"
+                :class="tab === 'commissions' ? 'bg-accent-fill text-white' : 'text-secondary hover:bg-surface-container-low'"
                 @click="tab = 'commissions'">
           Komisi ({{ commissions.length }})
         </button>

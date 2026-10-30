@@ -14,7 +14,7 @@ const categories = [
     desc: 'Aplikasi Android dan iOS native maupun cross-platform untuk tugas akhir atau project kuliah.' },
   { icon: 'database', title: 'Database & API', link: '/layanan', color: 'bg-tertiary-fixed/40 text-tertiary',
     desc: 'Desain skema database, optimalisasi query, dan pembuatan RESTful API / GraphQL.' },
-  { icon: 'monitoring', title: 'Data Science & AI', link: '/layanan', color: 'bg-error-container text-urgency-red',
+  { icon: 'monitoring', title: 'Data Science & AI', link: '/layanan', color: 'bg-error-container text-error',
     desc: 'Analisis data, machine learning models, scraping, dan implementasi algoritma AI.' },
   { icon: 'school', title: 'Tugas Umum & Algoritma', link: '/joki-tugas-kuliah-it', color: 'bg-primary-fixed/40 text-electric-blue',
     desc: 'Dasar pemrograman, struktur data, logika informatika, sampai tugas kuliah pemrograman.' },
@@ -43,7 +43,7 @@ const categories = [
           Eksplorasi direktori layanan lengkap kami. Dari perbaikan bug kecil hingga aplikasi full-stack, semua dibantu sampai beres.
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <RouterLink to="/request" class="bg-electric-blue text-white font-label-bold text-label-bold px-8 py-4 rounded-xl hover:bg-primary transition-colors shadow-lg flex items-center justify-center gap-2">
+          <RouterLink to="/request" class="bg-accent-fill text-white font-label-bold text-label-bold px-8 py-4 rounded-xl hover:bg-accent-fill transition-colors shadow-lg flex items-center justify-center gap-2">
             <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">rocket_launch</span>
             Cek Project Gratis
           </RouterLink>
@@ -68,11 +68,11 @@ const categories = [
       </section>
 
       <!-- CTA -->
-      <section class="bg-electric-blue rounded-2xl p-8 md:p-12 text-center text-white relative overflow-hidden">
+      <section class="bg-accent-fill rounded-2xl p-8 md:p-12 text-center text-white relative overflow-hidden">
         <div class="absolute inset-0 bg-primary opacity-20 -z-10"></div>
         <h2 class="font-headline-lg text-headline-lg font-bold mb-3">Masih Bingung Pilih Layanan?</h2>
-        <p class="text-body-md text-body-md text-on-primary-container opacity-90 max-w-lg mx-auto mb-7">Ceritakan saja masalahmu, kami bantu tentukan solusi yang paling pas.</p>
-        <a :href="waLink('6285166337257', WA_TEXT)" target="_blank" rel="noopener" class="inline-flex items-center gap-2 bg-white text-electric-blue font-label-bold text-label-bold px-7 py-3.5 rounded-xl hover:bg-surface-container-lowest transition-colors shadow-md">
+        <p class="text-body-md text-on-primary opacity-90 max-w-lg mx-auto mb-7">Ceritakan saja masalahmu, kami bantu tentukan solusi yang paling pas.</p>
+        <a :href="waLink('6285166337257', WA_TEXT)" target="_blank" rel="noopener" class="inline-flex items-center gap-2 bg-white text-accent-fill font-label-bold text-label-bold px-7 py-3.5 rounded-xl hover:bg-surface-container-lowest transition-colors shadow-md">
           <span class="material-symbols-outlined">chat</span>
           Konsultasi Gratis
         </a>

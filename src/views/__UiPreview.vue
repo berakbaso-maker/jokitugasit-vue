@@ -55,8 +55,8 @@ const rows = [
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-headline-md font-headline-md font-bold text-on-surface">Campus Database</h2>
           <button
-            class="inline-flex items-center gap-2 bg-electric-blue text-white font-label-bold
-                   px-4 py-2.5 rounded-xl hover:bg-primary transition-colors"
+            class="inline-flex items-center gap-2 bg-accent-fill text-white font-label-bold
+                   px-4 py-2.5 rounded-xl hover:bg-accent-fill transition-colors"
             @click="showModal = true"
           >
             <span class="material-symbols-outlined text-[18px]">add</span>
@@ -96,7 +96,7 @@ const rows = [
         </div>
         <template #footer>
           <button class="px-4 py-2.5 rounded-xl border border-border-subtle text-secondary font-label-bold hover:bg-surface-container-low" @click="showModal = false">Batal</button>
-          <button class="px-4 py-2.5 rounded-xl bg-electric-blue text-white font-label-bold hover:bg-primary">Simpan</button>
+          <button class="px-4 py-2.5 rounded-xl bg-accent-fill text-white font-label-bold hover:bg-accent-fill">Simpan</button>
         </template>
       </AppModal>
 

@@ -106,7 +106,7 @@ onMounted(load)
     </div>
 
     <div class="flex gap-2 overflow-x-auto mb-5">
-      <button v-for="item in [{id:'outbound',label:'🚀 Outreach'},{id:'leads',label:'Lead Instagram'},{id:'posts',label:'Antrean Konten'},{id:'compose',label:'Buat Konten'},{id:'insights',label:'Insight'}]" :key="item.id" class="whitespace-nowrap rounded-full px-4 py-2 font-bold transition" :class="tab === item.id ? 'bg-electric-blue text-white' : 'bg-surface-white text-on-surface border border-border-subtle'" @click="tab = item.id">{{ item.label }}</button>
+      <button v-for="item in [{id:'outbound',label:'🚀 Outreach'},{id:'leads',label:'Lead Instagram'},{id:'posts',label:'Antrean Konten'},{id:'compose',label:'Buat Konten'},{id:'insights',label:'Insight'}]" :key="item.id" class="whitespace-nowrap rounded-full px-4 py-2 font-bold transition" :class="tab === item.id ? 'bg-accent-fill text-white' : 'bg-surface-white text-on-surface border border-border-subtle'" @click="tab = item.id">{{ item.label }}</button>
     </div>
 
     <div v-if="loading" class="rounded-xl bg-surface-white p-12 text-center"><span class="material-symbols-outlined animate-spin text-electric-blue text-4xl">progress_activity</span></div>
@@ -125,7 +125,7 @@ onMounted(load)
           manualmu atas relevansi dan izin penerima.
         </p>
         <div class="flex flex-wrap gap-2 mt-5">
-          <RouterLink to="/ops/outreach" class="inline-flex items-center gap-2 bg-electric-blue text-white font-bold text-sm px-4 py-2.5 rounded-xl hover:bg-primary transition-colors">
+          <RouterLink to="/ops/outreach" class="inline-flex items-center gap-2 bg-accent-fill text-white font-bold text-sm px-4 py-2.5 rounded-xl hover:bg-accent-fill transition-colors">
             <span class="material-symbols-outlined text-[18px]">send</span>
             Buka Antrean DM
           </RouterLink>
@@ -144,14 +144,14 @@ onMounted(load)
     <section v-else-if="tab === 'leads'" class="rounded-xl bg-surface-white shadow-md overflow-hidden">
       <div class="p-4 border-b border-border-subtle flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div><h2 class="font-bold text-body-lg">Lead Masuk</h2><p class="text-secondary text-label-sm">Komentar, mention, dan DM yang tersedia via API.</p></div>
-        <select v-model="statusFilter" class="h-10 rounded-lg border border-outline-variant px-3 bg-white"><option value="all">Semua status</option><option v-for="(label,key) in IG_LEAD_STATUS" :key="key" :value="key">{{ label }}</option></select>
+        <select v-model="statusFilter" class="h-10 rounded-lg border border-outline-variant px-3 bg-surface-container-lowest"><option value="all">Semua status</option><option v-for="(label,key) in IG_LEAD_STATUS" :key="key" :value="key">{{ label }}</option></select>
       </div>
       <div v-if="!visibleLeads.length" class="p-12 text-center text-secondary">Belum ada lead Instagram.</div>
       <div v-else class="divide-y divide-border-subtle">
         <article v-for="lead in visibleLeads" :key="lead.id" class="p-4 md:p-5 flex flex-col md:flex-row gap-4 md:items-center">
           <div class="w-11 h-11 rounded-full bg-gradient-to-br from-fuchsia-500 via-rose-500 to-amber-400 text-white flex items-center justify-center font-extrabold shrink-0">{{ (lead.username || '?').charAt(0).toUpperCase() }}</div>
           <div class="min-w-0 flex-1"><div class="flex flex-wrap gap-2 items-center"><p class="font-bold">@{{ lead.username || lead.ig_user_id }}</p><span class="text-[11px] uppercase tracking-wide rounded-full bg-surface-container-high px-2 py-1">{{ lead.source }}</span></div><p class="text-secondary mt-1 break-words">{{ lead.last_message || 'Event tanpa teks' }}</p><p class="text-label-sm text-secondary mt-2">{{ formatDate(lead.last_event_at) }}<span v-if="lead.requests"> · Request #{{ lead.requests.order_no }}</span></p></div>
-          <select :value="lead.status" class="h-10 rounded-lg border border-outline-variant px-3 bg-white" @change="setLeadStatus(lead, $event.target.value)"><option v-for="(label,key) in IG_LEAD_STATUS" :key="key" :value="key">{{ label }}</option></select>
+          <select :value="lead.status" class="h-10 rounded-lg border border-outline-variant px-3 bg-surface-container-lowest" @change="setLeadStatus(lead, $event.target.value)"><option v-for="(label,key) in IG_LEAD_STATUS" :key="key" :value="key">{{ label }}</option></select>
         </article>
       </div>
     </section>
@@ -169,8 +169,8 @@ onMounted(load)
       <form class="space-y-4" @submit.prevent="queuePost">
         <label class="block"><span class="font-bold text-label-sm">URL gambar/video</span><input v-model.trim="form.media_url" type="url" required placeholder="https://..." class="mt-2 w-full h-11 rounded-lg border border-outline-variant px-4 outline-none focus:border-electric-blue"></label>
         <label class="block"><span class="font-bold text-label-sm">Caption</span><textarea v-model.trim="form.caption" required rows="6" maxlength="2200" placeholder="Tulis brief atau caption final..." class="mt-2 w-full rounded-lg border border-outline-variant p-4 outline-none focus:border-electric-blue"></textarea><span class="text-label-sm text-secondary">{{ form.caption.length }}/2200</span></label>
-        <div class="grid sm:grid-cols-2 gap-4"><label><span class="font-bold text-label-sm">Format</span><select v-model="form.media_type" class="mt-2 w-full h-11 rounded-lg border border-outline-variant px-3 bg-white"><option value="IMAGE">Gambar</option><option value="REELS">Reels</option></select></label><label><span class="font-bold text-label-sm">Jadwal (opsional)</span><input v-model="form.scheduled_at" type="datetime-local" class="mt-2 w-full h-11 rounded-lg border border-outline-variant px-3"></label></div>
-        <button :disabled="saving" class="h-11 px-6 rounded-lg bg-electric-blue text-white font-bold disabled:opacity-50">{{ saving ? 'Menyimpan...' : 'Masukkan Antrean' }}</button>
+        <div class="grid sm:grid-cols-2 gap-4"><label><span class="font-bold text-label-sm">Format</span><select v-model="form.media_type" class="mt-2 w-full h-11 rounded-lg border border-outline-variant px-3 bg-surface-container-lowest"><option value="IMAGE">Gambar</option><option value="REELS">Reels</option></select></label><label><span class="font-bold text-label-sm">Jadwal (opsional)</span><input v-model="form.scheduled_at" type="datetime-local" class="mt-2 w-full h-11 rounded-lg border border-outline-variant px-3"></label></div>
+        <button :disabled="saving" class="h-11 px-6 rounded-lg bg-accent-fill text-white font-bold disabled:opacity-50">{{ saving ? 'Menyimpan...' : 'Masukkan Antrean' }}</button>
       </form>
     </section>
 

@@ -44,7 +44,7 @@ const tahun = new Date().getFullYear()
         <div>
           <RouterLink to="/" class="flex items-center gap-2" aria-label="jokitugasit.my.id — beranda">
             <span
-              class="material-symbols-outlined grid h-9 w-9 place-items-center rounded-lg bg-primary text-xl text-on-primary"
+              class="material-symbols-outlined grid h-9 w-9 place-items-center rounded-lg bg-accent-fill text-xl text-on-primary"
               style="font-variation-settings: 'FILL' 1"
               aria-hidden="true"
               >terminal</span

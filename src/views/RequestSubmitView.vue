@@ -277,7 +277,7 @@ async function handleSubmit() {
           Kode kampanye tidak dikenali; form tetap bisa dikirim.
         </div>
 
-        <div class="bg-surface-white rounded-2xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] p-4 sm:p-6 md:p-8 border border-border-subtle/60">
+        <div class="bg-surface-white rounded-2xl shadow-[0px_4px_20px_rgb(var(--shadow-color) / 0.08)] p-4 sm:p-6 md:p-8 border border-border-subtle/60">
           <form class="space-y-5 sm:space-y-6" @submit.prevent="handleSubmit">
             <!-- Name -->
             <div>
@@ -310,7 +310,7 @@ async function handleSubmit() {
               <label class="block font-label-bold text-label-bold text-on-background mb-2">Upload File atau Link Project</label>
               <label class="mt-1 flex justify-center px-4 py-4 sm:px-6 sm:py-5 border-2 border-border-subtle border-dashed rounded-xl hover:border-electric-blue transition-colors bg-surface-container-lowest cursor-pointer group">
                 <div class="space-y-1 text-center">
-                  <span class="material-symbols-outlined text-outline group-hover:text-electric-blue text-3xl sm:text-4xl mb-1">cloud_upload</span>
+                  <span class="material-symbols-outlined text-muted group-hover:text-electric-blue text-3xl sm:text-4xl mb-1">cloud_upload</span>
                   <div class="flex text-sm text-on-surface-variant justify-center items-center">
                     <span class="relative rounded-md font-semibold text-electric-blue group-hover:text-primary">
                       <span>{{ file ? 'Ganti file terpilih' : 'Pilih file tugas' }}</span>
@@ -318,7 +318,7 @@ async function handleSubmit() {
                     </span>
                     <span class="hidden sm:inline pl-1 text-secondary">atau seret file ke sini</span>
                   </div>
-                  <p class="text-xs text-outline truncate max-w-[240px] sm:max-w-md mx-auto">{{ fileLabel }}</p>
+                  <p class="text-xs text-muted truncate max-w-[240px] sm:max-w-md mx-auto">{{ fileLabel }}</p>
                 </div>
               </label>
               <div class="mt-2.5">
@@ -485,7 +485,7 @@ async function handleSubmit() {
             <!-- CTA -->
             <div class="pt-1">
               <button
-                class="w-full bg-electric-blue text-surface-white font-label-bold text-label-bold py-4 rounded-xl flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 transition-all shadow-md min-h-[48px] disabled:opacity-60 disabled:active:scale-100"
+                class="w-full bg-accent-fill text-on-primary font-label-bold text-label-bold py-4 rounded-xl flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 transition-all shadow-md min-h-[48px] disabled:opacity-60 disabled:active:scale-100"
                 type="submit"
                 :disabled="submitting"
               >

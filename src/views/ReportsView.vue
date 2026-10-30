@@ -135,7 +135,7 @@ async function pickDim(k) {
           <div class="flex flex-wrap gap-1.5">
             <button v-for="d in DIMS" :key="d.key"
                     class="px-2.5 py-1.5 rounded-lg text-[12px] font-semibold transition-colors"
-                    :class="dim === d.key ? 'bg-primary text-white' : 'bg-surface-container-low text-secondary hover:bg-surface-container'"
+                    :class="dim === d.key ? 'bg-accent-fill text-white' : 'bg-surface-container-low text-secondary hover:bg-surface-container'"
                     @click="pickDim(d.key)">
               {{ d.label }}
             </button>

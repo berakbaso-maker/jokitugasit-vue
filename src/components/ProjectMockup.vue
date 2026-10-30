@@ -15,6 +15,7 @@
  * disediakan lewat aria-label pada pembungkusnya.
  */
 import { computed } from 'vue'
+import { pakaiTema } from '../lib/tema'
 
 const props = defineProps({
   gradient: { type: Array, default: () => ['#2563EB', '#1E3A8A'] },
@@ -49,10 +50,15 @@ const bentukAktif = computed(() =>
 )
 
 // Warna netral yang dipakai semua varian supaya tetap satu bahasa visual.
-const NETRAL = '#E2E8F0'
-const NETRAL_TERANG = '#F1F5F9'
-const NETRAL_MUDA = '#F8FAFC'
-const NETRAL_GELAP = '#CBD5E1'
+// Palet netral ilustrasi. Di mode gelap dibalik supaya panel "layar" tetap
+// terbaca sebagai panel, bukan silau putih di tengah kanvas gelap.
+// Urutan kontras terhadap panel dipertahankan di kedua tema.
+const { isDark } = pakaiTema()
+const PANEL = computed(() => (isDark.value ? '#1E293B' : '#FFFFFF'))
+const NETRAL = computed(() => (isDark.value ? '#475569' : '#E2E8F0'))
+const NETRAL_TERANG = computed(() => (isDark.value ? '#334155' : '#F1F5F9'))
+const NETRAL_MUDA = computed(() => (isDark.value ? '#0F172A' : '#F8FAFC'))
+const NETRAL_GELAP = computed(() => (isDark.value ? '#64748B' : '#CBD5E1'))
 
 // Tinggi batang grafik AI -- statis (bukan acak) supaya render stabil
 // dan tidak berubah tiap kali komponen di-mount ulang.
@@ -97,7 +103,7 @@ const BARIS_LOG = [
 
       <!-- ============ WEB: jendela browser ============ -->
       <g v-if="bentukAktif === 'web'" transform="translate(34 30)">
-        <rect width="252" height="150" rx="8" fill="#ffffff" opacity="0.97" />
+        <rect width="252" height="150" rx="8" :fill="PANEL" opacity="0.97" />
         <rect width="252" height="22" rx="8" :fill="NETRAL_TERANG" />
         <rect y="14" width="252" height="8" :fill="NETRAL_TERANG" />
         <circle cx="13" cy="11" r="2.8" :fill="NETRAL_GELAP" />
@@ -126,7 +132,7 @@ const BARIS_LOG = [
 
       <!-- ============ MOBILE: bingkai HP ============ -->
       <g v-else-if="bentukAktif === 'mobile'" transform="translate(112 18)">
-        <rect width="96" height="166" rx="14" fill="#ffffff" opacity="0.97" />
+        <rect width="96" height="166" rx="14" :fill="PANEL" opacity="0.97" />
         <rect x="34" y="6" width="28" height="5" rx="2.5" :fill="NETRAL" />
         <g transform="translate(10 20)">
           <rect width="46" height="7" rx="3.5" :fill="gradient[0]" opacity="0.9" />
@@ -160,7 +166,7 @@ const BARIS_LOG = [
 
       <!-- ============ DESKTOP: jendela app + sidebar ============ -->
       <g v-else-if="bentukAktif === 'desktop'" transform="translate(36 34)">
-        <rect width="248" height="142" rx="7" fill="#ffffff" opacity="0.97" />
+        <rect width="248" height="142" rx="7" :fill="PANEL" opacity="0.97" />
         <rect width="248" height="18" rx="7" :fill="NETRAL_TERANG" />
         <rect y="11" width="248" height="7" :fill="NETRAL_TERANG" />
         <circle cx="12" cy="9" r="3" :fill="gradient[0]" opacity="0.8" />
@@ -186,13 +192,13 @@ const BARIS_LOG = [
           <rect x="8" y="6.5" width="30" height="5" rx="2.5" :fill="NETRAL_GELAP" />
           <rect x="48" y="6.5" width="34" height="5" rx="2.5" :fill="NETRAL_GELAP" />
           <rect x="92" y="6.5" width="26" height="5" rx="2.5" :fill="NETRAL_GELAP" />
-          <rect y="24" width="166" height="14" rx="3" fill="#ffffff" />
+          <rect y="24" width="166" height="14" rx="3" :fill="PANEL" />
           <rect x="8" y="29" width="38" height="4" rx="2" :fill="gradient[0]" opacity="0.55" />
           <rect x="56" y="29" width="28" height="4" rx="2" :fill="NETRAL" />
           <rect y="42" width="166" height="14" rx="3" :fill="NETRAL_MUDA" />
           <rect x="8" y="47" width="30" height="4" rx="2" :fill="NETRAL_GELAP" />
           <rect x="56" y="47" width="34" height="4" rx="2" :fill="NETRAL" />
-          <rect y="60" width="166" height="14" rx="3" fill="#ffffff" />
+          <rect y="60" width="166" height="14" rx="3" :fill="PANEL" />
           <rect x="8" y="65" width="34" height="4" rx="2" :fill="NETRAL_GELAP" />
           <rect x="56" y="65" width="24" height="4" rx="2" :fill="NETRAL" />
           <rect y="78" width="166" height="14" rx="3" :fill="NETRAL_MUDA" />
@@ -203,7 +209,7 @@ const BARIS_LOG = [
 
       <!-- ============ DATABASE: skema tabel + relasi ============ -->
       <g v-else-if="bentukAktif === 'database'" transform="translate(26 32)">
-        <rect width="268" height="146" rx="8" fill="#ffffff" opacity="0.97" />
+        <rect width="268" height="146" rx="8" :fill="PANEL" opacity="0.97" />
         <g transform="translate(14 14)">
           <rect width="104" height="62" rx="5" :fill="NETRAL_MUDA" :stroke="NETRAL" />
           <rect width="104" height="16" rx="5" :fill="gradient[0]" opacity="0.9" />
@@ -241,7 +247,7 @@ const BARIS_LOG = [
 
       <!-- ============ AI: grafik tren + node ============ -->
       <g v-else-if="bentukAktif === 'ai'" transform="translate(28 30)">
-        <rect width="264" height="150" rx="8" fill="#ffffff" opacity="0.97" />
+        <rect width="264" height="150" rx="8" :fill="PANEL" opacity="0.97" />
         <rect x="14" y="14" width="60" height="6" rx="3" :fill="gradient[0]" opacity="0.85" />
         <rect x="14" y="26" width="38" height="4" rx="2" :fill="NETRAL_GELAP" />
         <g transform="translate(14 40)">
@@ -281,9 +287,9 @@ const BARIS_LOG = [
 
       <!-- ============ SKRIPSI: dokumen bertumpuk ============ -->
       <g v-else-if="bentukAktif === 'skripsi'" transform="translate(46 24)">
-        <rect x="16" y="8" width="196" height="152" rx="6" fill="#ffffff" opacity="0.55" />
-        <rect x="8" y="4" width="196" height="152" rx="6" fill="#ffffff" opacity="0.75" />
-        <rect width="196" height="152" rx="6" fill="#ffffff" opacity="0.98" />
+        <rect x="16" y="8" width="196" height="152" rx="6" :fill="PANEL" opacity="0.55" />
+        <rect x="8" y="4" width="196" height="152" rx="6" :fill="PANEL" opacity="0.75" />
+        <rect width="196" height="152" rx="6" :fill="PANEL" opacity="0.98" />
         <rect x="52" y="16" width="92" height="7" rx="3.5" :fill="gradient[0]" opacity="0.9" />
         <rect x="66" y="29" width="64" height="4" rx="2" :fill="NETRAL_GELAP" />
         <line x1="30" y1="42" x2="166" y2="42" :stroke="NETRAL" stroke-width="1" />
@@ -326,7 +332,7 @@ const BARIS_LOG = [
 
       <!-- ============ DESIGN: artboard wireframe + palet ============ -->
       <g v-else-if="bentukAktif === 'design'" transform="translate(28 30)">
-        <rect width="264" height="150" rx="8" fill="#ffffff" opacity="0.97" />
+        <rect width="264" height="150" rx="8" :fill="PANEL" opacity="0.97" />
         <rect x="12" y="12" width="24" height="24" rx="6" :fill="gradient[0]" opacity="0.85" />
         <rect x="42" y="12" width="24" height="24" rx="6" :fill="NETRAL_TERANG" />
         <rect x="72" y="12" width="24" height="24" rx="6" :fill="NETRAL_TERANG" />
@@ -344,10 +350,10 @@ const BARIS_LOG = [
           <rect x="10" y="10" width="140" height="20" rx="3" :fill="NETRAL" />
           <rect x="10" y="38" width="66" height="42" rx="3" :fill="gradient[0]" opacity="0.2" />
           <rect x="84" y="38" width="66" height="42" rx="3" :fill="gradient[0]" opacity="0.12" />
-          <rect x="-2.5" y="-2.5" width="5" height="5" fill="#ffffff" :stroke="gradient[0]" />
-          <rect x="157.5" y="-2.5" width="5" height="5" fill="#ffffff" :stroke="gradient[0]" />
-          <rect x="-2.5" y="87.5" width="5" height="5" fill="#ffffff" :stroke="gradient[0]" />
-          <rect x="157.5" y="87.5" width="5" height="5" fill="#ffffff" :stroke="gradient[0]" />
+          <rect x="-2.5" y="-2.5" width="5" height="5" :fill="PANEL" :stroke="gradient[0]" />
+          <rect x="157.5" y="-2.5" width="5" height="5" :fill="PANEL" :stroke="gradient[0]" />
+          <rect x="-2.5" y="87.5" width="5" height="5" :fill="PANEL" :stroke="gradient[0]" />
+          <rect x="157.5" y="87.5" width="5" height="5" :fill="PANEL" :stroke="gradient[0]" />
         </g>
         <g transform="translate(184 46)">
           <rect width="68" height="90" rx="4" :fill="NETRAL_MUDA" />
@@ -363,7 +369,7 @@ const BARIS_LOG = [
 
       <!-- ============ TUGAS KULIAH: lembar soal + checklist ============ -->
       <g v-else-if="bentukAktif === 'tugas_kuliah'" transform="translate(48 26)">
-        <rect width="200" height="148" rx="6" fill="#ffffff" opacity="0.98" />
+        <rect width="200" height="148" rx="6" :fill="PANEL" opacity="0.98" />
         <g :stroke="NETRAL_TERANG" stroke-width="1">
           <line x1="0" y1="34" x2="200" y2="34" />
           <line x1="0" y1="58" x2="200" y2="58" />
@@ -425,7 +431,7 @@ const BARIS_LOG = [
 
       <!-- ============ FALLBACK: kartu generik ============ -->
       <g v-else transform="translate(52 48)">
-        <rect width="216" height="104" rx="8" fill="#ffffff" opacity="0.97" />
+        <rect width="216" height="104" rx="8" :fill="PANEL" opacity="0.97" />
         <rect x="16" y="16" width="48" height="48" rx="10" :fill="gradient[0]" opacity="0.75" />
         <rect x="76" y="20" width="86" height="7" rx="3.5" :fill="NETRAL_GELAP" />
         <rect x="76" y="34" width="110" height="5" rx="2.5" :fill="NETRAL" />
@@ -437,9 +443,9 @@ const BARIS_LOG = [
 
     <!-- ikon kategori -->
     <div
-      class="absolute bottom-3 right-3 grid h-9 w-9 place-items-center rounded-lg bg-white/95 shadow-sm backdrop-blur"
+      class="absolute bottom-3 right-3 grid h-9 w-9 place-items-center rounded-lg border border-border-subtle bg-surface-container-lowest/95 shadow-sm backdrop-blur"
     >
-      <span class="material-symbols-outlined text-lg text-on-surface" aria-hidden="true">{{
+      <span class="material-symbols-outlined text-lg text-on-surface-variant" aria-hidden="true">{{
         icon
       }}</span>
     </div>

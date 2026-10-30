@@ -381,7 +381,7 @@ onMounted(async () => {
           <span class="material-symbols-outlined text-[20px]">upload_file</span>
           Impor CSV
         </button>
-        <button @click="showAdd = true" class="inline-flex items-center gap-2 bg-electric-blue text-white font-label-bold px-4 py-2.5 rounded-xl hover:bg-primary transition-colors shadow-sm">
+        <button @click="showAdd = true" class="inline-flex items-center gap-2 bg-accent-fill text-white font-label-bold px-4 py-2.5 rounded-xl hover:bg-accent-fill transition-colors shadow-sm">
           <span class="material-symbols-outlined text-[20px]">person_add</span>
           Tambah Manual
         </button>
@@ -595,7 +595,7 @@ onMounted(async () => {
           <p v-if="convertError" class="text-sm text-urgency-red">{{ convertError }}</p>
           <div class="flex gap-3 pt-2">
             <button type="button" @click="convertTarget = null" class="flex-1 px-4 py-2.5 rounded-xl border border-outline-variant font-bold text-sm">Batal</button>
-            <button type="submit" :disabled="converting" class="flex-1 px-4 py-2.5 rounded-xl bg-electric-blue text-white font-bold text-sm disabled:opacity-60">
+            <button type="submit" :disabled="converting" class="flex-1 px-4 py-2.5 rounded-xl bg-accent-fill text-white font-bold text-sm disabled:opacity-60">
               {{ converting ? 'Membuat...' : 'Buat Proyek' }}
             </button>
           </div>
@@ -644,7 +644,7 @@ onMounted(async () => {
           <p v-if="addError" class="text-sm text-urgency-red">{{ addError }}</p>
           <div class="flex gap-3 pt-2">
             <button type="button" @click="showAdd = false" class="flex-1 px-4 py-2.5 rounded-xl border border-outline-variant font-bold text-sm">Batal</button>
-            <button type="submit" :disabled="adding" class="flex-1 px-4 py-2.5 rounded-xl bg-electric-blue text-white font-bold text-sm disabled:opacity-60">
+            <button type="submit" :disabled="adding" class="flex-1 px-4 py-2.5 rounded-xl bg-accent-fill text-white font-bold text-sm disabled:opacity-60">
               {{ adding ? 'Menyimpan...' : 'Simpan' }}
             </button>
           </div>
@@ -751,7 +751,7 @@ onMounted(async () => {
             v-if="!importResult"
             @click="commitImport"
             :disabled="importing || !importPreview?.rows?.length"
-            class="flex-1 px-4 py-2.5 rounded-xl bg-electric-blue text-white font-bold text-sm disabled:opacity-50"
+            class="flex-1 px-4 py-2.5 rounded-xl bg-accent-fill text-white font-bold text-sm disabled:opacity-50"
           >
             {{ importing ? 'Menyimpan...' : `Simpan ${importPreview?.rows?.length || 0} prospek` }}
           </button>

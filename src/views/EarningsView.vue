@@ -94,7 +94,7 @@ onMounted(async () => {
       </div>
       <RouterLink
         to="/requests"
-        class="bg-electric-blue text-surface-white font-label-bold text-label-bold px-6 py-3 rounded-lg hover:scale-[0.98] transition-transform shadow-soft flex items-center gap-2 w-full md:w-auto justify-center"
+        class="bg-accent-fill text-on-primary font-label-bold text-label-bold px-6 py-3 rounded-lg hover:scale-[0.98] transition-transform shadow-soft flex items-center gap-2 w-full md:w-auto justify-center"
       >
         <span class="material-symbols-outlined">add_card</span>
         Catat Pembayaran
@@ -112,7 +112,7 @@ onMounted(async () => {
     <template v-else>
       <!-- Stats Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div class="bg-surface-white p-6 rounded-xl shadow-soft hover:shadow-[0_8px_30px_rgba(15,23,42,0.12)] hover:border hover:border-electric-blue transition-all group">
+        <div class="bg-surface-white p-6 rounded-xl shadow-soft hover:shadow-[0_8px_30px_rgb(var(--shadow-color) / 0.12)] hover:border hover:border-electric-blue transition-all group">
           <div class="flex items-center justify-between mb-4">
             <span class="font-label-bold text-label-bold text-secondary">Omzet Terkonfirmasi</span>
             <span class="material-symbols-outlined text-electric-blue bg-primary-fixed/30 p-2 rounded-lg group-hover:bg-primary-fixed/50 transition-colors">account_balance</span>
@@ -123,7 +123,7 @@ onMounted(async () => {
           </div>
         </div>
 
-        <div class="bg-surface-white p-6 rounded-xl shadow-soft hover:shadow-[0_8px_30px_rgba(15,23,42,0.12)] hover:border hover:border-electric-blue transition-all group">
+        <div class="bg-surface-white p-6 rounded-xl shadow-soft hover:shadow-[0_8px_30px_rgb(var(--shadow-color) / 0.12)] hover:border hover:border-electric-blue transition-all group">
           <div class="flex items-center justify-between mb-4">
             <span class="font-label-bold text-label-bold text-secondary">Komisi Siap Dibayar</span>
             <span class="material-symbols-outlined text-urgency-red bg-error-container/50 p-2 rounded-lg">pending_actions</span>
@@ -132,7 +132,7 @@ onMounted(async () => {
           <div class="font-label-sm text-label-sm text-secondary">Baru muncul setelah proyek lunas</div>
         </div>
 
-        <div class="bg-surface-white p-6 rounded-xl shadow-soft hover:shadow-[0_8px_30px_rgba(15,23,42,0.12)] hover:border hover:border-electric-blue transition-all group">
+        <div class="bg-surface-white p-6 rounded-xl shadow-soft hover:shadow-[0_8px_30px_rgb(var(--shadow-color) / 0.12)] hover:border hover:border-electric-blue transition-all group">
           <div class="flex items-center justify-between mb-4">
             <span class="font-label-bold text-label-bold text-secondary">Komisi Sudah Dibayar</span>
             <span class="material-symbols-outlined text-success-green bg-success-green/10 p-2 rounded-lg">paid</span>
@@ -141,7 +141,7 @@ onMounted(async () => {
           <div class="font-label-sm text-label-sm text-secondary">Dicatat di tabel komisi</div>
         </div>
 
-        <div class="bg-surface-white p-6 rounded-xl shadow-soft hover:shadow-[0_8px_30px_rgba(15,23,42,0.12)] hover:border hover:border-electric-blue transition-all group">
+        <div class="bg-surface-white p-6 rounded-xl shadow-soft hover:shadow-[0_8px_30px_rgb(var(--shadow-color) / 0.12)] hover:border hover:border-electric-blue transition-all group">
           <div class="flex items-center justify-between mb-4">
             <span class="font-label-bold text-label-bold text-secondary">Sebelum Biaya Lain</span>
             <span class="material-symbols-outlined text-electric-blue bg-primary-fixed/30 p-2 rounded-lg">trending_up</span>

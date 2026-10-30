@@ -299,7 +299,7 @@ function waLink(wa) {
         <p class="text-body-md font-body-md text-secondary mt-1">Kelola partner dan tracking komisi 10% per transaksi.</p>
       </div>
       <button @click="showAddModal = true"
-        class="inline-flex items-center gap-2 bg-electric-blue text-white font-label-bold text-label-bold px-5 py-2.5 rounded-xl hover:bg-primary transition-colors shadow-sm">
+        class="inline-flex items-center gap-2 bg-accent-fill text-white font-label-bold text-label-bold px-5 py-2.5 rounded-xl hover:bg-accent-fill transition-colors shadow-sm">
         <span class="material-symbols-outlined text-[20px]">person_add</span>
         Tambah Partner
       </button>
@@ -459,7 +459,7 @@ function waLink(wa) {
                 WA Partner
               </a>
               <button v-if="c.status === 'ELIGIBLE'" @click="openPay(c)"
-                class="inline-flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-lg bg-electric-blue text-white hover:bg-primary transition-colors">
+                class="inline-flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-lg bg-accent-fill text-white hover:bg-accent-fill transition-colors">
                 <span class="material-symbols-outlined text-[14px]">payments</span>
                 Tandai Lunas
               </button>
@@ -508,7 +508,7 @@ function waLink(wa) {
           <p v-if="addError" class="text-sm text-urgency-red">{{ addError }}</p>
           <div class="flex gap-3 pt-2">
             <button type="button" @click="showAddModal = false" class="flex-1 px-4 py-2.5 rounded-xl border border-outline-variant text-on-surface-variant font-bold text-sm hover:bg-surface-container transition-colors">Batal</button>
-            <button type="submit" :disabled="adding" class="flex-1 px-4 py-2.5 rounded-xl bg-electric-blue text-white font-bold text-sm hover:bg-primary transition-colors disabled:opacity-60">
+            <button type="submit" :disabled="adding" class="flex-1 px-4 py-2.5 rounded-xl bg-accent-fill text-white font-bold text-sm hover:bg-accent-fill transition-colors disabled:opacity-60">
               {{ adding ? 'Menyimpan...' : 'Tambah Partner' }}
             </button>
           </div>
@@ -561,7 +561,7 @@ function waLink(wa) {
           <p v-if="editError" class="text-sm text-urgency-red">{{ editError }}</p>
           <div class="flex gap-3 pt-2">
             <button type="button" @click="showEditModal = false" class="flex-1 px-4 py-2.5 rounded-xl border border-outline-variant font-bold text-sm">Batal</button>
-            <button type="submit" :disabled="savingEdit" class="flex-1 px-4 py-2.5 rounded-xl bg-electric-blue text-white font-bold text-sm disabled:opacity-60">
+            <button type="submit" :disabled="savingEdit" class="flex-1 px-4 py-2.5 rounded-xl bg-accent-fill text-white font-bold text-sm disabled:opacity-60">
               {{ savingEdit ? 'Menyimpan...' : 'Simpan Perubahan' }}
             </button>
           </div>
@@ -597,7 +597,7 @@ function waLink(wa) {
           <p v-if="payError" class="text-sm text-urgency-red">{{ payError }}</p>
           <div class="flex gap-3 pt-1">
             <button type="button" @click="payTarget = null" class="flex-1 px-4 py-2.5 rounded-xl border border-outline-variant font-bold text-sm">Batal</button>
-            <button type="submit" :disabled="paySaving" class="flex-1 px-4 py-2.5 rounded-xl bg-electric-blue text-white font-bold text-sm disabled:opacity-60">
+            <button type="submit" :disabled="paySaving" class="flex-1 px-4 py-2.5 rounded-xl bg-accent-fill text-white font-bold text-sm disabled:opacity-60">
               {{ paySaving ? 'Menyimpan...' : 'Konfirmasi Lunas' }}
             </button>
           </div>

@@ -161,7 +161,7 @@ const attrCols = [
       description="Program referral 10% dari pendapatan bersih proyek yang memenuhi syarat. Komisi hanya lahir dari pembayaran terverifikasi — bukan dari lead atau klik."
     >
       <template #actions>
-        <button class="inline-flex items-center gap-2 bg-primary text-white font-label-bold px-4 py-2.5 rounded-xl hover:bg-primary-container transition-colors" @click="showForm = true">
+        <button class="inline-flex items-center gap-2 bg-accent-fill text-white font-label-bold px-4 py-2.5 rounded-xl hover:bg-primary-container transition-colors" @click="showForm = true">
           <span class="material-symbols-outlined text-[18px]">person_add</span>
           Partner baru
         </button>
@@ -251,7 +251,7 @@ const attrCols = [
       <template #footer>
         <div class="flex justify-end gap-2">
           <button class="px-4 py-2.5 rounded-xl border border-border-subtle font-label-bold hover:bg-surface-container-low" @click="showForm = false">Batal</button>
-          <button class="px-4 py-2.5 rounded-xl bg-primary text-white font-label-bold hover:bg-primary-container disabled:opacity-50" :disabled="saving" @click="createPartner">
+          <button class="px-4 py-2.5 rounded-xl bg-accent-fill text-white font-label-bold hover:bg-primary-container disabled:opacity-50" :disabled="saving" @click="createPartner">
             {{ saving ? 'Menyimpan…' : 'Buat partner' }}
           </button>
         </div>

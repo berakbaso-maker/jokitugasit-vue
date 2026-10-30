@@ -61,7 +61,7 @@ function onDrop(colKey, e) {
     >
       <header class="flex items-center justify-between px-4 py-3 border-b border-border-subtle">
         <div class="flex items-center gap-2 min-w-0">
-          <span class="w-2 h-2 rounded-full shrink-0" :class="col.dot || 'bg-primary'" />
+          <span class="w-2 h-2 rounded-full shrink-0" :class="col.dot || 'bg-accent-fill'" />
           <h3 class="font-label-bold text-[12px] uppercase tracking-wider text-secondary truncate">
             {{ col.label }}
           </h3>

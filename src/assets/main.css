@@ -3,6 +3,175 @@
 @tailwind utilities;
 
 /* ==========================================================================
+   TEMA — sumber kebenaran warna.
+   Nilai di :root PERSIS sama dengan hex lama di tailwind.config.js, jadi mode
+   terang tidak berubah sedikit pun. .dark hanya menimpa nilai variabelnya;
+   3.160+ pemakaian kelas di seluruh view tidak perlu disentuh.
+   Format: triplet RGB tanpa koma, supaya <alpha-value> Tailwind tetap jalan
+   (mis. bg-primary/10).
+   ========================================================================== */
+:root {
+  color-scheme: light;
+
+  /* Kanvas & permukaan */
+  --background: 255 255 255;
+  --surface: 255 255 255;
+  --surface-white: 255 255 255;
+  --surface-bright: 255 255 255;
+  --surface-container-lowest: 255 255 255;
+  --surface-container-low: 248 250 252;
+  --surface-container: 241 245 249;
+  --surface-container-high: 226 232 240;
+  --surface-container-highest: 203 213 225;
+  --surface-variant: 226 232 240;
+  --surface-dim: 226 232 240;
+
+  /* Teks */
+  --on-background: 15 23 42;
+  --on-surface: 15 23 42;
+  --on-surface-variant: 71 85 105;
+  --secondary: 82 98 122;
+  --muted: 100 116 139;
+  --outline: 148 163 184;
+  --outline-variant: 203 213 225;
+  --border-subtle: 226 232 240;
+
+  /* Aksen peran-TEKS */
+  --primary: 37 99 235;
+  --electric-blue: 37 99 235;
+  --primary-fixed: 219 234 254;
+  --primary-fixed-dim: 191 219 254;
+  --on-primary-fixed: 30 58 138;
+  --on-primary-fixed-variant: 29 78 216;
+  --surface-tint: 37 99 235;
+  --inverse-primary: 147 197 253;
+
+  /* Aksen sekunder */
+  --secondary-container: 226 232 240;
+  --on-secondary-container: 71 85 105;
+  --secondary-fixed: 226 232 240;
+  --secondary-fixed-dim: 203 213 225;
+  --on-secondary-fixed: 15 23 42;
+  --on-secondary-fixed-variant: 51 65 85;
+
+  /* Aksen tersier */
+  --tertiary: 30 41 59;
+  --tertiary-container: 51 65 85;
+  --on-tertiary-container: 219 234 254;
+  --tertiary-fixed: 219 234 254;
+  --tertiary-fixed-dim: 147 197 253;
+  --on-tertiary-fixed: 15 23 42;
+  --on-tertiary-fixed-variant: 30 64 175;
+
+  /* Status */
+  --error: 185 28 28;
+  --error-container: 254 226 226;
+  --on-error-container: 127 29 29;
+  --success-green: 21 128 61;
+  --urgency-red: 220 38 38;
+
+  /* Permukaan invers (blok CTA) */
+  --inverse-surface: 15 23 42;
+  --inverse-on-surface: 248 250 252;
+
+  /* Pendukung non-Tailwind */
+  --shadow-color: 15 23 42;
+  --cta-shadow-color: 37 99 235;
+  --focus-ring: 37 99 235;
+  --focus-ring-contrast: 15 23 42;
+  --grid-color: 15 23 42;
+  --accent-gradient-a: 37 99 235;
+  --accent-gradient-b: 29 78 216;
+  --selection-bg: 219 234 254;
+  --selection-fg: 15 23 42;
+}
+
+/* --------------------------------------------------------------------------
+   Mode gelap. Prinsipnya BUKAN "semua dibalik", tapi:
+   - kanvas & permukaan  -> gelap (kartu sedikit lebih terang dari kanvas)
+   - teks                -> terang
+   - aksen peran-TEKS    -> diterangkan supaya lolos WCAG AA di latar gelap
+   - aksen peran-ISI     -> TIDAK ikut (ada di config, statis) agar teks putih
+                            di atas tombol biru tetap terbaca
+   - inverse-surface     -> justru jadi terang (blok CTA memang terbalik)
+   -------------------------------------------------------------------------- */
+.dark {
+  color-scheme: dark;
+
+  /* Kanvas & permukaan */
+  --background: 15 23 42;
+  --surface: 15 23 42;
+  --surface-white: 30 41 59;
+  --surface-bright: 30 41 59;
+  --surface-container-lowest: 30 41 59;
+  --surface-container-low: 30 41 59;
+  --surface-container: 30 41 59;
+  --surface-container-high: 51 65 85;
+  --surface-container-highest: 71 85 105;
+  --surface-variant: 51 65 85;
+  --surface-dim: 15 23 42;
+
+  /* Teks */
+  --on-background: 241 245 249;
+  --on-surface: 241 245 249;
+  --on-surface-variant: 203 213 225;
+  --secondary: 170 184 200;  /* dinaikkan: #94A3B8 gagal 4.04:1 di permukaan terang */
+  --muted: 148 163 184;
+  --outline: 100 116 139;
+  --outline-variant: 51 65 85;
+  --border-subtle: 51 65 85;
+
+  /* Aksen peran-TEKS: #60A5FA = 7.02:1 di atas #0F172A (lolos AA) */
+  --primary: 96 165 250;
+  --electric-blue: 96 165 250;
+  --primary-fixed: 30 58 138;
+  --primary-fixed-dim: 30 64 175;
+  --on-primary-fixed: 219 234 254;
+  --on-primary-fixed-variant: 147 197 253;
+  --surface-tint: 96 165 250;
+  --inverse-primary: 30 58 138;
+
+  /* Aksen sekunder */
+  --secondary-container: 51 65 85;
+  --on-secondary-container: 203 213 225;
+  --secondary-fixed: 51 65 85;
+  --secondary-fixed-dim: 71 85 105;
+  --on-secondary-fixed: 241 245 249;
+  --on-secondary-fixed-variant: 203 213 225;
+
+  /* Aksen tersier (dipakai sebagai TEKS -> diterangkan) */
+  --tertiary: 226 232 240;
+  --tertiary-container: 51 65 85;
+  --on-tertiary-container: 219 234 254;
+  --tertiary-fixed: 51 65 85;
+  --tertiary-fixed-dim: 71 85 105;
+  --on-tertiary-fixed: 241 245 249;
+  --on-tertiary-fixed-variant: 147 197 253;
+
+  /* Status: #F87171 6.45:1 · #4ADE80 10.25:1 */
+  --error: 248 113 113;
+  --error-container: 69 26 26;
+  --on-error-container: 254 202 202;
+  --success-green: 74 222 128;
+  --urgency-red: 248 113 113;
+
+  /* Blok CTA berbalik jadi terang di atas kanvas gelap */
+  --inverse-surface: 241 245 249;
+  --inverse-on-surface: 15 23 42;
+
+  /* Pendukung */
+  --shadow-color: 0 0 0;
+  --cta-shadow-color: 37 99 235;
+  --focus-ring: 147 197 253;
+  --focus-ring-contrast: 241 245 249;
+  --grid-color: 148 163 184;
+  --accent-gradient-a: 96 165 250;
+  --accent-gradient-b: 147 197 253;
+  --selection-bg: 30 58 138;
+  --selection-fg: 241 245 249;
+}
+
+/* ==========================================================================
    Material Icons
    ========================================================================== */
 .material-symbols-outlined {
@@ -23,9 +192,9 @@
 }
 
 @keyframes pulse-ring {
-  0%   { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(21, 128, 61, 0.55); }
-  70%  { transform: scale(1);    box-shadow: 0 0 0 6px rgba(21, 128, 61, 0); }
-  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(21, 128, 61, 0); }
+  0%   { transform: scale(0.95); box-shadow: 0 0 0 0 rgb(var(--success-green) / 0.55); }
+  70%  { transform: scale(1);    box-shadow: 0 0 0 6px rgb(var(--success-green) / 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgb(var(--success-green) / 0); }
 }
 
 /* ==========================================================================
@@ -51,7 +220,7 @@
      blok gelap, dan tidak tertimpa overflow:hidden pada kartu.
      ------------------------------------------------------------------ */
   :focus-visible {
-    outline: 2px solid #2563EB;
+    outline: 2px solid rgb(var(--focus-ring));
     outline-offset: 2px;
     border-radius: 0.25rem;
   }
@@ -62,7 +231,7 @@
      (putih di atas putih = tidak terlihat). */
   .bg-inverse-surface :focus-visible,
   .bg-tertiary :focus-visible {
-    outline-color: #FFFFFF;
+    outline-color: rgb(var(--focus-ring-contrast));
   }
 
   /* Jangan tampilkan outline pada klik mouse, hanya keyboard */
@@ -71,8 +240,8 @@
   }
 
   ::selection {
-    background-color: #DBEAFE;
-    color: #0F172A;
+    background-color: rgb(var(--selection-bg));
+    color: rgb(var(--selection-fg));
   }
 }
 
@@ -121,7 +290,7 @@
   }
 
   .btn-primary {
-    @apply btn bg-primary text-on-primary px-6 py-3 shadow-cta
+    @apply btn bg-accent-fill text-on-primary px-6 py-3 shadow-cta
            hover:bg-primary-container hover:-translate-y-0.5 hover:shadow-card-hover
            active:translate-y-0 active:shadow-card;
   }
@@ -137,9 +306,8 @@
      akan menyatu dengan tombol, cincin putih menyatu dengan latar.
      Slate gelap #0F172A terbaca jelas di keduanya. */
   .btn-primary:focus-visible,
-  .bg-primary:focus-visible,
-  .bg-electric-blue:focus-visible {
-    outline-color: #0F172A;
+  .bg-accent-fill:focus-visible {
+    outline-color: rgb(var(--focus-ring-contrast));
   }
 
   .btn-ghost {
@@ -169,7 +337,7 @@
 @layer utilities {
   /* Gradient teks halus untuk aksen judul — dibatasi, tidak dipakai di mana-mana */
   .text-gradient {
-    background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+    background: linear-gradient(135deg, rgb(var(--accent-gradient-a)) 0%, rgb(var(--accent-gradient-b)) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -178,8 +346,8 @@
   /* Grid halus untuk latar hero, sangat rendah kontras */
   .bg-grid {
     background-image:
-      linear-gradient(to right, rgba(15, 23, 42, 0.04) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(15, 23, 42, 0.04) 1px, transparent 1px);
+      linear-gradient(to right, rgb(var(--grid-color) / 0.04) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(var(--grid-color) / 0.04) 1px, transparent 1px);
     background-size: 56px 56px;
   }
 
@@ -202,7 +370,7 @@
   .media-stable {
     aspect-ratio: 4 / 3;
     object-fit: cover;
-    background-color: #F1F5F9;
+    background-color: rgb(var(--surface-container));
   }
 }
 

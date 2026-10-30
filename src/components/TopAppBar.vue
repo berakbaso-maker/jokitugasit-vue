@@ -1,9 +1,11 @@
 <script setup>
 import { ref, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { pakaiTema } from '../lib/tema'
 import { RouterLink, useRoute } from 'vue-router'
 
 const route = useRoute()
 const menuTerbuka = ref(false)
+const { isDark, toggleTema } = pakaiTema()
 
 /**
  * Satu state untuk semua dropdown, berisi nama dropdown yang terbuka
@@ -158,7 +160,7 @@ onBeforeUnmount(() => {
         aria-label="jokitugasit.my.id — beranda"
       >
         <span
-          class="material-symbols-outlined grid h-9 w-9 place-items-center rounded-lg bg-primary text-xl text-on-primary"
+          class="material-symbols-outlined grid h-9 w-9 place-items-center rounded-lg bg-accent-fill text-xl text-on-primary"
           style="font-variation-settings: 'FILL' 1"
           aria-hidden="true"
           >terminal</span
@@ -308,9 +310,21 @@ onBeforeUnmount(() => {
       <!-- Aksi: hanya CTA. "Jadi Partner" pindah ke dropdown Lainnya
            supaya baris kanan tidak bersaing perhatian dengan tombol utama. -->
       <div class="hidden shrink-0 items-center gap-2 md:flex">
+        <button
+          type="button"
+          class="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-border-subtle text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+          :aria-label="isDark ? 'Aktifkan mode terang' : 'Aktifkan mode gelap'"
+          :title="isDark ? 'Mode terang' : 'Mode gelap'"
+          :aria-pressed="isDark"
+          @click="toggleTema"
+        >
+          <span class="material-symbols-outlined text-xl" aria-hidden="true">
+            {{ isDark ? 'light_mode' : 'dark_mode' }}
+          </span>
+        </button>
         <RouterLink
           to="/request"
-          class="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-on-primary shadow-cta transition-[background-color,transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:bg-primary-container"
+          class="inline-flex items-center gap-1.5 rounded-lg bg-accent-fill px-4 py-2 text-sm font-bold text-on-primary shadow-cta transition-[background-color,transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:bg-primary-container"
         >
           Mulai Konsultasi
           <span class="material-symbols-outlined text-base" aria-hidden="true">arrow_forward</span>
@@ -363,7 +377,7 @@ onBeforeUnmount(() => {
         <div class="mt-4 flex flex-col gap-2 border-t border-border-subtle pt-4">
           <RouterLink
             to="/request"
-            class="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-bold text-on-primary"
+            class="inline-flex items-center justify-center gap-2 rounded-lg bg-accent-fill px-4 py-3 text-sm font-bold text-on-primary"
           >
             <span class="material-symbols-outlined text-base" aria-hidden="true">rocket_launch</span>
             Mulai Konsultasi
@@ -375,6 +389,19 @@ onBeforeUnmount(() => {
             <span class="material-symbols-outlined text-base" aria-hidden="true">group_add</span>
             Jadi Partner
           </RouterLink>
+
+          <!-- Toggle tema juga di drawer: di layar kecil tombol desktop disembunyikan -->
+          <button
+            type="button"
+            class="inline-flex items-center justify-center gap-2 rounded-lg border border-border-subtle px-4 py-3 text-sm font-bold text-on-surface"
+            :aria-pressed="isDark"
+            @click="toggleTema"
+          >
+            <span class="material-symbols-outlined text-base" aria-hidden="true">
+              {{ isDark ? 'light_mode' : 'dark_mode' }}
+            </span>
+            {{ isDark ? 'Mode Terang' : 'Mode Gelap' }}
+          </button>
         </div>
       </nav>
     </div>

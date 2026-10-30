@@ -39,7 +39,7 @@ const courses = [
           Jasa joki tugas kuliah IT umum terpercaya. Mulai dari dasar C++, Java, Python, hingga algoritma kompleks. Pengerjaan cepat, harga ramah mahasiswa.
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <RouterLink to="/request" class="bg-electric-blue text-white font-label-bold text-label-bold px-8 py-4 rounded-xl hover:bg-primary transition-colors shadow-lg flex items-center justify-center gap-2">
+          <RouterLink to="/request" class="bg-accent-fill text-white font-label-bold text-label-bold px-8 py-4 rounded-xl hover:bg-accent-fill transition-colors shadow-lg flex items-center justify-center gap-2">
             <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">rocket_launch</span>
             Cek Tugas Gratis
           </RouterLink>
@@ -53,7 +53,7 @@ const courses = [
       <!-- Pain points -->
       <section class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-14">
         <div v-for="p in painPoints" :key="p.title" class="bg-surface-white rounded-xl p-5 border border-border-subtle shadow-sm">
-          <span class="w-11 h-11 rounded-lg bg-error-container text-urgency-red flex items-center justify-center mb-3">
+          <span class="w-11 h-11 rounded-lg bg-error-container text-error flex items-center justify-center mb-3">
             <span class="material-symbols-outlined">{{ p.icon }}</span>
           </span>
           <h2 class="font-label-bold text-label-bold text-on-surface mb-1">{{ p.title }}</h2>
@@ -82,11 +82,11 @@ const courses = [
       </section>
 
       <!-- CTA -->
-      <section class="bg-electric-blue rounded-2xl p-8 md:p-12 text-center text-white relative overflow-hidden">
+      <section class="bg-accent-fill rounded-2xl p-8 md:p-12 text-center text-white relative overflow-hidden">
         <div class="absolute inset-0 bg-primary opacity-20 -z-10"></div>
         <h2 class="font-headline-lg text-headline-lg font-bold mb-3">Tugas IT Beres, Kamu Tenang.</h2>
-        <p class="text-body-md text-body-md text-on-primary-container opacity-90 max-w-lg mx-auto mb-7">Kirim tugasmu sekarang, kami kerjakan dengan standar profesional dan harga ramah mahasiswa.</p>
-        <RouterLink to="/request" class="inline-flex items-center gap-2 bg-white text-electric-blue font-label-bold text-label-bold px-7 py-3.5 rounded-xl hover:bg-surface-container-lowest transition-colors shadow-md">
+        <p class="text-body-md text-on-primary opacity-90 max-w-lg mx-auto mb-7">Kirim tugasmu sekarang, kami kerjakan dengan standar profesional dan harga ramah mahasiswa.</p>
+        <RouterLink to="/request" class="inline-flex items-center gap-2 bg-white text-accent-fill font-label-bold text-label-bold px-7 py-3.5 rounded-xl hover:bg-surface-container-lowest transition-colors shadow-md">
           <span class="material-symbols-outlined">send</span>
           Konsultasi Gratis Sekarang
         </RouterLink>

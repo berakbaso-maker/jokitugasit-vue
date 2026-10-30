@@ -137,12 +137,12 @@ function relTime(iso) {
           <button
             v-for="p in PERIODS" :key="p.value"
             class="px-3 py-2 text-[13px] font-semibold transition-colors"
-            :class="period === p.value ? 'bg-primary text-white' : 'text-secondary hover:bg-surface-container-low'"
+            :class="period === p.value ? 'bg-accent-fill text-white' : 'text-secondary hover:bg-surface-container-low'"
             @click="period = p.value; load()"
           >{{ p.label }}</button>
         </div>
         <button
-          class="inline-flex items-center gap-2 bg-primary text-white font-label-bold px-4 py-2.5 rounded-xl hover:bg-primary-container transition-colors"
+          class="inline-flex items-center gap-2 bg-accent-fill text-white font-label-bold px-4 py-2.5 rounded-xl hover:bg-primary-container transition-colors"
           @click="load"
         >
           <span class="material-symbols-outlined text-[18px]">refresh</span>

@@ -147,12 +147,12 @@ async function openRun(r) {
     <template v-else>
       <div class="inline-flex rounded-xl border border-border-subtle overflow-hidden bg-surface-white mb-5">
         <button class="px-4 py-2.5 text-[13px] font-semibold"
-                :class="tab === 'workflows' ? 'bg-primary text-white' : 'text-secondary hover:bg-surface-container-low'"
+                :class="tab === 'workflows' ? 'bg-accent-fill text-white' : 'text-secondary hover:bg-surface-container-low'"
                 @click="tab = 'workflows'">
           Workflow ({{ workflows.length }})
         </button>
         <button class="px-4 py-2.5 text-[13px] font-semibold"
-                :class="tab === 'runs' ? 'bg-primary text-white' : 'text-secondary hover:bg-surface-container-low'"
+                :class="tab === 'runs' ? 'bg-accent-fill text-white' : 'text-secondary hover:bg-surface-container-low'"
                 @click="tab = 'runs'">
           Riwayat eksekusi ({{ runs.length }})
         </button>
@@ -171,7 +171,7 @@ async function openRun(r) {
         <template #cell-enabled="{ row }">
           <button
             class="relative w-9 h-5 rounded-full transition-colors disabled:opacity-50"
-            :class="row.enabled ? 'bg-primary' : 'bg-surface-container'"
+            :class="row.enabled ? 'bg-accent-fill' : 'bg-surface-container'"
             :disabled="busy === row.id" @click.stop="toggle(row)"
           >
             <span class="absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all"

@@ -8,7 +8,7 @@ import { waLink } from '../lib/api'
 const WA_TEXT = 'Halo jokitugasit.my.id, saya butuh bantuan tugas mobile app.'
 
 const problems = [
-  { icon: 'link_off', title: 'API Gak Nyambung', desc: 'Data dari backend gak mau muncul di aplikasi? Error CORS, null check, atau response parsing bermasalah.', color: 'bg-error-container text-urgency-red' },
+  { icon: 'link_off', title: 'API Gak Nyambung', desc: 'Data dari backend gak mau muncul di aplikasi? Error CORS, null check, atau response parsing bermasalah.', color: 'bg-error-container text-error' },
   { icon: 'dashboard_customize', title: 'UI Berantakan', desc: 'Layout overflow, elemen ketutupan keyboard, atau tampilan nggak rapi di layar kecil.', color: 'bg-primary-fixed/40 text-electric-blue' },
   { icon: 'bug_report', title: 'Build Error / Crash', desc: 'Gradle error, dependency conflict, atau app langsung crash saat dibuka.', color: 'bg-tertiary-fixed/40 text-tertiary' },
 ]
@@ -34,7 +34,7 @@ const stacks = ['Flutter', 'React Native', 'Android Studio', 'Kotlin', 'Swift']
           Stuck di Flutter, React Native, atau Android Studio? Biar expert friend yang beresin. Fix bug, API, UI, sampai build error.
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <RouterLink to="/request" class="bg-electric-blue text-white font-label-bold text-label-bold px-8 py-4 rounded-xl hover:bg-primary transition-colors shadow-lg flex items-center justify-center gap-2">
+          <RouterLink to="/request" class="bg-accent-fill text-white font-label-bold text-label-bold px-8 py-4 rounded-xl hover:bg-accent-fill transition-colors shadow-lg flex items-center justify-center gap-2">
             <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">rocket_launch</span>
             Cek Project Gratis
           </RouterLink>
@@ -78,12 +78,12 @@ const stacks = ['Flutter', 'React Native', 'Android Studio', 'Kotlin', 'Swift']
       </section>
 
       <!-- CTA -->
-      <section class="bg-electric-blue rounded-2xl p-8 md:p-12 text-center text-white relative overflow-hidden">
+      <section class="bg-accent-fill rounded-2xl p-8 md:p-12 text-center text-white relative overflow-hidden">
         <div class="absolute inset-0 bg-primary opacity-20 -z-10"></div>
         <h2 class="font-headline-lg text-headline-lg font-bold mb-3">App-mu Error Sekarang?</h2>
-        <p class="text-body-md text-body-md text-on-primary-container opacity-90 max-w-lg mx-auto mb-7">Jangan tunda. Kirim screenshot error-nya, kami cek dulu gratis.</p>
+        <p class="text-body-md text-on-primary opacity-90 max-w-lg mx-auto mb-7">Jangan tunda. Kirim screenshot error-nya, kami cek dulu gratis.</p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <RouterLink to="/request" class="bg-white text-electric-blue font-label-bold text-label-bold px-7 py-3.5 rounded-xl hover:bg-surface-container-lowest transition-colors shadow-md">Kirim Sekarang</RouterLink>
+          <RouterLink to="/request" class="bg-white text-accent-fill font-label-bold text-label-bold px-7 py-3.5 rounded-xl hover:bg-surface-container-lowest transition-colors shadow-md">Kirim Sekarang</RouterLink>
           <a :href="waLink('6285166337257', WA_TEXT)" target="_blank" rel="noopener" class="border-2 border-white text-white font-label-bold text-label-bold px-7 py-3.5 rounded-xl hover:bg-white/10 transition-colors">Chat WhatsApp</a>
         </div>
       </section>
