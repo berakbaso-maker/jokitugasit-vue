@@ -4,10 +4,17 @@ import { RouterLink, useRoute } from 'vue-router'
 
 const route = useRoute()
 const menuTerbuka = ref(false)
-const layananTerbuka = ref(false)
+
+/**
+ * Satu state untuk semua dropdown, berisi nama dropdown yang terbuka
+ * atau null. Dulu ada satu ref per dropdown (`layananTerbuka`); begitu
+ * dropdown kedua ditambah, pola itu memaksa ref baru + handler baru +
+ * pengecekan di luar-klik. Satu string lebih sederhana dan mustahil
+ * membuka dua panel sekaligus.
+ */
+const dropdownAktif = ref(null)
 
 const tombolMenu = ref(null)
-const wadahLayanan = ref(null)
 
 /**
  * Item navigasi utama.
@@ -21,11 +28,22 @@ const wadahLayanan = ref(null)
  * Sekarang: nav desktop tampil mulai `lg`, di bawah `lg` semuanya lewat
  * drawer. Tidak ada item yang bisa "hilang" di breakpoint mana pun.
  */
+// Nav desktop sengaja dipangkas: hanya jalur yang dilalui calon klien
+// saat menimbang (bukti -> layanan -> harga -> cara kerja). Sisanya
+// masuk dropdown "Lainnya" supaya header tidak jadi deretan 9 tautan.
 const tautan = [
   { label: 'Harga', to: '/harga' },
   { label: 'Cara Kerja', to: '/cara-kerja' },
-  { label: 'Cek Status', to: '/track' },
-  { label: 'Tanya Jawab', to: '/tanya-jawab' },
+]
+
+// Tautan pencarian spesifik / sekunder. Bukan sampah -- hanya jarang
+// diklik pengunjung baru, jadi tidak perlu makan ruang header.
+const tautanLainnya = [
+  { label: 'Tanya Jawab', to: '/tanya-jawab', ikon: 'help' },
+  { label: 'Cek Status Order', to: '/track', ikon: 'receipt_long' },
+  { label: 'Testimoni', to: '/testimoni', ikon: 'reviews' },
+  { label: 'Tentang Kami', to: '/tentang', ikon: 'info' },
+  { label: 'Jadi Partner', to: '/partner', ikon: 'group_add' },
 ]
 
 const layanan = [
@@ -40,9 +58,14 @@ const layanan = [
   { label: 'Desain UI/UX', to: '/joki-desain-ui-ux' },
 ]
 
-// Drawer mobile: "Beranda" eksplisit ada di sini. Di desktop juga ada
-// (link tersendiri di nav, lihat template) -- logo saja tidak cukup jelas
-// sebagai satu-satunya jalan pulang.
+// Drawer mobile: SEMUA tautan tetap tampil di sini, termasuk yang di
+// desktop disembunyikan ke dropdown. Alasannya: dropdown butuh klik
+// presisi dan menambah satu lapisan; di layar kecil daftar datar justru
+// lebih cepat dipindai.
+//
+// Disusun dari `tautan` + `tautanLainnya` (bukan ditulis ulang manual)
+// supaya tidak ada tautan yang hilang saat nav desktop dipangkas.
+// "Jadi Partner" dikecualikan karena sudah jadi tombol di bawah drawer.
 //
 // Catatan: jangan tambahkan Beranda ke array `tautan`, karena array itu
 // di-spread ke sini dan akan menghasilkan dua link Beranda.
@@ -51,8 +74,7 @@ const tautanMobile = [
   { label: 'Portofolio', to: '/portofolio' },
   { label: 'Layanan', to: '/layanan' },
   ...tautan,
-  { label: 'Testimoni', to: '/testimoni' },
-  { label: 'Tentang', to: '/tentang' },
+  ...tautanLainnya.filter((item) => item.to !== '/partner'),
 ]
 
 const aktif = (to) => {
@@ -65,12 +87,16 @@ const aktif = (to) => {
 
 const tutupSemua = () => {
   menuTerbuka.value = false
-  layananTerbuka.value = false
+  dropdownAktif.value = null
 }
 
 const toggleMenu = () => {
   menuTerbuka.value = !menuTerbuka.value
-  if (menuTerbuka.value) layananTerbuka.value = false
+  if (menuTerbuka.value) dropdownAktif.value = null
+}
+
+const toggleDropdown = (nama) => {
+  dropdownAktif.value = dropdownAktif.value === nama ? null : nama
 }
 
 const tutupMenuKembalikanFokus = () => {
@@ -93,17 +119,18 @@ watch(
   },
 )
 
+// Tutup dropdown mana pun yang sedang terbuka saat klik di luar area
+// ber-atribut data-dropdown. Memakai closest() supaya tidak perlu satu
+// ref container per dropdown.
 const klikDiLuar = (e) => {
-  if (!layananTerbuka.value) return
-  if (wadahLayanan.value && !wadahLayanan.value.contains(e.target)) {
-    layananTerbuka.value = false
-  }
+  if (!dropdownAktif.value) return
+  if (!e.target.closest('[data-dropdown]')) dropdownAktif.value = null
 }
 
 const tombolEscape = (e) => {
   if (e.key !== 'Escape') return
-  if (layananTerbuka.value) {
-    layananTerbuka.value = false
+  if (dropdownAktif.value) {
+    dropdownAktif.value = null
     return
   }
   if (menuTerbuka.value) tutupMenuKembalikanFokus()
@@ -172,7 +199,7 @@ onBeforeUnmount(() => {
         </RouterLink>
 
         <!-- Dropdown Layanan -->
-        <div ref="wadahLayanan" class="relative">
+        <div class="relative" data-dropdown>
           <button
             type="button"
             class="inline-flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-semibold transition-colors duration-200"
@@ -181,22 +208,22 @@ onBeforeUnmount(() => {
                 ? 'bg-surface-container text-primary'
                 : 'text-secondary hover:bg-surface-container-low hover:text-on-surface'
             "
-            :aria-expanded="layananTerbuka"
+            :aria-expanded="dropdownAktif === 'layanan'"
             aria-haspopup="true"
             aria-controls="dropdown-layanan"
-            @click="layananTerbuka = !layananTerbuka"
+            @click="toggleDropdown('layanan')"
           >
             Layanan
             <span
               class="material-symbols-outlined text-base transition-transform duration-200"
-              :class="{ 'rotate-180': layananTerbuka }"
+              :class="{ 'rotate-180': dropdownAktif === 'layanan' }"
               aria-hidden="true"
               >expand_more</span
             >
           </button>
 
           <div
-            v-show="layananTerbuka"
+            v-show="dropdownAktif === 'layanan'"
             id="dropdown-layanan"
             class="absolute left-0 top-full z-50 mt-2 w-64 rounded-xl border border-border-subtle bg-surface-white p-2 shadow-card-hover"
           >
@@ -233,17 +260,54 @@ onBeforeUnmount(() => {
         >
           {{ item.label }}
         </RouterLink>
+
+        <!-- Dropdown "Lainnya": tautan sekunder agar header tidak penuh -->
+        <div class="relative" data-dropdown>
+          <button
+            type="button"
+            class="inline-flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-semibold transition-colors duration-200"
+            :class="
+              dropdownAktif === 'lainnya'
+                ? 'bg-surface-container text-primary'
+                : 'text-secondary hover:bg-surface-container-low hover:text-on-surface'
+            "
+            :aria-expanded="dropdownAktif === 'lainnya'"
+            aria-haspopup="true"
+            aria-controls="dropdown-lainnya"
+            @click="toggleDropdown('lainnya')"
+          >
+            Lainnya
+            <span
+              class="material-symbols-outlined text-base transition-transform duration-200"
+              :class="{ 'rotate-180': dropdownAktif === 'lainnya' }"
+              aria-hidden="true"
+              >expand_more</span
+            >
+          </button>
+
+          <div
+            v-show="dropdownAktif === 'lainnya'"
+            id="dropdown-lainnya"
+            class="absolute right-0 top-full z-50 mt-2 w-56 rounded-xl border border-border-subtle bg-surface-white p-2 shadow-card-hover"
+          >
+            <RouterLink
+              v-for="item in tautanLainnya"
+              :key="item.to"
+              :to="item.to"
+              class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-semibold text-secondary transition-colors hover:bg-surface-container-low hover:text-on-surface"
+              :class="{ 'bg-surface-container text-primary': aktif(item.to) }"
+              :aria-current="aktif(item.to) ? 'page' : undefined"
+            >
+              <span class="material-symbols-outlined text-base" aria-hidden="true">{{ item.ikon }}</span>
+              {{ item.label }}
+            </RouterLink>
+          </div>
+        </div>
       </nav>
 
-      <!-- Aksi: CTA selalu tampil mulai md, tautan partner hanya lg -->
+      <!-- Aksi: hanya CTA. "Jadi Partner" pindah ke dropdown Lainnya
+           supaya baris kanan tidak bersaing perhatian dengan tombol utama. -->
       <div class="hidden shrink-0 items-center gap-2 md:flex">
-        <RouterLink
-          to="/partner"
-          class="hidden rounded-lg px-3 py-2 text-sm font-semibold text-secondary transition-colors hover:bg-surface-container-low hover:text-on-surface lg:inline-flex"
-          :class="{ 'text-primary': aktif('/partner') }"
-        >
-          Jadi Partner
-        </RouterLink>
         <RouterLink
           to="/request"
           class="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-on-primary shadow-cta transition-[background-color,transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:bg-primary-container"
