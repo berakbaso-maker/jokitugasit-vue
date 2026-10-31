@@ -59,7 +59,7 @@ if (route.params.orderNo || route.query.order) track()
         <p class="text-body-lg font-body-lg text-on-surface-variant">Masukkan nomor order untuk melihat progress request secara real-time.</p>
       </section>
       <section class="max-w-2xl mx-auto bg-surface-white rounded-xl shadow-[0px_4px_20px_rgb(var(--shadow-color) / 0.08)] p-5 md:p-7 mb-8">
-        <form class="flex flex-col sm:flex-row gap-3" @submit.prevent="track"><label class="sr-only" for="order-number">Nomor order</label><input id="order-number" v-model="orderNo" type="text" placeholder="Contoh: JT1024" autocomplete="off" class="flex-1 min-w-0 h-12 rounded-lg border border-outline-variant bg-surface px-4 font-body-md text-on-surface uppercase outline-none focus:border-electric-blue focus:ring-2 focus:ring-electric-blue/20" /><button type="submit" :disabled="loading" class="h-12 px-6 rounded-lg bg-accent-fill text-white font-label-bold text-label-bold shadow-md hover:bg-accent-fill disabled:opacity-60 transition-colors"><span v-if="loading" class="material-symbols-outlined animate-spin align-middle">progress_activity</span><span v-else>Cek Status</span></button></form>
+        <form class="flex flex-col sm:flex-row gap-3" @submit.prevent="track"><label class="sr-only" for="order-number">Nomor order</label><input id="order-number" v-model="orderNo" type="text" placeholder="Contoh: JT1024" autocomplete="off" class="flex-1 min-w-0 min-h-[48px] rounded-lg border border-outline-variant bg-surface px-4 font-body-md text-on-surface uppercase outline-none focus:border-electric-blue focus:ring-2 focus:ring-electric-blue/20" /><button type="submit" :disabled="loading" class="h-12 px-6 rounded-lg bg-accent-fill text-white font-label-bold text-label-bold shadow-md hover:bg-accent-fill disabled:opacity-60 transition-colors"><span v-if="loading" class="material-symbols-outlined animate-spin align-middle">progress_activity</span><span v-else>Cek Status</span></button></form>
         <KotakGalat
           v-if="errorMsg"
           class="mt-4"
@@ -129,7 +129,7 @@ if (route.params.orderNo || route.query.order) track()
           </RouterLink>
         </div>
       </section>
-      <section v-else-if="!loading" class="max-w-2xl mx-auto text-center py-8"><span class="material-symbols-outlined text-5xl text-muted">search</span><p class="text-secondary mt-3">Belum ada order yang dicari.</p><button class="mt-5 text-electric-blue font-label-bold text-label-bold hover:underline" @click="router.push('/request')">Kirim request baru →</button></section>
+      <section v-else-if="!loading" class="max-w-2xl mx-auto text-center py-8"><span class="material-symbols-outlined text-5xl text-muted">search</span><p class="text-secondary mt-3">Belum ada order yang dicari.</p><button class="mt-5 inline-flex items-center min-h-11 px-2 text-electric-blue font-label-bold text-label-bold hover:underline" @click="router.push('/request')">Kirim request baru →</button></section>
     </main>
     <FooterBar />
     <BottomNavBar />

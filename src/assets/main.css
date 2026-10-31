@@ -659,3 +659,38 @@ nav[aria-label="Navigasi seksi beranda"] button {
     transform: none !important;
   }
 }
+
+/* --------------------------------------------------------------------------
+   Navigasi bawah (mobile)
+   - bar-nya fixed, jadi konten terakhir butuh ruang supaya tidak tertutup
+   - padding safe-area menjaga home indicator iPhone tidak menimpa ikon
+   -------------------------------------------------------------------------- */
+.nav-bawah {
+  padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
+}
+
+@media (max-width: 767.98px) {
+  body:has(.nav-bawah) {
+    padding-bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Target sentuh di layar kecil (Apple HIG: ≥44px)
+   Footer: daftar tautan dibuat 2 kolom supaya tinggi tidak meledak, tapi
+   setiap tautan tetap punya area sentuh 44px.
+   -------------------------------------------------------------------------- */
+@media (max-width: 767.98px) {
+  footer nav ul {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 1rem;
+    row-gap: 0;
+  }
+
+  footer nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+}

@@ -439,7 +439,7 @@ onBeforeUnmount(() => {
         </div>
 
         <div class="relative mx-auto max-w-container-max-width px-gutter py-16 md:py-24">
-          <div class="grid items-start gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
+          <div class="grid grid-cols-[minmax(0,1fr)] items-start gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
             <!-- Kolom kiri: pesan utama -->
             <div>
               <p class="eyebrow reveal">
