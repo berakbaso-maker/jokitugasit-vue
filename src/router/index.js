@@ -270,6 +270,12 @@ const router = createRouter({
       meta: { requiresEngineer: true },
     },
     {
+      path: '/requests/:id/kuitansi',
+      name: 'request-invoice',
+      component: () => import('../views/InvoiceView.vue'),
+      meta: { requiresEngineer: true },
+    },
+    {
       path: '/earnings',
       name: 'earnings',
       component: () => import('../views/EarningsView.vue'),

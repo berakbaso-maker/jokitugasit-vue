@@ -694,3 +694,30 @@ nav[aria-label="Navigasi seksi beranda"] button {
     min-height: 44px;
   }
 }
+
+/* --------------------------------------------------------------------------
+   Cetak (kuitansi)
+   - margin A4 wajar, latar putih (browser default membuang background)
+   - ruang untuk bottom nav tidak relevan di kertas
+   -------------------------------------------------------------------------- */
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+    padding-bottom: 0 !important;
+  }
+
+  * {
+    box-shadow: none !important;
+  }
+
+  /* Jangan cetak URL di belakang tautan */
+  a[href]::after {
+    content: '';
+  }
+}

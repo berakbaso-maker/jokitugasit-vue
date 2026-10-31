@@ -618,6 +618,14 @@ const typeColor = (c) => {
             </button>
 
             <button
+              class="w-full bg-surface-white border-2 border-border-subtle text-on-surface hover:border-electric-blue font-label-bold text-xs py-3 rounded-xl flex items-center justify-center gap-1.5 transition-all mb-3"
+              @click="router.push(`/requests/${request.id}/kuitansi`)"
+            >
+              <span class="material-symbols-outlined text-[18px]">receipt</span>
+              Lihat / Cetak Kuitansi
+            </button>
+
+            <button
               @click="copySowInvoice"
               class="w-full bg-surface-white border-2 border-electric-blue text-electric-blue hover:bg-primary-fixed/20 font-label-bold text-xs py-3 rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-2xs mb-4"
             >
