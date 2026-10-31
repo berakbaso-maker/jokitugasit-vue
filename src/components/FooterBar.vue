@@ -18,6 +18,7 @@ const kolomLayanan = [
 const kolomInformasi = [
   { label: 'Semua Layanan', to: '/layanan' },
   { label: 'Cara Kerja', to: '/cara-kerja' },
+  { label: 'Janji Layanan', to: '/janji' },
   { label: 'Estimasi Harga', to: '/harga' },
   { label: 'Tanya Jawab', to: '/tanya-jawab' },
   { label: 'Portofolio', to: '/portofolio' },
@@ -64,7 +65,7 @@ const tahun = new Date().getFullYear()
             :href="waTanya"
             target="_blank"
             rel="noopener noreferrer"
-            class="mt-5 inline-flex items-center gap-2 rounded-lg border border-border-subtle px-3.5 py-2 text-sm font-semibold text-on-surface transition-colors hover:border-outline hover:bg-surface-container-low"
+            class="mt-5 inline-flex min-h-11 items-center gap-2 rounded-lg border border-border-subtle px-3.5 py-2 text-sm font-semibold text-on-surface transition-colors hover:border-outline hover:bg-surface-container-low"
           >
             <span class="material-symbols-outlined text-base text-success-green" aria-hidden="true">chat</span>
             Hubungi via WhatsApp

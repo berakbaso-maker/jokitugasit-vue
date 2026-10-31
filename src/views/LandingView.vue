@@ -473,6 +473,10 @@ onBeforeUnmount(() => {
                 </RouterLink>
               </div>
 
+              <p class="reveal reveal-delay-3 mt-3 text-xs text-secondary">
+                Konsultasi gratis · tidak wajib lanjut · dibalas pada jam kerja (08.00–22.00 WIB)
+              </p>
+
               <!-- Penanda kepercayaan: fakta proses, bukan angka karangan -->
               <ul class="reveal reveal-delay-4 mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-secondary">
                 <li class="flex items-center gap-2">
@@ -1009,6 +1013,94 @@ onBeforeUnmount(() => {
                 Komisi dihitung dari nilai project yang benar-benar berjalan, bukan dari
                 sekadar pendaftaran.
               </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= JANJI & BUKTI ================= -->
+      <section id="janji" class="mx-auto max-w-container-max-width px-gutter py-16 md:py-24">
+        <div class="grid gap-10 lg:grid-cols-[1fr_0.85fr] lg:gap-14">
+          <div>
+            <p class="eyebrow reveal">Sebelum kamu percaya</p>
+            <h2 class="reveal reveal-delay-1 mt-4 text-[28px] font-extrabold tracking-tight text-on-surface md:text-[36px]">
+              Empat hal yang kami jamin
+            </h2>
+            <p class="reveal reveal-delay-2 mt-4 max-w-xl text-sm leading-relaxed text-secondary">
+              Bukan slogan. Ini yang benar-benar berjalan di sistem kami, dan bisa kamu
+              tanyakan kapan saja sebelum mulai.
+            </p>
+
+            <ul class="reveal reveal-delay-3 mt-7 space-y-3">
+              <li class="flex items-start gap-3 rounded-xl border border-border-subtle bg-surface-white p-4">
+                <span class="material-symbols-outlined text-[20px] text-success-green" aria-hidden="true">check_circle</span>
+                <div>
+                  <p class="text-sm font-bold text-on-surface">Nilai disepakati sebelum pengerjaan</p>
+                  <p class="mt-0.5 text-sm text-secondary">Tidak ada tagihan kejutan setelah pekerjaan jalan.</p>
+                </div>
+              </li>
+              <li class="flex items-start gap-3 rounded-xl border border-border-subtle bg-surface-white p-4">
+                <span class="material-symbols-outlined text-[20px] text-success-green" aria-hidden="true">check_circle</span>
+                <div>
+                  <p class="text-sm font-bold text-on-surface">Garansi perbaikan saat presentasi</p>
+                  <p class="mt-0.5 text-sm text-secondary">Muncul error waktu demo di depan dosen? Kami perbaiki.</p>
+                </div>
+              </li>
+              <li class="flex items-start gap-3 rounded-xl border border-border-subtle bg-surface-white p-4">
+                <span class="material-symbols-outlined text-[20px] text-success-green" aria-hidden="true">check_circle</span>
+                <div>
+                  <p class="text-sm font-bold text-on-surface">Dijelaskan, bukan diserahkan mentah</p>
+                  <p class="mt-0.5 text-sm text-secondary">Kamu dapat penjelasan kode dan pendampingan demo.</p>
+                </div>
+              </li>
+              <li class="flex items-start gap-3 rounded-xl border border-border-subtle bg-surface-white p-4">
+                <span class="material-symbols-outlined text-[20px] text-success-green" aria-hidden="true">check_circle</span>
+                <div>
+                  <p class="text-sm font-bold text-on-surface">Tugasmu tidak dipublikasikan</p>
+                  <p class="mt-0.5 text-sm text-secondary">File dan data tidak jadi portofolio tanpa izinmu.</p>
+                </div>
+              </li>
+            </ul>
+
+            <RouterLink
+              to="/janji"
+              class="mt-5 inline-flex min-h-11 items-center gap-1.5 text-sm font-bold text-primary hover:underline"
+            >
+              Baca janji lengkap, termasuk yang tidak kami janjikan
+              <span class="material-symbols-outlined text-[16px]" aria-hidden="true">arrow_forward</span>
+            </RouterLink>
+          </div>
+
+          <div class="reveal reveal-delay-2 self-start rounded-2xl border border-border-subtle bg-surface-container-low p-6">
+            <p class="flex items-center gap-2 text-sm font-bold text-on-surface">
+              <span class="material-symbols-outlined text-[20px] text-primary" aria-hidden="true">verified_user</span>
+              Bukti yang bisa kamu cek sendiri
+            </p>
+            <p class="mt-2 text-sm leading-relaxed text-secondary">
+              Situs ini bukan gambar mockup. Sistem yang kamu lihat adalah sistem yang
+              kami pakai mengelola pesanan setiap hari.
+            </p>
+            <ol class="mt-5 space-y-3 text-sm">
+              <li class="flex gap-3">
+                <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-fixed/60 text-xs font-bold text-primary">1</span>
+                <span class="text-secondary">Kirim request gratis, tanpa daftar akun.</span>
+              </li>
+              <li class="flex gap-3">
+                <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-fixed/60 text-xs font-bold text-primary">2</span>
+                <span class="text-secondary">Kode booking langsung terbit dan dikirim ke email.</span>
+              </li>
+              <li class="flex gap-3">
+                <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-fixed/60 text-xs font-bold text-primary">3</span>
+                <span class="text-secondary">Pantau statusnya tanpa login, dan dapat email tiap status berubah.</span>
+              </li>
+            </ol>
+            <div class="mt-5 flex flex-wrap gap-2">
+              <RouterLink to="/request" class="inline-flex min-h-11 items-center gap-1.5 rounded-lg bg-accent-fill px-4 text-xs font-bold text-white hover:bg-primary-container">
+                Coba kirim request
+              </RouterLink>
+              <RouterLink to="/track" class="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border-subtle bg-surface-white px-4 text-xs font-bold text-on-surface hover:border-electric-blue">
+                Cek status order
+              </RouterLink>
             </div>
           </div>
         </div>

@@ -12,6 +12,7 @@ import {
   summarizePayments, toRupiahInteger,
 } from '../lib/money'
 import { pesanGalat } from '../lib/galat'
+import { infoPembayaran } from '../lib/pembayaran'
 
 const route = useRoute()
 const router = useRouter()
@@ -208,6 +209,7 @@ function copySowInvoice() {
   if (!request.value) return
   const discountValue = Number(discount.value || request.value.discount_amount || 0)
   const q = Math.max(Number(quote.value || request.value.quote_amount || 0) - discountValue, 0)
+  const bayar = infoPembayaran()
   const dp = Math.round(q / 2)
   const sisa = q - dp
   const text = `Halo ${request.value.customer_name}, terima kasih sudah konsultasi di jokitugasit.my.id! 👍
@@ -224,10 +226,9 @@ Garansi Layanan:
 ✓ Free pendampingan & konsultasi persiapan demo dosen
 ✓ Garansi perbaikan jika ada runtime error saat presentasi
 
-Rekening Pembayaran DP:
-• BCA: 1234567890 a.n Engineer
-• GoPay / OVO / Dana: 085166337257
-(Kirim bukti transfer ke WhatsApp ini ya)
+${bayar.ada
+  ? `Rekening Pembayaran DP:\n${bayar.pesan.map((b) => `• ${b}`).join('\n')}\n(Kirim bukti transfer ke WhatsApp ini ya)`
+  : 'Rekening pembayaran akan dikirim di pesan terpisah supaya selalu nomor terbaru.'}
 
 Mohon konfirmasi jika sepakat dengan SOW di atas agar pengerjaan segera dimulai. Terima kasih!`
 

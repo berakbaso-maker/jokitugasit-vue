@@ -477,6 +477,28 @@ async function handleSubmit() {
               </div>
             </div>
 
+            <!-- Apa yang terjadi setelah kirim: menutup keraguan di titik keputusan -->
+            <div class="rounded-xl border border-border-subtle bg-surface-container-low p-4">
+              <p class="flex items-center gap-1.5 text-xs font-bold text-on-surface">
+                <span class="material-symbols-outlined text-[16px] text-primary">schedule</span>
+                Setelah kamu kirim, ini yang terjadi
+              </p>
+              <ol class="mt-3 space-y-2 text-[12px] leading-relaxed text-secondary">
+                <li class="flex gap-2">
+                  <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary-fixed/60 text-[10px] font-bold text-primary">1</span>
+                  <span>Kami balas di WhatsApp pada jam kerja (08.00–22.00 WIB) untuk klarifikasi singkat.</span>
+                </li>
+                <li class="flex gap-2">
+                  <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary-fixed/60 text-[10px] font-bold text-primary">2</span>
+                  <span>Nilai dan waktu pengerjaan disepakati dulu. Tidak ada biaya sebelum kamu setuju.</span>
+                </li>
+                <li class="flex gap-2">
+                  <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary-fixed/60 text-[10px] font-bold text-primary">3</span>
+                  <span>Nomor order terbit, progres bisa kamu pantau sendiri dan dikabari lewat email.</span>
+                </li>
+              </ol>
+            </div>
+
             <!-- CTA -->
             <div class="pt-1">
               <button
@@ -488,6 +510,9 @@ async function handleSubmit() {
                 <span v-else class="material-symbols-outlined">send</span>
                 {{ submitting ? 'Mengirim...' : 'Kirim & Konsultasi Gratis' }}
               </button>
+              <p class="mt-2.5 text-center text-[11px] leading-relaxed text-secondary">
+                Gratis · tidak wajib lanjut · dibalas pada jam kerja
+              </p>
             </div>
 
           </form>

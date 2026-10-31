@@ -60,6 +60,10 @@ if (route.params.orderNo || route.query.order) track()
       </section>
       <section class="max-w-2xl mx-auto bg-surface-white rounded-xl shadow-[0px_4px_20px_rgb(var(--shadow-color) / 0.08)] p-5 md:p-7 mb-8">
         <form class="flex flex-col sm:flex-row gap-3" @submit.prevent="track"><label class="sr-only" for="order-number">Nomor order</label><input id="order-number" v-model="orderNo" type="text" placeholder="Contoh: JT1024" autocomplete="off" class="flex-1 min-w-0 min-h-[48px] rounded-lg border border-outline-variant bg-surface px-4 font-body-md text-on-surface uppercase outline-none focus:border-electric-blue focus:ring-2 focus:ring-electric-blue/20" /><button type="submit" :disabled="loading" class="h-12 px-6 rounded-lg bg-accent-fill text-white font-label-bold text-label-bold shadow-md hover:bg-accent-fill disabled:opacity-60 transition-colors"><span v-if="loading" class="material-symbols-outlined animate-spin align-middle">progress_activity</span><span v-else>Cek Status</span></button></form>
+
+          <p class="mt-3 text-center text-xs text-secondary">
+            Tidak perlu login. Simpan nomor order untuk mengecek kapan saja.
+          </p>
         <KotakGalat
           v-if="errorMsg"
           class="mt-4"
