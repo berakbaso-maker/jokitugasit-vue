@@ -53,6 +53,7 @@ run "migration-campaigns"             "$ROOT/migration-campaigns.sql"
 run "migration-internal-platform"     "$ROOT/migration-internal-platform.sql"
 run "migration-testimonials"         "$ROOT/migration-testimonials.sql"
 run "migration-notify-guard"      "$ROOT/migration-notify-guard.sql"
+run "migration-status-notify"     "$ROOT/migration-status-notify.sql"
 run "migration-partner-manage"   "$ROOT/migration-partner-manage.sql"
 run "05_grants (supabase default)"     "$DIR/05_grants.sql"
 
@@ -73,6 +74,7 @@ run "110_campaigns.sql"                "$DIR/110_campaigns.sql"
 run "120_internal_platform.sql"        "$DIR/120_internal_platform.sql"
 run "130_testimonials.sql"           "$DIR/130_testimonials.sql"
 run "140_partner_manage.sql"       "$DIR/140_partner_manage.sql"
+run "150_status_notify.sql"       "$DIR/150_status_notify.sql"
 
 echo
 echo "${c_green}semua migration + test lulus${c_reset}"

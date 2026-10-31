@@ -33,6 +33,51 @@ const saving = ref(false)
 const savedMsg = ref('')
 const copySowSuccess = ref(false)
 
+// Kabar ke klien setelah status berubah. null = belum ada kabar.
+// tipe: 'ok' (email terkirim) | 'wa' (perlu WA manual) | 'gagal'
+const kabar = ref(null)
+
+// Kalimat yang dikirim ke klien lewat WA kalau email tidak tersedia.
+const PESAN_STATUS_KLIEN = {
+  new: 'request kamu sudah kami terima dan masuk antrean.',
+  consultation: 'kami sedang mendiskusikan kebutuhanmu, engineer akan menghubungimu.',
+  working: 'pengerjaan sudah dimulai, kami kabari lagi saat masuk tahap review.',
+  review: 'hasil sudah masuk pengecekan akhir sebelum diserahkan.',
+  done: 'pekerjaan selesai, silakan cek hasilnya lalu konfirmasi pelunasan kalau sudah sesuai.',
+  paid: 'pembayaran sudah kami terima dan order ini lunas. Terima kasih!',
+}
+
+function teksKabarWa(status) {
+  const label = STATUS_LABELS[status] || status
+  const pesan = PESAN_STATUS_KLIEN[status] || 'status order kamu diperbarui.'
+  return `Halo ${request.value?.customer_name || 'Kak'}, update untuk order ${request.value?.order_no || ''}: status sekarang *${label}* — ${pesan} Cek detail: https://jokitugasit.my.id/track/${request.value?.order_no || ''}`
+}
+
+async function kirimKabarStatus(status) {
+  kabar.value = null
+  const wa = waLink(request.value?.whatsapp, teksKabarWa(status))
+  try {
+    const res = await fetch('/api/notify-status', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderNo: request.value.order_no, status }),
+    })
+    if (res.ok) {
+      kabar.value = { tipe: 'ok', teks: 'Klien sudah dikabari lewat email.' }
+    } else if (res.status === 409) {
+      kabar.value = {
+        tipe: 'wa',
+        teks: 'Klien belum punya email (atau status ini sudah dikabarkan). Kirim kabar lewat WhatsApp:',
+        waUrl: wa,
+      }
+    } else {
+      kabar.value = { tipe: 'gagal', teks: 'Email kabar status gagal dikirim. Pakai WhatsApp:', waUrl: wa }
+    }
+  } catch {
+    kabar.value = { tipe: 'gagal', teks: 'Server notifikasi tidak bisa dihubungi. Pakai WhatsApp:', waUrl: wa }
+  }
+}
+
 // ---------- pembayaran & komisi ----------
 const payments = ref([])
 const commission = ref(null)
@@ -124,6 +169,7 @@ async function save() {
     return
   }
 
+  const statusSebelum = request.value.status
   try {
     const patch = {
       status: status.value,
@@ -147,6 +193,7 @@ async function save() {
     }
     request.value = await getRequest(request.value.id)
     status.value = request.value.status
+    if (statusSebelum !== status.value) await kirimKabarStatus(status.value)
     await loadMoney()
     savedMsg.value = 'Perubahan tersimpan.'
     setTimeout(() => (savedMsg.value = ''), 2500)
@@ -196,9 +243,12 @@ async function setStatus(next) {
   }
   saving.value = true
   try {
+    const statusSama = request.value.status === next
     const updated = await updateRequest(request.value.id, { status: next })
     request.value = updated
     status.value = next
+    // Kabari klien hanya kalau statusnya benar-benar berubah.
+    if (!statusSama) await kirimKabarStatus(next)
   } catch (err) {
     alertpesanGalat(err, 'Gagal update status.')
   } finally {
@@ -430,7 +480,7 @@ const typeColor = (c) => {
                 <p class="font-body-md font-medium flex items-center gap-2">
                   +62 {{ request.whatsapp }}
                   <a
-                    :href="waLink('62' + request.whatsapp, `Halo ${request.customer_name}, ini engineer jokitugasit.my.id untuk ${request.order_no}.`)"
+                    :href="waLink(request.whatsapp, `Halo ${request.customer_name}, ini engineer jokitugasit.my.id untuk ${request.order_no}.`)"
                     target="_blank"
                     rel="noopener"
                     class="text-electric-blue hover:text-primary transition-colors inline-flex items-center"
@@ -576,7 +626,7 @@ const typeColor = (c) => {
 
             <div class="space-y-3">
               <a
-                :href="waLink('62' + (request.whatsapp || ''), `Halo ${request.customer_name}, ini engineer jokitugasit.my.id untuk ${request.order_no}.`)"
+                :href="waLink(request.whatsapp, `Halo ${request.customer_name}, ini engineer jokitugasit.my.id untuk ${request.order_no}.`)"
                 target="_blank"
                 rel="noopener"
                 class="w-full bg-[#25D366] hover:bg-[#1EBE5D] text-white font-label-bold text-label-bold py-3 rounded-xl flex items-center justify-center gap-2 active:scale-95 transition-all shadow-md"
@@ -590,6 +640,32 @@ const typeColor = (c) => {
                   <span class="material-symbols-outlined text-sm">done_all</span> Done
                 </button>
               </div>
+              <div
+                v-if="kabar"
+                class="rounded-xl border p-3 text-xs leading-relaxed"
+                :class="kabar.tipe === 'ok'
+                  ? 'bg-success-green/10 border-success-green/40 text-on-surface'
+                  : 'bg-surface-container-low border-border-subtle text-on-surface'"
+                role="status"
+              >
+                <div class="flex items-start gap-2">
+                  <span class="material-symbols-outlined text-[18px]" :class="kabar.tipe === 'ok' ? 'text-success-green' : 'text-electric-blue'">
+                    {{ kabar.tipe === 'ok' ? 'mark_email_read' : 'info' }}
+                  </span>
+                  <span>{{ kabar.teks }}</span>
+                </div>
+                <a
+                  v-if="kabar.waUrl"
+                  :href="kabar.waUrl"
+                  target="_blank"
+                  rel="noopener"
+                  class="mt-2 inline-flex items-center gap-1.5 bg-[#25D366] hover:bg-[#1EBE5D] text-white font-label-bold text-[11px] px-3 py-2 rounded-lg transition-colors"
+                >
+                  <span class="material-symbols-outlined text-[16px]">chat</span>
+                  Kirim kabar via WhatsApp
+                </a>
+              </div>
+
               <button class="w-full bg-transparent border border-electric-blue text-electric-blue hover:bg-surface-container-low font-label-bold text-label-bold py-3 rounded-xl active:scale-95 transition-all text-center mt-2" @click="openSettlement">
                 Catat Pelunasan
               </button>

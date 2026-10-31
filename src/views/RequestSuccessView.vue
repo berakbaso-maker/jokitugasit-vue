@@ -106,7 +106,7 @@ onMounted(muat)
           Cek Status Order
         </button>
         <a
-          :href="waLink(request.whatsapp ? '62' + request.whatsapp : '6285166337257', `Halo, saya ${request.customer_name} (${request.order_no}), mau lanjut diskusi project saya.`)"
+          :href="waLink(request.whatsapp || '6285166337257', `Halo, saya ${request.customer_name} (${request.order_no}), mau lanjut diskusi project saya.`)"
           target="_blank"
           rel="noopener"
           class="w-full h-[48px] bg-[#25D366] hover:bg-[#20bd5a] text-white font-label-bold text-label-bold rounded-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-transform shadow-md"
