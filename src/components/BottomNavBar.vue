@@ -21,7 +21,7 @@ const isActive = (item) => {
 </script>
 
 <template>
-  <nav aria-label="Navigasi bawah" class="md:hidden fixed bottom-0 w-full flex justify-around items-center px-4 py-2 bg-surface-white/90 dark:bg-inverse-surface/90 backdrop-blur-md z-50 shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
+  <nav aria-label="Navigasi bawah" class="md:hidden fixed bottom-0 w-full flex justify-around items-center px-4 py-2 bg-surface-white/90 backdrop-blur-md z-50 border-t border-border-subtle shadow-[0_-4px_10px_rgba(0,0,0,0.05)] dark:shadow-[0_-4px_12px_rgba(0,0,0,0.45)]">
     <template v-for="item in items" :key="item.label">
       <a v-if="item.type === 'external'" :href="item.to" target="_blank" rel="noopener noreferrer" class="flex flex-col items-center justify-center rounded-xl p-2 w-[72px] h-[56px] text-on-secondary-container active:bg-surface-container-high active:scale-90 duration-150 transition-transform">
         <span class="material-symbols-outlined mb-1" aria-hidden="true">{{ item.icon }}</span>

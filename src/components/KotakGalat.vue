@@ -23,7 +23,7 @@ const tampilDetail = computed(() => import.meta.env.DEV && Boolean(props.detail)
     <button
       v-if="bisaUlang"
       type="button"
-      class="mt-3 inline-flex items-center gap-1.5 h-11 px-4 rounded-lg bg-white/70 text-on-error-container font-label-bold text-label-bold hover:bg-white transition-colors"
+      class="mt-3 inline-flex items-center gap-1.5 h-11 px-4 rounded-lg bg-surface-white text-on-surface border border-on-error-container/25 font-label-bold text-label-bold hover:bg-surface-container-high transition-colors"
       @click="$emit('coba-lagi')"
     >
       <span class="material-symbols-outlined text-[18px]" aria-hidden="true">refresh</span>
