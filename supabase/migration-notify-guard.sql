@@ -14,7 +14,8 @@
 
 alter table public.requests
   add column if not exists notified_at timestamptz,
-  add column if not exists email_sent_at timestamptz;
+  add column if not exists email_sent_at timestamptz,
+  add column if not exists email_provider_id text;
 
 -- ---------------------------------------------------------------
 -- Klaim notifikasi Telegram

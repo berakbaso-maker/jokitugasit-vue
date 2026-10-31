@@ -101,6 +101,11 @@ export default async function handler(req, res) {
       await supabase.rpc('release_order_claim', { p_order_no: orderNo, p_kind: 'email' })
       return res.status(502).json({ error: 'Gagal mengirim email' })
     }
+    const hasil = await kirim.json().catch(() => ({}))
+    if (hasil?.id) {
+      // Jejak audit: ID Resend disimpan supaya status pengiriman bisa dicek.
+      await supabase.from('requests').update({ email_provider_id: hasil.id }).eq('order_no', orderNo)
+    }
     return res.status(200).json({ ok: true })
   } catch (err) {
     console.error('send-email:', err)
