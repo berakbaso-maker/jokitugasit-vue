@@ -316,7 +316,7 @@ async function handleSubmit() {
                   v-model="form.link"
                   class="w-full rounded-xl border border-border-subtle bg-surface-container-lowest px-4 py-3 text-base focus:border-electric-blue focus:ring-1 focus:ring-electric-blue outline-none transition-shadow placeholder:text-outline-variant"
                   placeholder="Atau tempel link repo / Google Drive / Figma..."
-                  type="url"
+                  type="url" aria-label="Tautan referensi atau lampiran (opsional)"
                 />
               </div>
             </div>

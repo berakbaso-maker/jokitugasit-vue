@@ -238,7 +238,8 @@ Mohon konfirmasi jika sepakat dengan SOW di atas agar pengerjaan segera dimulai.
 
 async function setStatus(next) {
   if (next === 'paid' && remaining.value > 0) {
-    alert('Catat pelunasan dulu. Status lunas tidak bisa dipilih manual.')
+    savedMsg.value = 'Catat pelunasan dulu. Status lunas tidak bisa dipilih manual.'
+    setTimeout(() => (savedMsg.value = ''), 4000)
     return
   }
   saving.value = true

@@ -318,7 +318,7 @@ const BARIS_LOG = [
         <g transform="translate(14 32)">
           <g v-for="(baris, i) in BARIS_LOG" :key="i" :transform="`translate(0 ${i * 15})`">
             <circle cx="3" cy="2.5" r="2.4" :fill="baris.warna" opacity="0.9" />
-            <rect x="12" width="baris.w" height="5" rx="2.5" :fill="baris.warna" opacity="0.55" />
+            <rect x="12" :width="baris.w" height="5" rx="2.5" :fill="baris.warna" opacity="0.55" />
             <rect :x="baris.w + 20" width="56" height="5" rx="2.5" fill="#475569" />
           </g>
         </g>

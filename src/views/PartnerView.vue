@@ -480,25 +480,25 @@ function copyCode() {
             <form @submit.prevent="handleSubmit" class="space-y-5">
               <div>
                 <label class="block text-label-sm font-label-sm text-on-surface-variant mb-1.5">Nama Lengkap <span class="text-urgency-red">*</span></label>
-                <input v-model="form.full_name" type="text" placeholder="Nama kamu (dipakai untuk generate kode)" required
+                <input v-model="form.full_name" type="text" aria-label="Nama lengkap pendaftar partner" placeholder="Nama kamu (dipakai untuk generate kode)" required
                   class="w-full rounded-xl border border-outline-variant bg-surface-container-low px-4 py-3 text-on-surface focus:outline-none focus:ring-2 focus:ring-electric-blue/40 focus:border-electric-blue transition-all">
               </div>
 
               <div>
                 <label class="block text-label-sm font-label-sm text-on-surface-variant mb-1.5">Nomor WhatsApp <span class="text-urgency-red">*</span></label>
-                <input v-model="form.whatsapp" type="tel" placeholder="08xxxx (komisi dikirim & dikonfirmasi via WA)" required
+                <input v-model="form.whatsapp" type="tel" aria-label="Nomor WhatsApp aktif" placeholder="08xxxx (komisi dikirim & dikonfirmasi via WA)" required
                   class="w-full rounded-xl border border-outline-variant bg-surface-container-low px-4 py-3 text-on-surface focus:outline-none focus:ring-2 focus:ring-electric-blue/40 focus:border-electric-blue transition-all">
               </div>
 
               <div>
                 <label class="block text-label-sm font-label-sm text-on-surface-variant mb-1.5">Kampus <span class="text-on-surface-variant/50">(opsional)</span></label>
-                <input v-model="form.campus" type="text" placeholder="Contoh: Binus, Telkom, Trisakti..."
+                <input v-model="form.campus" type="text" aria-label="Kampus asal" placeholder="Contoh: Binus, Telkom, Trisakti..."
                   class="w-full rounded-xl border border-outline-variant bg-surface-container-low px-4 py-3 text-on-surface focus:outline-none focus:ring-2 focus:ring-electric-blue/40 focus:border-electric-blue transition-all">
               </div>
 
               <div>
                 <label class="block text-label-sm font-label-sm text-on-surface-variant mb-1.5">Info Rekening / E-wallet <span class="text-on-surface-variant/50">(opsional, bisa diisi nanti)</span></label>
-                <input v-model="form.ewallet_info" type="text" placeholder="GoPay/OVO/Dana: 08xxx atau Nama Bank: No Rek"
+                <input v-model="form.ewallet_info" type="text" aria-label="Info e-wallet atau rekening" placeholder="GoPay/OVO/Dana: 08xxx atau Nama Bank: No Rek"
                   class="w-full rounded-xl border border-outline-variant bg-surface-container-low px-4 py-3 text-on-surface focus:outline-none focus:ring-2 focus:ring-electric-blue/40 focus:border-electric-blue transition-all">
                 <p class="text-[11px] text-on-surface-variant mt-1">Digunakan untuk transfer komisi. Bisa dikirimkan via WhatsApp kemudian.</p>
               </div>

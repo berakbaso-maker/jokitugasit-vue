@@ -1,3 +1,4 @@
+import crypto from 'node:crypto'
 import {
   extractInstagramEvents,
   notifyTelegram,
@@ -8,12 +9,20 @@ import {
 
 export const config = { api: { bodyParser: false } }
 
+function samaAman(kiri, kanan) {
+  const a = Buffer.from(String(kiri ?? ''))
+  const b = Buffer.from(String(kanan ?? ''))
+  if (!a.length || a.length !== b.length) return false
+  return crypto.timingSafeEqual(a, b)
+}
+
 export default async function handler(req, res) {
   if (req.method === 'GET') {
     const mode = req.query['hub.mode']
     const token = req.query['hub.verify_token']
     const challenge = req.query['hub.challenge']
-    if (mode === 'subscribe' && token && token === process.env.IG_WEBHOOK_VERIFY_TOKEN) {
+    // Perbandingan waktu-konstan: jangan bocorkan panjang/awalan token lewat timing.
+    if (mode === 'subscribe' && samaAman(token, process.env.IG_WEBHOOK_VERIFY_TOKEN)) {
       return res.status(200).send(challenge)
     }
     return res.status(403).json({ error: 'Webhook verification failed' })
